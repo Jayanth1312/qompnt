@@ -65,9 +65,9 @@ func handleValidate(w http.ResponseWriter, r *http.Request) {
 }
 
 var tabPanels = map[string]struct{ Label, Body string }{
-	"overview": {"Overview", "Opus, Sonnet, and Haiku share one API surface."},
-	"pricing":  {"Pricing", "Priced per million tokens, in and out counted separately."},
-	"limits":   {"Limits", "Rate limits scale with usage tier, per model."},
+	"overview": {"Overview", "A short summary of the thing this panel describes."},
+	"pricing":  {"Pricing", "One price per seat, billed monthly or yearly."},
+	"limits":   {"Limits", "Fair limits that scale with the size of the team."},
 }
 
 var tabOrder = []string{"overview", "pricing", "limits"}

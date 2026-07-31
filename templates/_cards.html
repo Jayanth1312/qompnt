@@ -6,17 +6,14 @@
        to the controls inside it. Pressing a button there does the button's job,
        not the card's. The link is also a sibling, not a wrapper: a button inside
        an anchor is invalid HTML. -->
-  <div class="gallery-card relative rounded-lg border border-border bg-background p-2">
+  <div data-card data-name="{{.Name}}" class="gallery-card relative rounded-lg border border-border bg-background p-2">
     <a href="/c/{{.Slug}}" aria-label="{{.Name}}" class="absolute inset-0 rounded-lg"></a>
 
-    <!-- Above the stretched link, so copying does not navigate. -->
-    <button type="button" data-copy-src="/src/{{.Slug}}" aria-label="Copy {{.Name}} markup"
-            class="absolute right-3 top-3 z-10 grid place-items-center rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-foreground">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>
-      </svg>
-    </button>
+    <!-- The per-card copy button lived here, above the stretched link so copying
+         did not navigate. Hidden for now: the component page has the same
+         action, spelled out, next to the code it copies. The handler in
+         qompnt.js still serves [data-copy-src], so restoring it is markup
+         alone. -->
 
     <div class="preview-inert relative grid h-[280px] place-items-center overflow-hidden rounded-md bg-muted px-6 py-10">
       {{.Preview}}
@@ -26,10 +23,12 @@
       <span class="text-body-sm text-muted-foreground/70">{{.CreatedLabel}}</span>
     </div>
   </div>
-  {{else}}
-  <p class="py-16 text-center text-body-sm text-muted-foreground/70">
-    No components match{{if .Query}} “{{.Query}}”{{end}}.
-  </p>
   {{end}}
+  <!-- Always rendered, shown by the filter when nothing matches. The filter runs
+       in the browser, so the server never sees a query to echo back - and the
+       message has to exist before one is typed. -->
+  <p data-cards-empty{{if .Components}} hidden{{end}} class="py-16 text-center text-body-sm text-muted-foreground/70">
+    No components match.
+  </p>
 </div>
 {{end}}

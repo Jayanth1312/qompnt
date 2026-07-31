@@ -1,7 +1,90 @@
-/* Checkbox and radio are native and drawn by the platform from accent-color, so
-   there is nothing to animate inside them - the tick is the OS's. The press is
-   ours. */
-input[type='checkbox']:active:not(:disabled),
-input[type='radio']:active:not(:disabled) {
+/* Checkbox and radio.
+ *
+ * These were left native, tinted with `accent-color`, and that is still the
+ * one-line answer if the tick's colour does not matter to you. It did here:
+ * accent-color lets the browser pick the tick, and each engine picks
+ * differently. Chrome derives it from the accent's contrast and chose black on
+ * this palette's coral; Firefox chose white. The same control looked like two
+ * different components depending on where it was opened, and there is no
+ * property that says "tint the box, keep the tick white".
+ *
+ * So the box is drawn here and the tick is a clip-path, which costs the platform
+ * drawing and nothing else: it is still a real input, so the label, the keyboard
+ * behaviour, the focus ring, :checked, :indeterminate and the form value are all
+ * unchanged.
+ *
+ * The classes are opt-in. A bare <input type="checkbox"> elsewhere on the page
+ * stays native.
+ */
+.check,
+.radio {
+  appearance: none;
+  flex: none;
+  display: inline-grid;
+  place-content: center;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  border: 1px solid var(--input);
+  border-radius: var(--r-xs);
+  background: var(--background);
+  cursor: pointer;
+}
+.radio {
+  border-radius: var(--r-pill);
+}
+.check:checked,
+.radio:checked {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+/* The mark. --primary-foreground, not white: it is the colour the contract
+   already guarantees is legible on --primary, in every design system and both
+   themes. */
+.check::before,
+.radio::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  background: var(--primary-foreground);
+  transform: scale(0);
+}
+.check::before {
+  clip-path: polygon(14% 47%, 0 61%, 39% 100%, 100% 22%, 85% 9%, 38% 71%);
+}
+.radio::before {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--r-pill);
+}
+.check:checked::before,
+.radio:checked::before {
+  transform: scale(1);
+}
+
+/* A half-checked parent box: one bar, no tick. */
+.check:indeterminate {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+.check:indeterminate::before {
+  clip-path: none;
+  width: 8px;
+  height: 2px;
+  border-radius: 1px;
+  transform: scale(1);
+}
+
+.check:disabled,
+.radio:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* The press is ours; the tick's own scale-in comes from the contract's
+   transform transition. */
+.check:active:not(:disabled),
+.radio:active:not(:disabled) {
   transform: scale(0.92);
 }

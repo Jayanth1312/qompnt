@@ -62,6 +62,116 @@ details[open] > summary [data-chevron] {
   }
 }
 
+/* ---- avatar ---- */
+/* Avatar: a person at a fixed size.
+ *
+ * One box, one radius, one size token. The interesting parts are the fallback
+ * and the stack - everything else is a square with rounded corners.
+ */
+.avatar {
+  --avatar-size: 40px;
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: var(--avatar-size);
+  height: var(--avatar-size);
+  border-radius: var(--r-pill);
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  font-size: calc(var(--avatar-size) * 0.36);
+  font-weight: 500;
+  line-height: 1;
+  user-select: none;
+  /* Deliberately not overflow: hidden. The status dot sits on the edge and would
+     be sliced in half by it; the picture rounds itself with border-radius:
+     inherit instead, which is the only thing that needed clipping. */
+}
+.avatar-sm {
+  --avatar-size: 28px;
+}
+.avatar-lg {
+  --avatar-size: 56px;
+}
+/* Square-ish, for a product or a team rather than a person - the radius still
+   comes from the design system, so it changes with it. */
+.avatar-square {
+  border-radius: var(--r-md);
+}
+.avatar-muted {
+  background: var(--muted);
+  color: var(--muted-foreground);
+}
+
+/* Both layers occupy the same cell; the picture simply paints over the initials.
+   No :has(), no script, and nothing to reset when the image 404s - the browser
+   draws nothing for a broken <img> and the initials are already behind it. */
+.avatar-initials,
+.avatar-img {
+  grid-area: 1 / 1;
+}
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+}
+
+/* Status. Bottom-right, with a ring in the page colour so it reads as sitting on
+   top of the avatar rather than punched out of it. box-shadow rather than a
+   border: a border would eat into the dot's own size. */
+.avatar-status {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: calc(var(--avatar-size) * 0.28);
+  height: calc(var(--avatar-size) * 0.28);
+  border-radius: var(--r-pill);
+  background: var(--success-fg);
+  box-shadow: 0 0 0 2px var(--background);
+}
+.avatar-status-busy {
+  background: var(--destructive);
+}
+.avatar-status-away {
+  background: var(--muted-foreground);
+}
+
+/* The stack. Each avatar laps the one after it, and the ring is what keeps the
+   edge readable where they overlap.
+
+   The z-index ladder is the whole trick. Paint order is DOM order, so without it
+   each avatar covers the one before it and every set of initials but the last is
+   sliced down the middle. Counting down puts the first on top, which is the
+   order a reader expects - and it is why the overflow count goes last, where
+   being underneath costs nothing. Six rules, for a control whose whole point is
+   that the group is small; past six they stack in DOM order and the ring still
+   separates them. */
+.avatar-stack {
+  display: flex;
+  align-items: center;
+}
+.avatar-stack > .avatar {
+  position: relative;
+  margin-inline-start: calc(var(--avatar-size) * -0.28);
+  box-shadow: 0 0 0 2px var(--background);
+}
+.avatar-stack > .avatar:nth-child(1) { z-index: 6; }
+.avatar-stack > .avatar:nth-child(2) { z-index: 5; }
+.avatar-stack > .avatar:nth-child(3) { z-index: 4; }
+.avatar-stack > .avatar:nth-child(4) { z-index: 3; }
+.avatar-stack > .avatar:nth-child(5) { z-index: 2; }
+.avatar-stack > .avatar:nth-child(6) { z-index: 1; }
+.avatar-stack > .avatar:first-child {
+  margin-inline-start: 0;
+}
+/* Raise the one under the pointer to the top of the pile, so an overlapped face
+   can be read. Stacking order only - it does not move, so an avatar has nothing
+   to animate and no Animation toggle. */
+.avatar-stack > .avatar:hover {
+  z-index: 7;
+}
+
 /* ---- breadcrumb ---- */
 /* Breadcrumb separators: decorative, so they are pseudo-elements - never
    selected when you copy the trail, never read out. */
@@ -196,11 +306,94 @@ button:active:not(:disabled),
 }
 
 /* ---- checkbox ---- */
-/* Checkbox and radio are native and drawn by the platform from accent-color, so
-   there is nothing to animate inside them - the tick is the OS's. The press is
-   ours. */
-input[type='checkbox']:active:not(:disabled),
-input[type='radio']:active:not(:disabled) {
+/* Checkbox and radio.
+ *
+ * These were left native, tinted with `accent-color`, and that is still the
+ * one-line answer if the tick's colour does not matter to you. It did here:
+ * accent-color lets the browser pick the tick, and each engine picks
+ * differently. Chrome derives it from the accent's contrast and chose black on
+ * this palette's coral; Firefox chose white. The same control looked like two
+ * different components depending on where it was opened, and there is no
+ * property that says "tint the box, keep the tick white".
+ *
+ * So the box is drawn here and the tick is a clip-path, which costs the platform
+ * drawing and nothing else: it is still a real input, so the label, the keyboard
+ * behaviour, the focus ring, :checked, :indeterminate and the form value are all
+ * unchanged.
+ *
+ * The classes are opt-in. A bare <input type="checkbox"> elsewhere on the page
+ * stays native.
+ */
+.check,
+.radio {
+  appearance: none;
+  flex: none;
+  display: inline-grid;
+  place-content: center;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  border: 1px solid var(--input);
+  border-radius: var(--r-xs);
+  background: var(--background);
+  cursor: pointer;
+}
+.radio {
+  border-radius: var(--r-pill);
+}
+.check:checked,
+.radio:checked {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+/* The mark. --primary-foreground, not white: it is the colour the contract
+   already guarantees is legible on --primary, in every design system and both
+   themes. */
+.check::before,
+.radio::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  background: var(--primary-foreground);
+  transform: scale(0);
+}
+.check::before {
+  clip-path: polygon(14% 47%, 0 61%, 39% 100%, 100% 22%, 85% 9%, 38% 71%);
+}
+.radio::before {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--r-pill);
+}
+.check:checked::before,
+.radio:checked::before {
+  transform: scale(1);
+}
+
+/* A half-checked parent box: one bar, no tick. */
+.check:indeterminate {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+.check:indeterminate::before {
+  clip-path: none;
+  width: 8px;
+  height: 2px;
+  border-radius: 1px;
+  transform: scale(1);
+}
+
+.check:disabled,
+.radio:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* The press is ours; the tick's own scale-in comes from the contract's
+   transform transition. */
+.check:active:not(:disabled),
+.radio:active:not(:disabled) {
   transform: scale(0.92);
 }
 
@@ -286,6 +479,35 @@ dialog[open]::backdrop {
   }
 }
 
+/* ---- expanding-input ---- */
+/* The field grows out of the button rather than replacing it.
+ *
+ * Both halves are in the markup and `hidden` swaps which one shows, so the swap
+ * itself is instant and there is no second layout to keep in sync. What was
+ * missing was the growing: `hidden` is `display: none`, and a property cannot
+ * transition from a box that was never laid out.
+ *
+ * @starting-style is what closes that gap. It names the values the field should
+ * be given for the first frame it exists in - zero width, transparent - and the
+ * transition takes over from there. No script, no measuring, and nothing to undo
+ * when it is hidden again.
+ *
+ * Support: Chrome 117+, Safari 17.5+, Firefox 129+. Older engines skip the rule
+ * and the field simply appears at full width, exactly as it did before.
+ */
+[data-search-field] {
+  overflow: hidden;
+  transition:
+    width var(--motion) var(--ease),
+    opacity var(--motion) var(--ease);
+}
+@starting-style {
+  [data-search-field] {
+    width: 0;
+    opacity: 0;
+  }
+}
+
 /* ---- filter ---- */
 /* Filter shares Select's dropdown rules - the menu, the chevron flip, the
    check on the active option - because it is the same disclosure with a
@@ -353,6 +575,23 @@ dialog[open]::backdrop {
  */
 .level {
   --stops: 5;
+  /* The marker is narrower than the Slider's knob, and the label row is inset by
+     half a thumb to match the thumb's travel. Naming the width once keeps the
+     two in step - with the knob's 26px hardcoded here the labels sat 4px wide of
+     the positions the marker actually stops at. */
+  --level-knob-w: 18px;
+  /* Taller than the Slider's knob on purpose: the marker's lower half tapers to
+     a point, so the part that reads as a body is only about half its height. */
+  --level-knob-h: 26px;
+}
+/* A thicker track needs a marker with more to it, or the control looks like the
+   handle was left behind when the track grew. */
+.level:has(.slider-thick) {
+  --level-knob-w: 22px;
+  --level-knob-h: 32px;
+}
+.level:has(.level-knob) {
+  --level-knob-w: var(--slider-knob-w, 26px);
 }
 
 /* The labels are absolutely placed at their exact fraction of the track rather
@@ -364,7 +603,7 @@ dialog[open]::backdrop {
 .level-stops {
   position: relative;
   height: 1.3em;
-  margin-inline: calc(var(--slider-knob-w, 26px) / 2);
+  margin-inline: calc(var(--level-knob-w) / 2);
   font-size: 13px;
   line-height: 1.3;
 }
@@ -398,7 +637,11 @@ dialog[open]::backdrop {
 .level-ends {
   display: flex;
   justify-content: space-between;
-  margin-inline: calc(var(--slider-knob-w, 26px) / 2);
+  /* Flush with the track, not inset like the stop labels. These caption the
+     scale as a whole rather than any one stop, so they line up with where the
+     track starts and ends - inset by half a thumb they read as belonging to the
+     first and last stop instead. */
+  margin-inline: 0;
   font-size: 13px;
   color: var(--muted-foreground);
 }
@@ -418,19 +661,35 @@ dialog[open]::backdrop {
  * pseudo-elements is dropped whole by both engines.
  */
 .level input::-webkit-slider-thumb {
-  width: 18px;
-  height: 20px;
-  margin-top: calc((var(--slider-track) - 20px) / 2 - 5px);
+  width: var(--level-knob-w);
+  height: var(--level-knob-h);
+  /* Anchored by the shoulder, not by the centre or the tip. The square part of
+     the marker has to cover the track completely and the point has to hang below
+     it, so what must line up is where the taper begins - 68% down, per the
+     clip-path - with the track's lower edge. Everything above that is the body;
+     everything below is the point. */
+  margin-top: calc(var(--slider-track) - var(--level-knob-h) * 0.68);
   border-radius: 6px 6px 2px 2px;
-  background: var(--foreground);
-  clip-path: polygon(0 0, 100% 0, 100% 52%, 50% 100%, 0 52%);
+  /* --knob, the same surface the Slider's handle uses: a handle reads as a
+     physical thing you grab, and it stays one colour while the track fills
+     underneath it. Tinting it with the accent made it vanish into the fill on
+     the design systems whose primary is also the track colour. */
+  background: var(--knob);
+  clip-path: polygon(0 0, 100% 0, 100% 68%, 50% 100%, 0 68%);
+  /* filter, not box-shadow: clip-path cuts the border box and everything drawn
+     with it, so a shadow set here would be clipped away with the corners it was
+     meant to soften. A filter is applied after the clip, so it traces the shape
+     that survived - which is the only way a white marker keeps an edge against a
+     light page. */
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 28%));
 }
 .level input::-moz-range-thumb {
-  width: 18px;
-  height: 20px;
+  width: var(--level-knob-w);
+  height: var(--level-knob-h);
   border-radius: 6px 6px 2px 2px;
-  background: var(--foreground);
-  clip-path: polygon(0 0, 100% 0, 100% 52%, 50% 100%, 0 52%);
+  background: var(--knob);
+  clip-path: polygon(0 0, 100% 0, 100% 68%, 50% 100%, 0 68%);
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 28%));
 }
 
 /* Round-knob variant: hand the thumb back to the Slider's own look. */
@@ -1400,8 +1659,13 @@ input:checked + .toggle [data-toggle-off] {
      the triangle at 100%+8px to 100%+13px - entirely underneath the bubble,
      which starts at 100%+8px. It only became visible when the bubble faded and
      went translucent, which is what read as "the arrow outlives the tooltip".
-     calc(100% - 2px) lands the triangle in the 5px gap where it belongs. */
-  bottom: calc(100% - 2px);
+     calc(100% - 1px) lands the triangle in the 5px gap where it belongs, with
+     its flat edge 1px *under* the bubble rather than exactly against it. That
+     overlap is deliberate: two edges that merely touch are rounded to different
+     device pixels on a phone or a scaled display, and the seam between them
+     shows as a hairline of page background - which is the gap you see between
+     the bubble and its arrow. */
+  bottom: calc(100% - 1px);
   transform: translateX(-50%);
   z-index: 30;
   border: 5px solid transparent;
@@ -1423,7 +1687,7 @@ input:checked + .toggle [data-toggle-off] {
 }
 .tip-bottom::before {
   bottom: auto;
-  top: calc(100% - 2px);
+  top: calc(100% - 1px);
   border-top-color: transparent;
   border-bottom-color: var(--foreground);
 }
@@ -1461,4 +1725,18 @@ input:checked + .toggle [data-toggle-off] {
 .tip-bottom::after,
 .tip-bottom::before {
   translate: 0 -4px;
+}
+
+/* Icon-only. A tooltip earns its keep most on a control with no words in it, so
+   the same button ships both and this variant swaps which one is drawn. Two
+   rules rather than a second button: the tooltip, the aria-label and the hit
+   area are identical either way, and only the content changes. */
+.tip .tip-icon {
+  display: none;
+}
+.tip-icon-only .tip-label {
+  display: none;
+}
+.tip-icon-only .tip-icon {
+  display: block;
 }

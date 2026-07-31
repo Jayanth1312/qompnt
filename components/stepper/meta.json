@@ -1,7 +1,7 @@
 {
   "name": "Stepper",
   "blurb": "Numbered steps showing where you are in a multi-step flow.",
-  "created": "2026-08-03",
+  "created": "2026-07-31",
   "tags": [
     "Navigation",
     "Display"

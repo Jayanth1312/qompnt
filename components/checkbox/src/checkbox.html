@@ -1,18 +1,18 @@
 <!-- accent-color tints the native control with one property - no pseudo-element
      stack, and the platform keeps drawing the checkmark and focus behaviour. -->
 <label class="flex cursor-pointer items-center gap-2.5 text-body-sm leading-none text-foreground">
-  <input type="checkbox" checked class="h-4 w-4 rounded-xs accent-primary" style="accent-color: var(--primary)">
+  <input type="checkbox" checked class="check">
   Email me about new components
 </label>
 
 <fieldset class="flex flex-col gap-2.5">
   <legend class="mb-2 text-caption font-500 text-foreground">Theme</legend>
   <label class="flex cursor-pointer items-center gap-2.5 text-body-sm leading-none text-foreground">
-    <input type="radio" name="theme" value="light" checked class="h-4 w-4" style="accent-color: var(--primary)">
+    <input type="radio" name="theme" value="light" checked class="radio">
     Light
   </label>
   <label class="flex cursor-pointer items-center gap-2.5 text-body-sm leading-none text-foreground">
-    <input type="radio" name="theme" value="dark" class="h-4 w-4" style="accent-color: var(--primary)">
+    <input type="radio" name="theme" value="dark" class="radio">
     Dark
   </label>
 </fieldset>

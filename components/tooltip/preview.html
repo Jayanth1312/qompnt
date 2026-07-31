@@ -1,14 +1,14 @@
-<!-- gap-16, not gap-3: with "Forced open" on, both bubbles are up at once, and a
-     bubble is far wider than the control it belongs to. At a normal gap they
-     overlap and neither is readable. -->
-<div class="flex items-center gap-16">
+<!-- One control, not two. The bubble is wider than the button it belongs to, so
+     a second example beside it either overlaps or forces a gap wide enough to
+     look like a layout bug. The Icon only option below swaps this same button
+     between its label and its icon - which is the case a tooltip exists for. -->
+<div class="flex items-center">
   <button data-x-tip class="tip rounded-md border border-border bg-background px-control-x py-control-y text-button font-500 text-foreground hover:bg-accent"
           data-tip="Copies the markup" aria-label="Copy — copies the markup">
-    Hover me
-  </button>
-  <button data-x-tip-icon class="tip grid place-items-center rounded-md px-control-x py-control-y text-muted-foreground hover:bg-accent hover:text-foreground"
-          data-tip="Delete component" aria-label="Delete component">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-         stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M9 7V5h6v2M7 7l1 13h8l1-13"/></svg>
+    <span class="tip-label">Hover me</span>
+    <svg class="tip-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>
+    </svg>
   </button>
 </div>

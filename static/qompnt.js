@@ -235,14 +235,9 @@ const assetV =
     ).searchParams.get("v") || "";
 
 function applyDesignSystem(name) {
-    withoutTransitions(() => {
-        const link = document.getElementById("ds");
-        // removeAttribute, not href='': an empty href points at the current page,
-        // which the browser dutifully downloads and tries to parse as CSS.
-        if (link && name) link.href = `/static/themes/${name}.css?v=${assetV}`;
-        else if (link) link.removeAttribute("href");
-        document.documentElement.dataset.ds = name || "";
-    });
+    // removeAttribute rather than href='' inside: an empty href points at the
+    // current page, which the browser dutifully downloads and parses as CSS.
+    withoutTransitions(() => applyDesignSystemLink(name));
     try {
         if (name) localStorage.setItem("qompnt-ds", name);
         else localStorage.removeItem("qompnt-ds");
@@ -474,8 +469,11 @@ document.addEventListener("click", async (e) => {
         const box = clearSearch.closest("[data-search]");
         const input = box.querySelector('input[type="search"]');
         input.value = "";
-        // hx-trigger listens for `search`, so this refetches the full stack.
-        input.dispatchEvent(new Event("search"));
+        // Restores the full stack. Nothing is fetched - filterCards only unhides
+        // what is already there. Header only: Expanding Input ships this same
+        // clear button, and its demo is rendered inside a card on the index, so
+        // an unscoped call would reset the page's filter from inside a preview.
+        if (clearSearch.closest("[data-sticky-header]")) filterCards("");
         box.querySelector("[data-search-field]").hidden = true;
         box.querySelector("[data-search-open]").hidden = false;
         return;
@@ -694,3 +692,153 @@ document.addEventListener("click", (e) => {
 // pure CSS - see [data-sticky-header] in tokens.css. There used to be an
 // IntersectionObserver here toggling a border on once the header was stuck; the
 // blur does that job at every scroll position, so it is gone.
+
+// ---- Index search ----------------------------------------------------------
+//
+// Filters the cards already in the page. This used to be an htmx GET to
+// /p/search on every keystroke, which meant a server round trip - and on Vercel
+// a function invocation billed for CPU - per character typed. The whole list is
+// thirty cards and it is already rendered, so the network was never buying
+// anything the browser could not do itself.
+//
+// The count badge is filtered too, because it always claimed to count what was
+// on screen.
+function filterCards(q) {
+    const needle = q.trim().toLowerCase();
+    const cards = document.querySelectorAll("[data-card]");
+    let shown = 0;
+    cards.forEach((c) => {
+        const hit = needle === "" || c.dataset.name.toLowerCase().includes(needle);
+        c.hidden = !hit;
+        if (hit) shown++;
+    });
+    const empty = document.querySelector("[data-cards-empty]");
+    if (empty) empty.hidden = shown > 0 || cards.length === 0;
+    const count = document.querySelector("[data-card-count]");
+    if (count) count.textContent = String(shown);
+}
+
+document.addEventListener("input", (e) => {
+    if (e.target.matches("[data-search-input]")) filterCards(e.target.value);
+});
+
+// ---- Level Slider: how many stops --------------------------------------------
+//
+// The generic option handlers swap classes or attributes; this one has to move
+// several things at once - the range's max, its value if that max just passed
+// it, the fill, and where each remaining label sits - so it gets a handler of
+// its own rather than a data-opt-* spelling that would only ever fit this
+// control.
+//
+// The markup always ships six stops. Fewer is the six with the tail hidden and
+// the rest respaced, which keeps this reversible: nothing is removed, so sliding
+// back up restores the labels the component came with.
+function setLevelStops(level, n) {
+    const stops = [...level.querySelectorAll(".level-stops > *")];
+    stops.forEach((s, i) => {
+        s.hidden = i >= n;
+        // Fractions of the track, so the last stop lands exactly on the end.
+        if (i < n) s.style.setProperty("--stop", n === 1 ? 0 : i / (n - 1));
+    });
+
+    const range = level.querySelector('input[type="range"]');
+    if (!range) return;
+    range.max = String(n - 1);
+    if (Number(range.value) > n - 1) range.value = String(n - 1);
+    range.style.setProperty("--p", (Number(range.value) / (n - 1)) * 100);
+    level.dataset.v = range.value;
+}
+
+document.addEventListener("input", (e) => {
+    const ctl = e.target.closest("[data-opt-levels]");
+    if (!ctl) return;
+    const level = ctl
+        .closest("[data-block]")
+        ?.querySelector("[data-preview] .level");
+    if (level) setLevelStops(level, Number(ctl.value));
+});
+
+// ---- Keyboard hints ---------------------------------------------------------
+//
+// The shortcuts are Cmd on a Mac and Ctrl everywhere else - the handlers already
+// accept either - so the labels have to say which. Written as Ctrl in the markup
+// and rewritten here, rather than the reverse, because Ctrl is what the larger
+// share of visitors will press and it is the correct answer if this never runs.
+//
+// navigator.platform is deprecated but is still the only reliable Mac signal;
+// userAgentData.platform is not exposed everywhere, hence both.
+const isApplePlatform = /mac|iphone|ipad|ipod/i.test(
+    navigator.userAgentData?.platform || navigator.platform || navigator.userAgent,
+);
+
+function localiseShortcuts() {
+    if (!isApplePlatform) return;
+    document.querySelectorAll("[data-kbd-mod]").forEach((el) => {
+        el.textContent = "⌘";
+    });
+    document.querySelectorAll("[data-tip]").forEach((el) => {
+        if (el.dataset.tip.includes("Ctrl")) {
+            el.dataset.tip = el.dataset.tip.replace("Ctrl", "⌘");
+        }
+    });
+}
+localiseShortcuts();
+// hx-boost replaces the header, and with it the tooltips just rewritten.
+document.body?.addEventListener("htmx:afterSettle", localiseShortcuts);
+
+// ---- Restoring preferences on a back/forward navigation ----------------------
+//
+// The theme, the design system and the motion setting are written onto <html> by
+// an inline script in the head, which runs once per real page load. A back
+// gesture usually does not do a real page load: the browser restores the page
+// whole out of its back/forward cache, DOM and all, and that DOM is the one it
+// froze - with whatever theme was on it at the time.
+//
+// So changing the theme on a component page and swiping back showed the page
+// still in the old theme, while the back *button* often looked correct because
+// it more often does a fresh load. Same for the design system and motion.
+//
+// pageshow with persisted set is the event for exactly this: it fires only on a
+// cached restore, and it is the one place the head script cannot reach.
+function restorePreferences() {
+    const root = document.documentElement;
+    let theme, ds, motion;
+    try {
+        theme = localStorage.getItem("qompnt-theme");
+        ds = localStorage.getItem("qompnt-ds");
+        motion = localStorage.getItem("qompnt-motion");
+    } catch (_) {
+        return;
+    }
+
+    if (theme) root.dataset.theme = theme;
+    if (motion) root.dataset.motion = motion;
+
+    // Without transitions: this is a restore, not a change the visitor made, and
+    // a page fading between themes as it comes back reads as a bug.
+    withoutTransitions(() => {
+        if ((ds || "") !== (root.dataset.ds || "")) applyDesignSystemLink(ds || "");
+    });
+
+    syncDesignSystem();
+    syncMotion();
+    localiseShortcuts();
+}
+
+// The stylesheet half of applyDesignSystem, without the persisting - the value
+// being restored came out of storage in the first place.
+function applyDesignSystemLink(name) {
+    const link = document.getElementById("ds");
+    if (link && name) link.href = `/static/themes/${name}.css?v=${assetV}`;
+    else if (link) link.removeAttribute("href");
+    document.documentElement.dataset.ds = name || "";
+}
+
+window.addEventListener("pageshow", (e) => {
+    if (e.persisted) restorePreferences();
+});
+
+// The other way a page comes back without reloading: hx-boost handles the click,
+// so Back is a history entry htmx restores from its own snapshot rather than a
+// navigation the browser performs. Same failure, same fix.
+document.body?.addEventListener("htmx:historyRestore", restorePreferences);

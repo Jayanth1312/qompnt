@@ -1,0 +1,26 @@
+<div class="flex flex-col items-center gap-6">
+  <div class="flex items-center gap-4">
+    <span data-x-avatar class="avatar">
+      <span class="avatar-initials">JP</span>
+      <span data-x-status class="avatar-status" title="Online"></span>
+    </span>
+
+    <span data-x-avatar-img class="avatar">
+      <span class="avatar-initials">RS</span>
+      <!-- Drawn over the initials, so a picture that fails to load falls back to
+           them without a second element or a script. -->
+      <svg class="avatar-img" viewBox="0 0 40 40" aria-hidden="true">
+        <rect width="40" height="40" fill="var(--secondary)"/>
+        <circle cx="20" cy="15" r="7" fill="var(--muted-foreground)"/>
+        <path d="M4 40c0-9 7-14 16-14s16 5 16 14z" fill="var(--muted-foreground)"/>
+      </svg>
+    </span>
+  </div>
+
+  <div data-x-stack hidden class="avatar-stack">
+    <span class="avatar"><span class="avatar-initials">JP</span></span>
+    <span class="avatar"><span class="avatar-initials">RS</span></span>
+    <span class="avatar"><span class="avatar-initials">MK</span></span>
+    <span class="avatar avatar-muted"><span class="avatar-initials">+3</span></span>
+  </div>
+</div>

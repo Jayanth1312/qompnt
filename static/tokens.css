@@ -262,6 +262,18 @@
   animation-delay: 0s !important;
   animation-iteration-count: 1 !important;
 }
+/* Zeroing a duration only removes the travel; the end state still applies, so
+   every press still jumped to its scaled-down size instantly. A press, a tilt
+   and a lift are movement - with motion off there should be none. Colour, shadow
+   and opacity are untouched: those are how a control says it is being pressed
+   once the movement is gone.
+
+   !important because the component rules it overrides are plain selectors of
+   equal or higher specificity, and this has to win from one place rather than
+   being restated in each of the six components that has a press. */
+[data-motion='off'] :active {
+  transform: none !important;
+}
 
 /* The OS preference is the default when nothing has been chosen. An explicit
    data-motion='on' is the user overriding their own system setting on this
@@ -374,6 +386,19 @@ body {
 .gallery-card:hover .card-tilt {
   transform: perspective(900px) rotateX(2.5deg) rotateY(-3.5deg) translateY(-4px);
   box-shadow: var(--shadow-2);
+}
+
+/* Motion off means no tilt, not an instant one. Zeroing the duration - what the
+   blanket rule above does for everything else - leaves the card still jumping
+   into a 3D rotation, just without the travel to explain it. A tilt is the kind
+   of movement the setting exists to remove, so it is removed. The shadow stays:
+   it is depth, not motion, and it is what keeps the hover legible.
+
+   Both selectors, because the lift has two sources - the component's own hover
+   on a detail page, and the gallery proxy on the index. */
+[data-motion='off'] .card-tilt:hover,
+[data-motion='off'] .gallery-card:hover .card-tilt {
+  transform: none;
 }
 
 /* Command palette (Ctrl/Cmd+K). <dialog> is not centred by default and the
@@ -707,12 +732,26 @@ dialog[data-palette][open] {
 
 /* Theme swap. The root snapshot is cross-faded by default, which reads as a
    flash; instead the old theme is held still and the new one is wiped down over
-   it from the top edge of the viewport. */
+   it from the top edge of the viewport.
+
+   The group's duration is set explicitly. Only ::view-transition-new carries the
+   wipe, and the group around it keeps whatever the browser defaults to - 250ms
+   in Firefox against Chrome's longer default - so the same swap ran visibly
+   quicker in one than the other. Naming it here makes the two agree. */
+::view-transition-group(root) {
+  animation-duration: 450ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;
   mix-blend-mode: normal;
 }
+
+/* The sticky header stays inside the root snapshot deliberately. Lifting it out
+   under its own view-transition-name made it swap colour instantly while the
+   wipe was still coming down the page, so the header changed theme before the
+   content under it - the swap read as two events instead of one. */
 
 ::view-transition-old(root) { z-index: 0; }
 
@@ -744,4 +783,10 @@ dialog[data-palette][open] {
   background: color-mix(in srgb, var(--background) 72%, transparent);
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
+  /* Same bar at every width. The blur is held on its own composited layer:
+     without this, mobile drops the layer while scrolling down and repaints it on
+     the way up, so the header appeared to come and go. */
+  will-change: backdrop-filter;
+  transform: translateZ(0);
 }
+

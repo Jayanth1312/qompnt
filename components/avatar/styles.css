@@ -1,0 +1,108 @@
+/* Avatar: a person at a fixed size.
+ *
+ * One box, one radius, one size token. The interesting parts are the fallback
+ * and the stack - everything else is a square with rounded corners.
+ */
+.avatar {
+  --avatar-size: 40px;
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: var(--avatar-size);
+  height: var(--avatar-size);
+  border-radius: var(--r-pill);
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  font-size: calc(var(--avatar-size) * 0.36);
+  font-weight: 500;
+  line-height: 1;
+  user-select: none;
+  /* Deliberately not overflow: hidden. The status dot sits on the edge and would
+     be sliced in half by it; the picture rounds itself with border-radius:
+     inherit instead, which is the only thing that needed clipping. */
+}
+.avatar-sm {
+  --avatar-size: 28px;
+}
+.avatar-lg {
+  --avatar-size: 56px;
+}
+/* Square-ish, for a product or a team rather than a person - the radius still
+   comes from the design system, so it changes with it. */
+.avatar-square {
+  border-radius: var(--r-md);
+}
+.avatar-muted {
+  background: var(--muted);
+  color: var(--muted-foreground);
+}
+
+/* Both layers occupy the same cell; the picture simply paints over the initials.
+   No :has(), no script, and nothing to reset when the image 404s - the browser
+   draws nothing for a broken <img> and the initials are already behind it. */
+.avatar-initials,
+.avatar-img {
+  grid-area: 1 / 1;
+}
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+}
+
+/* Status. Bottom-right, with a ring in the page colour so it reads as sitting on
+   top of the avatar rather than punched out of it. box-shadow rather than a
+   border: a border would eat into the dot's own size. */
+.avatar-status {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: calc(var(--avatar-size) * 0.28);
+  height: calc(var(--avatar-size) * 0.28);
+  border-radius: var(--r-pill);
+  background: var(--success-fg);
+  box-shadow: 0 0 0 2px var(--background);
+}
+.avatar-status-busy {
+  background: var(--destructive);
+}
+.avatar-status-away {
+  background: var(--muted-foreground);
+}
+
+/* The stack. Each avatar laps the one after it, and the ring is what keeps the
+   edge readable where they overlap.
+
+   The z-index ladder is the whole trick. Paint order is DOM order, so without it
+   each avatar covers the one before it and every set of initials but the last is
+   sliced down the middle. Counting down puts the first on top, which is the
+   order a reader expects - and it is why the overflow count goes last, where
+   being underneath costs nothing. Six rules, for a control whose whole point is
+   that the group is small; past six they stack in DOM order and the ring still
+   separates them. */
+.avatar-stack {
+  display: flex;
+  align-items: center;
+}
+.avatar-stack > .avatar {
+  position: relative;
+  margin-inline-start: calc(var(--avatar-size) * -0.28);
+  box-shadow: 0 0 0 2px var(--background);
+}
+.avatar-stack > .avatar:nth-child(1) { z-index: 6; }
+.avatar-stack > .avatar:nth-child(2) { z-index: 5; }
+.avatar-stack > .avatar:nth-child(3) { z-index: 4; }
+.avatar-stack > .avatar:nth-child(4) { z-index: 3; }
+.avatar-stack > .avatar:nth-child(5) { z-index: 2; }
+.avatar-stack > .avatar:nth-child(6) { z-index: 1; }
+.avatar-stack > .avatar:first-child {
+  margin-inline-start: 0;
+}
+/* Raise the one under the pointer to the top of the pile, so an overlapped face
+   can be read. Stacking order only - it does not move, so an avatar has nothing
+   to animate and no Animation toggle. */
+.avatar-stack > .avatar:hover {
+  z-index: 7;
+}

@@ -10,6 +10,23 @@
  */
 .level {
   --stops: 5;
+  /* The marker is narrower than the Slider's knob, and the label row is inset by
+     half a thumb to match the thumb's travel. Naming the width once keeps the
+     two in step - with the knob's 26px hardcoded here the labels sat 4px wide of
+     the positions the marker actually stops at. */
+  --level-knob-w: 18px;
+  /* Taller than the Slider's knob on purpose: the marker's lower half tapers to
+     a point, so the part that reads as a body is only about half its height. */
+  --level-knob-h: 26px;
+}
+/* A thicker track needs a marker with more to it, or the control looks like the
+   handle was left behind when the track grew. */
+.level:has(.slider-thick) {
+  --level-knob-w: 22px;
+  --level-knob-h: 32px;
+}
+.level:has(.level-knob) {
+  --level-knob-w: var(--slider-knob-w, 26px);
 }
 
 /* The labels are absolutely placed at their exact fraction of the track rather
@@ -21,7 +38,7 @@
 .level-stops {
   position: relative;
   height: 1.3em;
-  margin-inline: calc(var(--slider-knob-w, 26px) / 2);
+  margin-inline: calc(var(--level-knob-w) / 2);
   font-size: 13px;
   line-height: 1.3;
 }
@@ -55,7 +72,11 @@
 .level-ends {
   display: flex;
   justify-content: space-between;
-  margin-inline: calc(var(--slider-knob-w, 26px) / 2);
+  /* Flush with the track, not inset like the stop labels. These caption the
+     scale as a whole rather than any one stop, so they line up with where the
+     track starts and ends - inset by half a thumb they read as belonging to the
+     first and last stop instead. */
+  margin-inline: 0;
   font-size: 13px;
   color: var(--muted-foreground);
 }
@@ -75,19 +96,35 @@
  * pseudo-elements is dropped whole by both engines.
  */
 .level input::-webkit-slider-thumb {
-  width: 18px;
-  height: 20px;
-  margin-top: calc((var(--slider-track) - 20px) / 2 - 5px);
+  width: var(--level-knob-w);
+  height: var(--level-knob-h);
+  /* Anchored by the shoulder, not by the centre or the tip. The square part of
+     the marker has to cover the track completely and the point has to hang below
+     it, so what must line up is where the taper begins - 68% down, per the
+     clip-path - with the track's lower edge. Everything above that is the body;
+     everything below is the point. */
+  margin-top: calc(var(--slider-track) - var(--level-knob-h) * 0.68);
   border-radius: 6px 6px 2px 2px;
-  background: var(--foreground);
-  clip-path: polygon(0 0, 100% 0, 100% 52%, 50% 100%, 0 52%);
+  /* --knob, the same surface the Slider's handle uses: a handle reads as a
+     physical thing you grab, and it stays one colour while the track fills
+     underneath it. Tinting it with the accent made it vanish into the fill on
+     the design systems whose primary is also the track colour. */
+  background: var(--knob);
+  clip-path: polygon(0 0, 100% 0, 100% 68%, 50% 100%, 0 68%);
+  /* filter, not box-shadow: clip-path cuts the border box and everything drawn
+     with it, so a shadow set here would be clipped away with the corners it was
+     meant to soften. A filter is applied after the clip, so it traces the shape
+     that survived - which is the only way a white marker keeps an edge against a
+     light page. */
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 28%));
 }
 .level input::-moz-range-thumb {
-  width: 18px;
-  height: 20px;
+  width: var(--level-knob-w);
+  height: var(--level-knob-h);
   border-radius: 6px 6px 2px 2px;
-  background: var(--foreground);
-  clip-path: polygon(0 0, 100% 0, 100% 52%, 50% 100%, 0 52%);
+  background: var(--knob);
+  clip-path: polygon(0 0, 100% 0, 100% 68%, 50% 100%, 0 68%);
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 28%));
 }
 
 /* Round-knob variant: hand the thumb back to the Slider's own look. */

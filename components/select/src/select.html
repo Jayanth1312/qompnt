@@ -6,7 +6,7 @@
 
   <details data-select class="relative inline-block">
     <summary data-trigger class="flex cursor-pointer list-none items-center gap-1.5 rounded-md px-control-x py-control-y text-body-sm leading-none text-foreground hover:bg-accent">
-      <span data-select-label>Opus</span>
+      <span data-select-label>Medium</span>
       <svg data-select-chevron width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
            class="shrink-0 text-muted-foreground">
@@ -14,20 +14,20 @@
       </svg>
     </summary>
 
-    <input type="hidden" name="model" value="Opus">
+    <input type="hidden" name="size" value="Medium">
 
     <div role="listbox" class="absolute left-0 top-[calc(100%+4px)] min-w-[160px] z-20 rounded-md border border-border bg-popover p-1 shadow-e2">
       <button type="button" role="option" aria-selected="true"
               class="flex w-full items-center rounded-sm px-row-x py-row-y text-left text-body-sm leading-none text-foreground hover:bg-accent">
-        Opus
+        Small
       </button>
       <button type="button" role="option" aria-selected="false"
               class="flex w-full items-center rounded-sm px-row-x py-row-y text-left text-body-sm leading-none text-foreground hover:bg-accent">
-        Sonnet
+        Medium
       </button>
       <button type="button" role="option" aria-selected="false"
               class="flex w-full items-center rounded-sm px-row-x py-row-y text-left text-body-sm leading-none text-foreground hover:bg-accent">
-        Haiku
+        Large
       </button>
     </div>
   </details>

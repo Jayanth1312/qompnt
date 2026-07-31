@@ -1,0 +1,27 @@
+/* The field grows out of the button rather than replacing it.
+ *
+ * Both halves are in the markup and `hidden` swaps which one shows, so the swap
+ * itself is instant and there is no second layout to keep in sync. What was
+ * missing was the growing: `hidden` is `display: none`, and a property cannot
+ * transition from a box that was never laid out.
+ *
+ * @starting-style is what closes that gap. It names the values the field should
+ * be given for the first frame it exists in - zero width, transparent - and the
+ * transition takes over from there. No script, no measuring, and nothing to undo
+ * when it is hidden again.
+ *
+ * Support: Chrome 117+, Safari 17.5+, Firefox 129+. Older engines skip the rule
+ * and the field simply appears at full width, exactly as it did before.
+ */
+[data-search-field] {
+  overflow: hidden;
+  transition:
+    width var(--motion) var(--ease),
+    opacity var(--motion) var(--ease);
+}
+@starting-style {
+  [data-search-field] {
+    width: 0;
+    opacity: 0;
+  }
+}

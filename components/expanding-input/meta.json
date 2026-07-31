@@ -6,7 +6,7 @@
     "Form",
     "Navigation"
   ],
-  "mechanism": "Both states are in the markup and `[hidden]` picks which one is showing. Nothing is created or measured, so opening is a single attribute flip - the width transition is CSS.",
+  "mechanism": "Two halves in one control: a button and a field, with `hidden` deciding which is shown. The field grows from nothing on the way in via `@starting-style`, which gives a first frame to transition away from - `display: none` alone has no box to animate.",
   "caveats": [
     "Four lines of JavaScript to move focus into the field on open. Without them the icon still expands, it just does not focus, and a keyboard user has to tab into it.",
     "The collapsed state is an icon button, so it needs an aria-label - a magnifying glass is not a name."

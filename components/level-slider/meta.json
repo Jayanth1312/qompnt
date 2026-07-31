@@ -13,6 +13,5 @@
   ],
   "support": [
     "`clip-path` on a range thumb for the pole variant - a thumb cannot host a pseudo-element, so the marker shape has to be cut out of the thumb itself."
-  ],
-  "motion": true
+  ]
 }

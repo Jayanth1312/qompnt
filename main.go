@@ -45,8 +45,8 @@ type pageData struct {
 	// Button because it is a way of arranging buttons rather than a thing you go
 	// looking for on its own; it still has its own page.
 	Companion *Component
-	Query     string
-	BaseURL   string
+	Query   string
+	BaseURL string
 	// V is the asset version, stamped onto every /static/ URL in the layout.
 	V string
 }
@@ -113,6 +113,13 @@ func staticCache(version func() string, h http.Handler) http.Handler {
 		// time a file is edited.
 		if v := version(); v != "" && r.URL.Query().Get("v") == v {
 			w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+			// Cache at the CDN as well as in the browser. Without this the edge
+			// forwards every first-visit asset request to the function, and on a
+			// pay-per-CPU platform five stylesheets and scripts per new visitor is
+			// five invocations that produce a byte-identical response. The CDN
+			// cache is purged on deploy, and the URL carries the build hash
+			// anyway, so nothing can go stale.
+			w.Header().Set("CDN-Cache-Control", "public, max-age=31536000, immutable")
 		} else {
 			w.Header().Set("Cache-Control", "no-cache")
 		}
@@ -277,6 +284,12 @@ func (s *server) render(w http.ResponseWriter, r *http.Request, t *template.Temp
 	etag := fmt.Sprintf(`"%x"`, sha256.Sum256(buf.Bytes()))
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Cache-Control", "no-cache")
+	// The page is the same bytes for everyone - theme, design system and motion
+	// are all client state - so the CDN can answer for it and the function only
+	// runs on a cache miss. Safe at this TTL because Vercel purges the edge cache
+	// on every deploy; the browser still revalidates, so a new build is never
+	// served stale from a laptop that was open through it.
+	w.Header().Set("CDN-Cache-Control", "public, s-maxage=86400, stale-while-revalidate=604800")
 	w.Header().Set("ETag", etag)
 	if r.Header.Get("If-None-Match") == etag {
 		w.WriteHeader(http.StatusNotModified)

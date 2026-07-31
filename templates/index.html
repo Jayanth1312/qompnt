@@ -10,7 +10,7 @@
     <span class="font-display text-title-md text-foreground sm:text-title-lg">Qompnt</span>
     <!-- Counted from the same slice the cards render from, so it cannot drift
          from what is on the page - including when search filters it. -->
-    <span class="inline-grid h-5 min-w-5 shrink-0 place-items-center rounded-pill bg-secondary px-1.5 text-caption leading-none text-muted-foreground">{{len .Components}}</span>
+    <span data-card-count class="inline-grid h-5 min-w-5 shrink-0 place-items-center rounded-pill bg-secondary px-1.5 text-caption leading-none text-muted-foreground">{{len .Components}}</span>
   </a>
 
   {{template "dsswitch" .}}
@@ -25,7 +25,8 @@
        rather than a second one hidden at every other width. -->
   <div data-search class="flex items-center">
     <button type="button" data-search-open aria-label="Search components"
-            class="grid place-items-center rounded-md px-control-x py-control-y text-muted-foreground hover:bg-accent hover:text-foreground">
+            data-tip="Search · Ctrl K"
+            class="tip tip-bottom grid place-items-center rounded-md px-control-x py-control-y text-muted-foreground hover:bg-accent hover:text-foreground">
       <i class="ph ph-magnifying-glass text-[18px]" aria-hidden="true"></i>
     </button>
 
@@ -33,12 +34,8 @@
       <i class="ph ph-magnifying-glass pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-[14px] text-muted-foreground/70" aria-hidden="true"></i>
       <input type="search" name="q" placeholder="Search components…"
              aria-label="Search components"
-             autocomplete="off"
-             class="w-full rounded-md border border-border bg-background py-control-y pl-7 pr-7 text-body-sm leading-none text-foreground placeholder:text-muted-foreground/70 [&::-webkit-search-cancel-button]:hidden"
-             hx-get="/p/search"
-             hx-trigger="input changed delay:200ms, search"
-             hx-target="#cards"
-             hx-swap="outerHTML">
+             autocomplete="off" data-search-input
+             class="w-full rounded-md border border-border bg-background py-control-y pl-7 pr-7 text-body-sm leading-none text-foreground placeholder:text-muted-foreground/70 [&::-webkit-search-cancel-button]:hidden">
       <button type="button" data-search-clear aria-label="Clear search"
               class="absolute right-1.5 top-1/2 grid -translate-y-1/2 place-items-center rounded-xs p-0.5 text-muted-foreground hover:text-foreground">
         <i class="ph ph-x text-[13px]" aria-hidden="true"></i>

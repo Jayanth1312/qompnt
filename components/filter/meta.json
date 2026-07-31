@@ -11,6 +11,5 @@
     "A `<details>` used as a menu announces as a disclosure, not as a listbox, despite the roles on the options.",
     "No arrow-key navigation between options; Tab moves through them."
   ],
-  "support": [],
-  "motion": true
+  "support": []
 }

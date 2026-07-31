@@ -24,7 +24,7 @@
 {{if .Mechanism}}
 <!-- Section shape: a title, an optional action on the right, a rule, content. -->
 <section class="mb-10">
-  <div class="mb-4 flex items-center justify-between gap-4 border-b border-border pb-3">
+  <div class="mb-4 flex items-center justify-between gap-4 border-b border-border pb-1.5">
     <h2 class="text-title-sm font-500 text-foreground">How it works</h2>
   </div>
   <p class="text-body-md text-foreground">{{.MechanismHTML}}</p>
@@ -32,7 +32,7 @@
 {{end}}
 
 <section class="mb-10">
-  <div class="mb-4 flex items-center justify-between gap-4 border-b border-border pb-3">
+  <div class="mb-4 flex items-center justify-between gap-4 border-b border-border pb-1.5">
     <h2 class="text-title-sm font-500 text-foreground">Implementation</h2>
     <!-- Copies the markup. The install command lives in the registry, not in the
          header of every page. -->
@@ -87,7 +87,7 @@
 </section>
 
 <section class="mb-10">
-  <div class="mb-4 flex items-center justify-between gap-4 border-b border-border pb-3">
+  <div class="mb-4 flex items-center justify-between gap-4 border-b border-border pb-1.5">
     <h2 class="text-title-sm font-500 text-foreground">Code</h2>
     <button type="button" data-copy-code
             class="grid place-items-center rounded-md px-control-x py-control-y text-muted-foreground hover:bg-accent hover:text-foreground"
@@ -136,7 +136,7 @@
      something you would go looking for on its own. It keeps its own page too;
      this is a second place it appears, not its only one. -->
 <section class="mb-10">
-  <div class="mb-4 flex items-center justify-between gap-4 border-b border-border pb-3">
+  <div class="mb-4 flex items-center justify-between gap-4 border-b border-border pb-1.5">
     <h2 class="text-title-sm font-500 text-foreground">{{.Name}}</h2>
     <a href="/c/{{.Slug}}"
        class="shrink-0 text-body-sm leading-none text-muted-foreground no-underline hover:text-foreground">Full page →</a>
@@ -164,7 +164,7 @@
 {{end}}
 
 <section class="mb-10">
-  <div class="mb-1 flex items-center justify-between gap-4 border-b border-border pb-3">
+  <div class="mb-1 flex items-center justify-between gap-4 border-b border-border pb-1.5">
     <h2 class="text-title-sm font-500 text-foreground">Credits</h2>
   </div>
   <dl class="text-body-sm">

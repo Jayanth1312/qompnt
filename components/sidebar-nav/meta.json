@@ -1,7 +1,7 @@
 {
   "name": "Sidebar nav",
   "blurb": "A vertical list of sections, with collapsible groups.",
-  "created": "2026-08-03",
+  "created": "2026-07-31",
   "tags": [
     "Navigation",
     "Layout"
@@ -12,6 +12,5 @@
     "Styling from `aria-current` means a wrong attribute is a visible bug rather than a silent one - which is the point, but it does mean the server has to set it.",
     "A long sidebar needs a skip link ahead of it, or keyboard users tab through every item to reach the content."
   ],
-  "support": [],
-  "motion": true
+  "support": []
 }

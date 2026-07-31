@@ -1,0 +1,15 @@
+{
+  "name": "Avatar",
+  "blurb": "A person, as initials or a picture, alone or stacked into a group.",
+  "created": "2026-08-01",
+  "tags": [
+    "Display"
+  ],
+  "mechanism": "A sized box with `overflow: hidden` and a radius. Initials are the fallback layer underneath the image, so a picture that fails to load reveals them rather than a broken icon. The stack is negative margin plus a ring in the page colour.",
+  "caveats": [
+    "Initials are decoration, not identity — the name has to be in the DOM or in alt text, or the avatar announces as nothing.",
+    "A status dot is colour alone. Pair it with a label, or with a title, wherever the state actually matters.",
+    "Stacked avatars overlap in DOM order; the first is on top, so put the most relevant person first."
+  ],
+  "support": []
+}

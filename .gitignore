@@ -21,6 +21,7 @@ qompnt
 /comps.md
 /Designs/
 /expandable_tab_navigation/
+render.yaml
 
 # Per-component working notes. component.go loads meta.json, preview.html,
 # styles.css, options.html, extras.html and src/* - never these.

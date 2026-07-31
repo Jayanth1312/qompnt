@@ -6,7 +6,7 @@
     "Overlay",
     "HTMX"
   ],
-  "mechanism": "The server returns the toast and htmx swaps it into a live region. Its lifetime is a CSS animation, not a timer, and the animationend handler removes the node.",
+  "mechanism": "A stack in a live region, with the toast's lifetime as a CSS animation rather than a timer - `animationend` is what removes it, so a toast cannot outlive its own exit.",
   "caveats": [
     "aria-live=\"polite\" waits for a pause in speech; use assertive only for errors that block the user.",
     "A toast that auto-dismisses can be missed entirely. Anything that must be acted on belongs in a dialog or inline, not here.",

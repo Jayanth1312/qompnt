@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{if .C}}{{.C.Name}} — Qompnt{{else}}Qompnt — HTML components, ten design systems{{end}}</title>
 <meta name="description" content="{{if .C}}{{.C.Blurb}}{{else}}HTML components built on native elements and a token contract. Swap the whole design system with one stylesheet. Copy them, or install with shadcn.{{end}}">
+<!-- Both CDNs are hit by render-blocking stylesheets below, so the connection is
+     opened while the HTML is still parsing rather than after it. Costs two DNS
+     lookups; saves a full round trip each on first paint. -->
+<link rel="preconnect" href="https://fonts.cdnfonts.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link href="https://fonts.cdnfonts.com/css/opening-hours-sans" rel="stylesheet">
 <link href="https://fonts.cdnfonts.com/css/cambo" rel="stylesheet">
 <link href="https://fonts.cdnfonts.com/css/fira-mono" rel="stylesheet">
@@ -77,7 +82,8 @@ try {
      CSS rather than JS means the right icon is there on the first paint. -->
 <button type="button" data-theme-toggle
         aria-label="Toggle dark mode"
-        class="grid p-2 shrink-0 place-items-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground">
+        data-tip="Toggle theme · Ctrl T"
+        class="tip tip-bottom grid p-2 shrink-0 place-items-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground">
   <i data-icon="moon" class="ph ph-moon text-[15px]" aria-hidden="true"></i>
   <i data-icon="sun" class="ph ph-sun text-[15px]" aria-hidden="true"></i>
 </button>
@@ -88,7 +94,8 @@ try {
      is: an expanding field would have to push the title out of the way, and the
      palette already searches every component from anywhere. -->
 <button type="button" data-palette-open aria-label="Search components"
-        class="grid p-2 shrink-0 place-items-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground">
+        data-tip="Search · Ctrl K"
+        class="tip tip-bottom grid p-2 shrink-0 place-items-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground">
   <i class="ph ph-magnifying-glass text-[15px]" aria-hidden="true"></i>
 </button>
 {{end}}
@@ -127,7 +134,7 @@ try {
          two characters rendered as an empty box. -->
     <span class="flex items-center gap-1.5"><kbd class="palette-kbd"><i class="ph ph-arrow-elbow-down-left" aria-hidden="true"></i></kbd> Go to page</span>
     <span class="flex items-center gap-1.5"><kbd class="palette-kbd"><i class="ph ph-arrow-up" aria-hidden="true"></i><i class="ph ph-arrow-down" aria-hidden="true"></i></kbd> Navigate</span>
-    <span class="flex items-center gap-1.5"><kbd class="palette-kbd">Ctrl T</kbd> Theme</span>
+    <span class="flex items-center gap-1.5"><kbd class="palette-kbd"><span data-kbd-mod>Ctrl</span> T</kbd> Theme</span>
   </div>
 </dialog>
 {{end}}

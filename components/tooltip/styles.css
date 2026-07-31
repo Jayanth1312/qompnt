@@ -33,8 +33,13 @@
      the triangle at 100%+8px to 100%+13px - entirely underneath the bubble,
      which starts at 100%+8px. It only became visible when the bubble faded and
      went translucent, which is what read as "the arrow outlives the tooltip".
-     calc(100% - 2px) lands the triangle in the 5px gap where it belongs. */
-  bottom: calc(100% - 2px);
+     calc(100% - 1px) lands the triangle in the 5px gap where it belongs, with
+     its flat edge 1px *under* the bubble rather than exactly against it. That
+     overlap is deliberate: two edges that merely touch are rounded to different
+     device pixels on a phone or a scaled display, and the seam between them
+     shows as a hairline of page background - which is the gap you see between
+     the bubble and its arrow. */
+  bottom: calc(100% - 1px);
   transform: translateX(-50%);
   z-index: 30;
   border: 5px solid transparent;
@@ -56,7 +61,7 @@
 }
 .tip-bottom::before {
   bottom: auto;
-  top: calc(100% - 2px);
+  top: calc(100% - 1px);
   border-top-color: transparent;
   border-bottom-color: var(--foreground);
 }
@@ -94,4 +99,18 @@
 .tip-bottom::after,
 .tip-bottom::before {
   translate: 0 -4px;
+}
+
+/* Icon-only. A tooltip earns its keep most on a control with no words in it, so
+   the same button ships both and this variant swaps which one is drawn. Two
+   rules rather than a second button: the tooltip, the aria-label and the hit
+   area are identical either way, and only the content changes. */
+.tip .tip-icon {
+  display: none;
+}
+.tip-icon-only .tip-label {
+  display: none;
+}
+.tip-icon-only .tip-icon {
+  display: block;
 }

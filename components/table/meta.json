@@ -1,7 +1,7 @@
 {
   "name": "Table",
   "blurb": "Rows of data with a header, sized by the row density token.",
-  "created": "2026-08-04",
+  "created": "2026-08-01",
   "tags": [
     "Data display"
   ],
@@ -11,6 +11,5 @@
     "Zebra striping helps scanning and hurts contrast: the striped rows here stay above 4.5:1, but check yours if you re-tint them.",
     "On narrow screens the container scrolls sideways. That is the honest fallback - collapsing a table into cards loses the column relationship."
   ],
-  "support": [],
-  "motion": true
+  "support": []
 }

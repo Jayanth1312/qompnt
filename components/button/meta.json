@@ -6,12 +6,11 @@
     "Action",
     "Form"
   ],
-  "mechanism": "Static markup on a real `<button>`. Variants are class swaps; the loading state rides on htmx's .htmx-request class rather than any state of its own.",
+  "mechanism": "Static markup on a real `<button>`. Every variant is a class swap, and the loading state is a class the button carries - nothing about it is stateful.",
   "caveats": [
-    "Icon-only buttons must carry aria-label \u2014 there is no text to announce.",
+    "Icon-only buttons must carry aria-label — there is no text to announce.",
     "A disabled button is not focusable, so its tooltip or reason must live elsewhere in the DOM."
   ],
   "support": [],
-  "motion": true,
-  "companion": "button-group"
+  "motion": true
 }

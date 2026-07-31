@@ -13,6 +13,5 @@
   ],
   "support": [
     "Nothing newer than logical border-radius properties."
-  ],
-  "motion": true
+  ]
 }
