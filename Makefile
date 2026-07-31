@@ -1,8 +1,6 @@
-.PHONY: all css build test dev kill clean deploy
+.PHONY: all css build test dev kill clean
 
 PORT ?= 8080
-SERVICE ?= qompnt
-REGION ?= asia-south1
 
 all: css build
 
@@ -30,13 +28,6 @@ kill:
 	-@pkill -f "exe/qompnt" 2>/dev/null || true
 	-@fuser -k $(PORT)/tcp 2>/dev/null || true
 	@sleep 0.3
-
-# Deploy to Cloud Run. --source builds the Dockerfile on Cloud Build, so no
-# local Docker daemon is involved. css first, and it matters: the stylesheet is
-# generated from the markup and then embedded into the binary as it stands on
-# disk, so a stale one ships silently.
-deploy: css
-	gcloud run deploy $(SERVICE) --source . --region $(REGION) --allow-unauthenticated
 
 clean:
 	rm -f qompnt static/qompnt.css static/components.css
