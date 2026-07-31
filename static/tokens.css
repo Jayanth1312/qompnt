@@ -366,6 +366,49 @@ body {
 .preview-inert :is(a, button, summary, input, select, textarea, label, dialog) {
   pointer-events: auto;
 }
+/* ...which also means nothing inside a preview ever matches :hover here, so a
+   component whose demo IS a hover state looks dead on the index. The gallery
+   card does get the pointer (through the stretched link), so its hover is
+   proxied down to the pieces that need one. Kept out of the component's own
+   styles.css: .gallery-card is this site's chrome, not part of what you copy. */
+.gallery-card:hover .card-tilt {
+  transform: perspective(900px) rotateX(2.5deg) rotateY(-3.5deg) translateY(-4px);
+  box-shadow: var(--shadow-2);
+}
+
+/* Command palette (Ctrl/Cmd+K). <dialog> is not centred by default and the
+   margin: auto that does it has to beat the utility resetting margins, hence
+   the rule here rather than a class. */
+dialog[data-palette] {
+  margin: auto;
+}
+dialog[data-palette][open] {
+  animation: palette-in 140ms var(--ease);
+}
+@keyframes palette-in {
+  from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+}
+/* Keyboard selection only - the mouse gets :hover, and having both lit at once
+   makes it ambiguous which one Enter takes. */
+[data-palette-item][aria-selected='true'],
+[data-palette-item]:hover {
+  background: var(--accent);
+}
+.palette-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 20px;
+  padding: 2px 5px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--muted);
+  font-family: inherit;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--muted-foreground);
+}
 
 /* The Customize panel under a preview. Controls are laid out as cards and the
    raw inputs are restyled here, so every options.html stays plain labels and
@@ -660,4 +703,45 @@ body {
 .htmx-request .indicator,
 .htmx-request.indicator {
   opacity: 1;
+}
+
+/* Theme swap. The root snapshot is cross-faded by default, which reads as a
+   flash; instead the old theme is held still and the new one is wiped down over
+   it from the top edge of the viewport. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) { z-index: 0; }
+
+::view-transition-new(root) {
+  z-index: 1;
+  /* Deliberately not --motion-slow: data-swapping zeroes that token for the
+     duration of the swap, which is exactly when this animation has to run.
+     Reduced motion is handled in the click handler, which skips the
+     transition entirely. */
+  animation: theme-reveal 450ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes theme-reveal {
+  from { clip-path: inset(0 0 100% 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+
+/* Sticky page header. No border: content passing underneath is blurred out
+   instead, which separates the two without drawing a line across the page.
+   The background has to stay part-transparent or there is nothing to blur.
+
+   Set here rather than as a utility because backdrop-filter needs the
+   translucent background on the same element, and the two belong together.
+
+   Safari still needs the prefix, and this is the one place the site uses
+   backdrop-filter - a browser without it just gets the tinted background,
+   which is legible on its own. */
+[data-sticky-header] {
+  background: color-mix(in srgb, var(--background) 72%, transparent);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
 }

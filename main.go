@@ -2,12 +2,17 @@ package main
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"flag"
 	"fmt"
 	"html/template"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 )
@@ -18,6 +23,8 @@ type server struct {
 	mu         sync.RWMutex
 	components []Component
 	tmpl       templates
+	// version stamps every asset URL and doubles as the cache key for them.
+	version string
 }
 
 type templates struct {
@@ -37,6 +44,8 @@ type pageData struct {
 	Companion *Component
 	Query     string
 	BaseURL   string
+	// V is the asset version, stamped onto every /static/ URL in the layout.
+	V string
 }
 
 func main() {
@@ -58,28 +67,63 @@ func main() {
 	// ServeMux wildcards must be whole segments, so ".json" cannot be a literal
 	// suffix in the pattern - one handler takes the filename and splits it.
 	mux.HandleFunc("GET /r/{file}", s.handleRegistry)
-	mux.Handle("GET /static/", staticCache(http.StripPrefix("/static/", http.FileServer(http.Dir("static")))))
+	mux.Handle("GET /static/", staticCache(s.assetVersion, http.StripPrefix("/static/", http.FileServer(http.Dir("static")))))
 	s.routeDemos(mux)
 
 	log.Printf("qompnt listening on %s (dev=%v)", *addr, *dev)
 	log.Fatal(http.ListenAndServe(*addr, s.withReload(mux)))
 }
 
-// staticCache makes the browser revalidate every static file.
+// staticCache decides how long a static file may be reused.
 //
-// Without a Cache-Control header a browser is free to invent a freshness
-// lifetime from Last-Modified and serve the file for hours without asking. These
-// filenames are not content-hashed, so components.css keeps its name across a
-// rule change and a client that skipped revalidation renders the old rules -
-// which looks like a CSS bug that reproduces for nobody else. no-cache still
-// allows the cache: the file is stored and a 304 costs a header exchange, not a
-// download. Immutable caching is available once filenames carry a hash, not
-// before.
-func staticCache(h http.Handler) http.Handler {
+// Filenames here are stable - components.css keeps its name across a rule change
+// - so a browser caching them by name would render old rules, which looks like a
+// CSS bug that reproduces for nobody else. The version is carried in the query
+// string instead: every asset in layout.html is stamped with ?v=<build>, and the
+// build is a hash of the files themselves. A stamped URL is therefore safe to
+// cache forever, because editing a file changes the URL. An unstamped one - a
+// file typed in by hand, or fetched by something that dropped the query - falls
+// back to revalidating, which still costs a header exchange rather than a
+// download.
+func staticCache(version func() string, h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Cache-Control", "no-cache")
+		// Read per request, not once at startup: in dev the version changes every
+		// time a file is edited.
+		if v := version(); v != "" && r.URL.Query().Get("v") == v {
+			w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+		} else {
+			w.Header().Set("Cache-Control", "no-cache")
+		}
 		h.ServeHTTP(w, r)
 	})
+}
+
+// staticVersion hashes every file the layout links, so one string identifies the
+// whole asset set. Per-file hashes would let an unchanged file keep its URL, but
+// there are six of them: the extra plumbing buys a few kilobytes on the one load
+// after a deploy.
+func staticVersion() string {
+	var names []string
+	// Walked, not globbed: static/themes/*.css is stamped and cached for a year
+	// like everything else, so a design system edited but not hashed here would
+	// keep serving from cache until the filename changed.
+	filepath.WalkDir("static", func(p string, d fs.DirEntry, err error) error {
+		if err == nil && !d.IsDir() && !strings.HasPrefix(d.Name(), ".") {
+			names = append(names, p)
+		}
+		return nil
+	})
+	sort.Strings(names)
+
+	h := sha256.New()
+	for _, n := range names {
+		b, err := os.ReadFile(n)
+		if err != nil {
+			continue
+		}
+		fmt.Fprintf(h, "%s:%x", n, sha256.Sum256(b))
+	}
+	return hex.EncodeToString(h.Sum(nil))[:12]
 }
 
 // componentsCSS concatenates every component's styles.css. The per-component
@@ -119,12 +163,22 @@ func (s *server) reload() error {
 
 	// Written to disk rather than served from memory so a plain-HTML consumer can
 	// copy static/ and get the same stylesheet the site uses.
-	if err := os.WriteFile("static/components.css", componentsCSS(cs), 0o644); err != nil {
+	//
+	// Temp file and rename, not WriteFile: rename is atomic, so a request being
+	// served the file either gets the old one whole or the new one whole. Writing
+	// in place truncates first, and a reader landing in that window gets a
+	// half-written stylesheet - which renders as one component, usually a late one
+	// alphabetically, silently losing its rules until the next load.
+	tmp := "static/.components.css.tmp"
+	if err := os.WriteFile(tmp, componentsCSS(cs), 0o644); err != nil {
+		return err
+	}
+	if err := os.Rename(tmp, "static/components.css"); err != nil {
 		return err
 	}
 
 	s.mu.Lock()
-	s.components, s.tmpl = cs, t
+	s.components, s.tmpl, s.version = cs, t, staticVersion()
 	s.mu.Unlock()
 	return nil
 }
@@ -134,9 +188,16 @@ func (s *server) withReload(next http.Handler) http.Handler {
 		return next
 	}
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if err := s.reload(); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+		// Pages only. A static file is served straight off disk and gains nothing
+		// from re-reading every component - and the page that asked for it has
+		// just done exactly that. Reloading here also meant a request for
+		// components.css rewrote components.css while the file server was reading
+		// it, which is a race no amount of atomic writing should have to cover.
+		if !strings.HasPrefix(r.URL.Path, "/static/") {
+			if err := s.reload(); err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
 		}
 		next.ServeHTTP(w, r)
 	})
@@ -148,33 +209,50 @@ func (s *server) snapshot() ([]Component, templates) {
 	return s.components, s.tmpl
 }
 
+func (s *server) assetVersion() string {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.version
+}
+
 // render buffers first. Executing straight into the ResponseWriter means a
 // template error - a renamed field, say - ships a 200 that just stops mid-page,
 // which looks like a styling bug rather than the failure it is.
-func (s *server) render(w http.ResponseWriter, t *template.Template, name string, data any) {
+func (s *server) render(w http.ResponseWriter, r *http.Request, t *template.Template, name string, data any) {
 	var buf bytes.Buffer
 	if err := t.ExecuteTemplate(&buf, name, data); err != nil {
 		log.Printf("render %s: %v", name, err)
 		http.Error(w, "template error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+	// Revalidate rather than no-store. The page is always checked with the
+	// server, so a new build is never missed, but an unchanged one comes back as
+	// a 304 with no body - and no-store additionally disables the back/forward
+	// cache, which is what made every Back press re-render the whole page.
+	//
+	// The ETag is the rendered bytes, so it covers the markup, the component
+	// list and the asset version in one.
+	etag := fmt.Sprintf(`"%x"`, sha256.Sum256(buf.Bytes()))
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	// Dev site: never let a browser (or htmx, which uses normal cache rules on
-	// boosted navigations) reuse HTML from an earlier build.
-	w.Header().Set("Cache-Control", "no-store")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("ETag", etag)
+	if r.Header.Get("If-None-Match") == etag {
+		w.WriteHeader(http.StatusNotModified)
+		return
+	}
 	buf.WriteTo(w)
 }
 
 func (s *server) handleIndex(w http.ResponseWriter, r *http.Request) {
 	cs, t := s.snapshot()
-	s.render(w, t.index, "layout", pageData{Components: cs})
+	s.render(w, r, t.index, "layout", pageData{Components: cs, V: s.assetVersion()})
 }
 
 // handleSearch returns just the card stack, swapped in by htmx.
 func (s *server) handleSearch(w http.ResponseWriter, r *http.Request) {
 	cs, t := s.snapshot()
 	q := r.URL.Query().Get("q")
-	s.render(w, t.cards, "cards", pageData{Components: search(cs, q), Query: q})
+	s.render(w, r, t.cards, "cards", pageData{Components: search(cs, q), Query: q})
 }
 
 func (s *server) handleDetail(w http.ResponseWriter, r *http.Request) {
@@ -184,13 +262,13 @@ func (s *server) handleDetail(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	data := pageData{Components: cs, C: &c, BaseURL: baseURL(r)}
+	data := pageData{Components: cs, C: &c, BaseURL: baseURL(r), V: s.assetVersion()}
 	if c.Companion != "" {
 		if comp, ok := find(cs, c.Companion); ok {
 			data.Companion = &comp
 		}
 	}
-	s.render(w, t.detail, "layout", data)
+	s.render(w, r, t.detail, "layout", data)
 }
 
 // handleSource serves a component's markup as plain text - what the copy button

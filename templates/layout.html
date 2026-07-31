@@ -8,19 +8,21 @@
 <link href="https://fonts.cdnfonts.com/css/opening-hours-sans" rel="stylesheet">
 <link href="https://fonts.cdnfonts.com/css/cambo" rel="stylesheet">
 <link href="https://fonts.cdnfonts.com/css/fira-mono" rel="stylesheet">
-<link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+<link rel="icon" href="/static/icon.svg?v={{.V}}" type="image/svg+xml">
 <!-- Phosphor, for this site's own chrome only. Component markup keeps inline
      SVG on purpose: an icon copied out of here must not need a second
      stylesheet to render. See README, "Icons". -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-<link rel="stylesheet" href="/static/tokens.css">
-<link rel="stylesheet" href="/static/qompnt.css">
+<link rel="stylesheet" href="/static/tokens.css?v={{.V}}">
+<link rel="stylesheet" href="/static/qompnt.css?v={{.V}}">
 <!-- Generated from components/*/styles.css - see componentsCSS in main.go. -->
-<link rel="stylesheet" href="/static/components.css">
+<link rel="stylesheet" href="/static/components.css?v={{.V}}">
 <!-- The design system is one stylesheet layered over the contract in tokens.css.
-     Empty href = the default system. -->
-<link id="ds" rel="stylesheet" href="">
+     No href = the default system. Deliberately absent rather than href="": an
+     empty href resolves to the current page, so the browser fetched the HTML
+     back as a stylesheet on every load of the default system. -->
+<link id="ds" rel="stylesheet">
 <script>
 // Both applied before first paint, so neither the theme nor the design system
 // flashes the wrong one.
@@ -32,7 +34,7 @@ try {
   var ds = localStorage.getItem('qompnt-ds');
   if (ds) {
     document.documentElement.dataset.ds = ds;
-    document.getElementById('ds').href = '/static/themes/' + ds + '.css';
+    document.getElementById('ds').href = '/static/themes/' + ds + '.css?v={{.V}}';
   }
 
   // Motion, same reason: the attribute has to be on <html> before the first
@@ -54,8 +56,10 @@ try {
   <div id="toasts" role="status" aria-live="polite"
        class="fixed top-6 right-6 z-50 flex w-[min(360px,calc(100vw-3rem))] flex-col gap-2"></div>
 
-  <script src="/static/htmx.js"></script>
-  <script src="/static/qompnt.js"></script>
+  {{template "palette" .}}
+
+  <script src="/static/htmx.js?v={{.V}}"></script>
+  <script src="/static/qompnt.js?v={{.V}}"></script>
 </body>
 </html>{{end}}
 
@@ -77,6 +81,55 @@ try {
   <i data-icon="moon" class="ph ph-moon text-[15px]" aria-hidden="true"></i>
   <i data-icon="sun" class="ph ph-sun text-[15px]" aria-hidden="true"></i>
 </button>
+{{end}}
+
+{{define "palettebutton"}}
+<!-- Opens the command palette. On the detail page this is the only search there
+     is: an expanding field would have to push the title out of the way, and the
+     palette already searches every component from anywhere. -->
+<button type="button" data-palette-open aria-label="Search components"
+        class="grid p-2 shrink-0 place-items-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground">
+  <i class="ph ph-magnifying-glass text-[15px]" aria-hidden="true"></i>
+</button>
+{{end}}
+
+{{define "palette"}}
+<!-- Command palette, Ctrl/Cmd+K. Every component is rendered here on every page
+     - .Components is on pageData for both routes - and filtering is a substring
+     match in the browser. No endpoint, no fetch, no spinner: the list is thirty
+     rows, and the network round trip would be the slowest part of typing.
+
+     A native <dialog> rather than a div: showModal() gives the focus trap, the
+     Escape handler, inertness of the page behind and the ::backdrop for free. -->
+<dialog data-palette
+        class="m-0 w-[min(560px,calc(100vw-2rem))] rounded-xl border border-border bg-popover p-0 text-foreground shadow-e2 backdrop:bg-black/40">
+  <div class="flex items-center gap-2 border-b border-border px-4">
+    <i class="ph ph-magnifying-glass shrink-0 text-[15px] text-muted-foreground" aria-hidden="true"></i>
+    <input data-palette-input type="text" placeholder="Search components…" aria-label="Search components"
+           autocomplete="off" spellcheck="false"
+           class="w-full bg-transparent py-3.5 text-body-md text-foreground outline-none placeholder:text-muted-foreground">
+  </div>
+
+  <div data-palette-list role="listbox" aria-label="Components" class="max-h-[min(380px,60vh)] overflow-y-auto p-2">
+    <p data-palette-heading class="px-2 py-1.5 text-caption text-muted-foreground">Components</p>
+    {{range .Components}}
+    <a href="/c/{{.Slug}}" role="option" aria-selected="false" data-palette-item data-name="{{.Name}}"
+       class="flex items-center gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground no-underline">
+      <i class="ph ph-circle-dashed shrink-0 text-[15px] text-muted-foreground" aria-hidden="true"></i>
+      {{.Name}}
+    </a>
+    {{end}}
+    <p data-palette-empty hidden class="px-2 py-6 text-center text-body-sm text-muted-foreground">No components match.</p>
+  </div>
+
+  <div class="flex items-center gap-4 border-t border-border px-4 py-2.5 text-caption text-muted-foreground">
+    <!-- Icons rather than ↑↓: the display font has no arrow glyphs, so those
+         two characters rendered as an empty box. -->
+    <span class="flex items-center gap-1.5"><kbd class="palette-kbd"><i class="ph ph-arrow-elbow-down-left" aria-hidden="true"></i></kbd> Go to page</span>
+    <span class="flex items-center gap-1.5"><kbd class="palette-kbd"><i class="ph ph-arrow-up" aria-hidden="true"></i><i class="ph ph-arrow-down" aria-hidden="true"></i></kbd> Navigate</span>
+    <span class="flex items-center gap-1.5"><kbd class="palette-kbd">Ctrl T</kbd> Theme</span>
+  </div>
+</dialog>
 {{end}}
 
 {{define "dsswitch"}}

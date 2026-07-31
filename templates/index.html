@@ -1,18 +1,28 @@
 {{define "content"}}
-<header class="mb-8 flex items-center gap-1">
-  <a href="/" class="mr-auto flex items-center gap-2 no-underline">
+<!-- Sticky, so the identity and the controls stay reachable down a long list.
+     -mx-5 px-5 puts the background under the page gutters as well, or content
+     scrolls up through the sides of the bar. -->
+<header data-sticky-header class="sticky top-0 z-30 -mx-5 mb-8 flex items-center gap-1 px-5 py-3">
+  <a href="/" class="mr-auto flex min-w-0 items-center gap-2 no-underline">
     {{template "mark" .}}
-    <span class="font-display text-title-lg text-foreground">Qompnt</span>
+    <!-- Smaller on a phone: at 22px the wordmark and the count push the theme
+         toggle off the row. -->
+    <span class="font-display text-title-md text-foreground sm:text-title-lg">Qompnt</span>
     <!-- Counted from the same slice the cards render from, so it cannot drift
          from what is on the page - including when search filters it. -->
-    <span class="inline-grid h-5 min-w-5 place-items-center rounded-pill bg-secondary px-1.5 text-caption leading-none text-muted-foreground">{{len .Components}}</span>
+    <span class="inline-grid h-5 min-w-5 shrink-0 place-items-center rounded-pill bg-secondary px-1.5 text-caption leading-none text-muted-foreground">{{len .Components}}</span>
   </a>
 
   {{template "dsswitch" .}}
 
   <!-- Search: a bare icon until it is clicked, then the field itself. Both halves
        are in the markup and [hidden] swaps which one shows, so it is instant and
-       there is no second layout to maintain. -->
+       there is no second layout to maintain.
+
+       On a phone the same button opens the command palette instead - a 224px
+       field cannot open in a header that is already full, and the palette is the
+       better small-screen answer anyway. One button, branched in the handler,
+       rather than a second one hidden at every other width. -->
   <div data-search class="flex items-center">
     <button type="button" data-search-open aria-label="Search components"
             class="grid place-items-center rounded-md px-control-x py-control-y text-muted-foreground hover:bg-accent hover:text-foreground">
