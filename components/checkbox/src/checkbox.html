@@ -16,16 +16,3 @@
     Dark
   </label>
 </fieldset>
-
-<!-- Switch: a checkbox whose track and knob are drawn with peer- classes. -->
-<label class="flex cursor-pointer items-center justify-between gap-4 text-body-sm leading-none text-foreground">
-  Reduce motion
-  <input type="checkbox" class="peer sr-only">
-  <!-- .switch is the timing hook: the knob is an ::after, which no utility class
-       can reach. See styles.css. -->
-  <span class="switch relative h-6 w-10 shrink-0 rounded-pill bg-secondary
-               peer-checked:bg-primary
-               after:absolute after:left-0.5 after:top-0.5 after:h-5 after:w-5 after:rounded-pill
-               after:bg-background after:content-['']
-               peer-checked:after:translate-x-4"></span>
-</label>

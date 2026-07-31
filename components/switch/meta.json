@@ -1,0 +1,18 @@
+{
+  "name": "Switch",
+  "blurb": "An on/off control, with an optional icon riding in the knob.",
+  "created": "2026-08-04",
+  "tags": [
+    "Form"
+  ],
+  "mechanism": "A native checkbox, visually hidden but still the control - it keeps focus, keyboard and form submission. The track and knob are a sibling span, so the state rules are plain CSS sibling selectors and there is no JavaScript and no second input to keep in sync.",
+  "caveats": [
+    "A switch is announced as a checkbox. Where it applies immediately rather than on save, say so in the label - the shape carries that meaning for sighted users and nothing else does.",
+    "The icon inside the knob is decoration and carries `aria-hidden`. A switch whose only label is its icon has no accessible name; keep the text label.",
+    "At 24px the knob is below the 40px touch floor, so the whole row is the label and therefore the hit area. Do not shrink the row to fit the switch."
+  ],
+  "support": [
+    "`:has()` — Baseline since December 2023, used only for the pressed state and the disabled cursor."
+  ],
+  "motion": true
+}

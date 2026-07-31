@@ -1,14 +1,14 @@
 {
   "name": "Checkbox & Radio",
-  "blurb": "Checkbox, radio group, and switch, drawn from the native controls.",
+  "blurb": "Checkbox and radio group, drawn from the native controls.",
   "created": "2026-07-26",
   "tags": [
     "Form"
   ],
-  "mechanism": "Native input plus accent-color for the tint. The switch is the same checkbox with its track and knob drawn by peer-checked classes - no second control.",
+  "mechanism": "Native input plus accent-color for the tint - one property, and the platform keeps drawing the checkmark, the focus ring and the keyboard behaviour.",
   "caveats": [
-    "The switch reads as a checkbox to assistive tech. If it toggles something immediately, say so in the label rather than relying on the shape.",
-    "accent-color styles the control but not its focus ring, which stays the platform's."
+    "accent-color styles the control but not its focus ring, which stays the platform's.",
+    "For an on/off control that applies immediately, use Switch rather than a checkbox - the shape is what tells a sighted user there is no save step."
   ],
   "support": [
     "`accent-color` \u2014 Baseline since March 2022."

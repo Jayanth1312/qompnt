@@ -198,21 +198,10 @@ button:active:not(:disabled),
 /* ---- checkbox ---- */
 /* Checkbox and radio are native and drawn by the platform from accent-color, so
    there is nothing to animate inside them - the tick is the OS's. The press is
-   ours.
-
-   The switch is the opposite: its track and knob are our own boxes, so both
-   travel. The knob is an ::after, which the contract's transition rule does not
-   reach (it lists elements, not pseudo-elements), so it is timed here. */
+   ours. */
 input[type='checkbox']:active:not(:disabled),
 input[type='radio']:active:not(:disabled) {
   transform: scale(0.92);
-}
-
-.switch,
-.switch::after {
-  transition:
-    background-color var(--motion) var(--ease),
-    transform var(--motion) var(--ease);
 }
 
 /* ---- combobox ---- */
@@ -1073,6 +1062,131 @@ details[data-select][open] > [role='listbox'] {
     opacity: 0;
     transform: scale(0.4);
   }
+}
+
+/* ---- switch ---- */
+/* Switch. The input is the control - visually hidden, still focusable, still a
+   checkbox to assistive tech and to a form post. The track and knob next to it
+   are the only visible parts.
+
+   Why these rules are here and not peer- utilities: the knob is a child of the
+   track, not a sibling of the input, and `peer-checked:` compiles to a sibling
+   combinator that cannot reach it. The icon crossfade has no utility form
+   either. One place for the state, rather than half here and half in the markup.
+
+   One size formula. Travel is width minus height, so a size variant sets those
+   two numbers and the knob, its offset and its distance all follow. */
+.toggle {
+  --track-w: 44px;
+  --track-h: 24px;
+  --knob-pad: 3px;
+  --knob-size: calc(var(--track-h) - var(--knob-pad) * 2);
+  --knob-travel: calc(var(--track-w) - var(--track-h));
+
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  width: var(--track-w);
+  height: var(--track-h);
+  border-radius: var(--r-pill);
+  /* Mixed from --foreground rather than named, so the off track separates from
+     whatever surface it sits on in every theme - including ones where
+     --secondary lands within a shade of the panel behind it. */
+  background: color-mix(in oklab, var(--foreground) 14%, transparent);
+  box-shadow: inset 0 0 0 1px var(--border);
+  transition:
+    background-color var(--motion) var(--ease),
+    box-shadow var(--motion-fast) var(--ease);
+}
+
+.toggle-lg {
+  --track-w: 56px;
+  --track-h: 30px;
+  --knob-pad: 4px;
+}
+
+.toggle-knob {
+  position: absolute;
+  top: var(--knob-pad);
+  left: var(--knob-pad);
+  display: grid;
+  place-items: center;
+  width: var(--knob-size);
+  height: var(--knob-size);
+  border-radius: var(--r-pill);
+  /* Not --knob. That token is the Slider's handle and a design system is free to
+     make it the brand colour - ClickHouse does, with the same yellow as
+     --primary - which on a switch means an off knob that reads as on and an on
+     knob the same colour as the track it sits on. A control with state names a
+     colour per state instead: off, a neutral that can never be the accent; on,
+     --primary-foreground, which is by definition what stays legible on
+     --primary, so this holds for themes not written yet. */
+  background: color-mix(in oklab, var(--foreground) 55%, var(--background));
+  color: var(--background);
+  transition:
+    transform var(--motion) var(--ease),
+    background-color var(--motion) var(--ease),
+    color var(--motion) var(--ease),
+    width var(--motion-fast) var(--ease);
+}
+
+input:checked + .toggle {
+  background: var(--primary);
+  box-shadow: none;
+}
+input:checked + .toggle .toggle-knob {
+  transform: translateX(var(--knob-travel));
+  background: var(--primary-foreground);
+  color: var(--primary);
+}
+
+/* The press. The knob stretches toward the far end rather than scaling, which is
+   what a physical switch under a thumb does and what makes the control feel
+   attached to the pointer. Checked, the stretch has to eat into the travel or
+   the knob leaves the track on the right. */
+label:has(.toggle):active .toggle-knob {
+  width: calc(var(--knob-size) + 4px);
+}
+label:has(.toggle):active input:checked + .toggle .toggle-knob {
+  transform: translateX(calc(var(--knob-travel) - 4px));
+}
+
+/* The ring is on the track, because the input it belongs to has no box. The
+   inner --background stop keeps the ring off the track's own edge. */
+input:focus-visible + .toggle {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--background),
+    0 0 0 4px var(--ring);
+}
+
+input:disabled + .toggle {
+  opacity: 0.5;
+}
+label:has(input:disabled) {
+  cursor: not-allowed;
+}
+
+/* The icon variant. Both icons occupy the same grid cell, so they crossfade in
+   place instead of one pushing the other. They rotate out of the way rather than
+   only fading - at 12px a fade alone is too small a change to read as motion. */
+.toggle-knob > svg {
+  grid-area: 1 / 1;
+  transition:
+    opacity var(--motion-fast) var(--ease),
+    transform var(--motion) var(--ease);
+}
+.toggle-knob > [data-toggle-on] {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.5);
+}
+input:checked + .toggle [data-toggle-on] {
+  opacity: 1;
+  transform: none;
+}
+input:checked + .toggle [data-toggle-off] {
+  opacity: 0;
+  transform: rotate(90deg) scale(0.5);
 }
 
 /* ---- table ---- */

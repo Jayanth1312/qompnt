@@ -415,6 +415,7 @@ body {
      switches simply disappeared. A hairline gives the track an edge without
      inventing a colour. */
   box-shadow: inset 0 0 0 1px var(--border);
+  transition: background-color var(--motion) var(--ease);
 }
 /* And the knob has to separate from the track it sits on. Vercel asks for a
    dark knob, which on its dark track left the whole switch one flat grey. A
@@ -432,19 +433,31 @@ body {
   width: 14px;
   height: 14px;
   border-radius: var(--r-pill);
-  /* --knob, not --background. A physical switch has a light knob in any light,
-     which is exactly what the token means and why the Slider already uses it.
-     --background follows the theme, so on every dark theme the knob went black
-     and the switch read as a hole rather than a control. A design system that
-     genuinely wants a dark knob overrides --knob. */
-  background: var(--knob);
+  /* Not --knob. --knob is the Slider's handle, and a design system is free to
+     make that its brand colour - ClickHouse does, with the same yellow as
+     --primary. On a switch that is two separate failures: off, a brand-coloured
+     knob reads as on; on, the knob is the track's own colour and the control
+     collapses into a solid pill. Vercel fails the same way in light mode, where
+     --knob #1f1f1f sits on --primary #171717.
+
+     A switch has state, so each state names a colour that cannot collide with
+     its own track. Off: a neutral mixed from --foreground, never the accent.
+     On: --primary-foreground, which is by definition what stays legible on
+     --primary - so this holds for any theme, including ones not written yet. */
+  background: color-mix(in oklab, var(--foreground) 55%, var(--background));
+  transition:
+    transform var(--motion) var(--ease),
+    background-color var(--motion) var(--ease);
 }
 .options-grid input[type='checkbox']:checked {
   background: var(--primary);
   box-shadow: none;
 }
+/* transform, not left: the knob is what moves, and only transform animates on
+   the compositor. */
 .options-grid input[type='checkbox']:checked::after {
-  left: 16px;
+  transform: translateX(14px);
+  background: var(--primary-foreground);
 }
 /* The panel's range controls are the Slider component itself. qompnt.js adds
    the .slider class and keeps --p in step, so the rules in

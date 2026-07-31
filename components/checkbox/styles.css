@@ -1,18 +1,7 @@
 /* Checkbox and radio are native and drawn by the platform from accent-color, so
    there is nothing to animate inside them - the tick is the OS's. The press is
-   ours.
-
-   The switch is the opposite: its track and knob are our own boxes, so both
-   travel. The knob is an ::after, which the contract's transition rule does not
-   reach (it lists elements, not pseudo-elements), so it is timed here. */
+   ours. */
 input[type='checkbox']:active:not(:disabled),
 input[type='radio']:active:not(:disabled) {
   transform: scale(0.92);
-}
-
-.switch,
-.switch::after {
-  transition:
-    background-color var(--motion) var(--ease),
-    transform var(--motion) var(--ease);
 }

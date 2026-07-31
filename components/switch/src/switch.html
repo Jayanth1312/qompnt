@@ -1,0 +1,49 @@
+<!-- Plain. The label wraps everything, so the whole row toggles and the row is
+     the touch target - the 24px track never has to be one. -->
+<label class="flex w-full max-w-[280px] cursor-pointer items-center justify-between gap-4 text-body-sm leading-none text-foreground">
+  Wi-Fi
+  <input type="checkbox" name="wifi" checked class="sr-only">
+  <span class="toggle">
+    <span class="toggle-knob"></span>
+  </span>
+</label>
+
+<!-- With icon. Same control; the knob gains two icons that swap as it travels.
+     Both are aria-hidden - the text label is the accessible name, and an icon
+     that duplicated it would just be read twice. -->
+<label class="flex w-full max-w-[280px] cursor-pointer items-center justify-between gap-4 text-body-sm leading-none text-foreground">
+  Airplane mode
+  <input type="checkbox" name="airplane" class="sr-only">
+  <span class="toggle">
+    <span class="toggle-knob">
+      <svg data-toggle-on width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M20 6 9 17l-5-5"/>
+      </svg>
+      <svg data-toggle-off width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="3.5" stroke-linecap="round" aria-hidden="true">
+        <path d="M18 6 6 18M6 6l12 12"/>
+      </svg>
+    </span>
+  </span>
+</label>
+
+<!-- Large. .toggle-lg sets width and height; the knob, its inset and its travel
+     are derived from those two, so nothing else changes. -->
+<label class="flex w-full max-w-[280px] cursor-pointer items-center justify-between gap-4 text-body-sm leading-none text-foreground">
+  Notifications
+  <input type="checkbox" checked class="sr-only">
+  <span class="toggle toggle-lg">
+    <span class="toggle-knob"></span>
+  </span>
+</label>
+
+<!-- Disabled. On the input, not the label: a disabled input is skipped by the
+     keyboard and left out of the form post, which is the whole behaviour. -->
+<label class="flex w-full max-w-[280px] items-center justify-between gap-4 text-body-sm leading-none text-muted-foreground">
+  Beta features
+  <input type="checkbox" disabled class="sr-only">
+  <span class="toggle">
+    <span class="toggle-knob"></span>
+  </span>
+</label>
