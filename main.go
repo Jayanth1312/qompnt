@@ -58,11 +58,28 @@ func main() {
 	// ServeMux wildcards must be whole segments, so ".json" cannot be a literal
 	// suffix in the pattern - one handler takes the filename and splits it.
 	mux.HandleFunc("GET /r/{file}", s.handleRegistry)
-	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	mux.Handle("GET /static/", staticCache(http.StripPrefix("/static/", http.FileServer(http.Dir("static")))))
 	s.routeDemos(mux)
 
 	log.Printf("qompnt listening on %s (dev=%v)", *addr, *dev)
 	log.Fatal(http.ListenAndServe(*addr, s.withReload(mux)))
+}
+
+// staticCache makes the browser revalidate every static file.
+//
+// Without a Cache-Control header a browser is free to invent a freshness
+// lifetime from Last-Modified and serve the file for hours without asking. These
+// filenames are not content-hashed, so components.css keeps its name across a
+// rule change and a client that skipped revalidation renders the old rules -
+// which looks like a CSS bug that reproduces for nobody else. no-cache still
+// allows the cache: the file is stored and a 304 costs a header exchange, not a
+// download. Immutable caching is available once filenames carry a hash, not
+// before.
+func staticCache(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-cache")
+		h.ServeHTTP(w, r)
+	})
 }
 
 // componentsCSS concatenates every component's styles.css. The per-component
