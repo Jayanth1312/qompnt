@@ -11,10 +11,10 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
 	"sort"
 	"strings"
 	"sync"
+	"time"
 )
 
 type server struct {
@@ -23,6 +23,9 @@ type server struct {
 	mu         sync.RWMutex
 	components []Component
 	tmpl       templates
+	// componentsCSS is generated from the components on load and served from
+	// memory - see reload.
+	componentsCSS []byte
 	// version stamps every asset URL and doubles as the cache key for them.
 	version string
 }
@@ -53,7 +56,19 @@ func main() {
 	dev := flag.Bool("dev", false, "reload components and templates on every request")
 	flag.Parse()
 
+	// Cloud Run (and most PaaS) assign the port and pass it in the environment;
+	// binding anything else means the container is killed as unhealthy. The flag
+	// stays the local default.
+	if p := os.Getenv("PORT"); p != "" {
+		*addr = ":" + p
+	}
+
 	s := &server{dev: *dev}
+	// Under -dev the files on disk win, so an edit shows up on the next request
+	// without a rebuild. A build serves what was compiled into it.
+	if *dev {
+		useDiskAssets()
+	}
 	if err := s.reload(); err != nil {
 		log.Fatal(err)
 	}
@@ -67,7 +82,14 @@ func main() {
 	// ServeMux wildcards must be whole segments, so ".json" cannot be a literal
 	// suffix in the pattern - one handler takes the filename and splits it.
 	mux.HandleFunc("GET /r/{file}", s.handleRegistry)
-	mux.Handle("GET /static/", staticCache(s.assetVersion, http.StripPrefix("/static/", http.FileServer(http.Dir("static")))))
+	// More specific than the pattern below it, so ServeMux routes the generated
+	// stylesheet here and the rest to the files.
+	mux.Handle("GET /static/components.css", staticCache(s.assetVersion, http.HandlerFunc(s.handleComponentsCSS)))
+	static, err := fs.Sub(assets, "static")
+	if err != nil {
+		log.Fatal(err)
+	}
+	mux.Handle("GET /static/", staticCache(s.assetVersion, http.StripPrefix("/static/", http.FileServer(http.FS(static)))))
 	s.routeDemos(mux)
 
 	log.Printf("qompnt listening on %s (dev=%v)", *addr, *dev)
@@ -102,12 +124,12 @@ func staticCache(version func() string, h http.Handler) http.Handler {
 // whole asset set. Per-file hashes would let an unchanged file keep its URL, but
 // there are six of them: the extra plumbing buys a few kilobytes on the one load
 // after a deploy.
-func staticVersion() string {
+func staticVersion(generated []byte) string {
 	var names []string
 	// Walked, not globbed: static/themes/*.css is stamped and cached for a year
 	// like everything else, so a design system edited but not hashed here would
 	// keep serving from cache until the filename changed.
-	filepath.WalkDir("static", func(p string, d fs.DirEntry, err error) error {
+	fs.WalkDir(assets, "static", func(p string, d fs.DirEntry, err error) error {
 		if err == nil && !d.IsDir() && !strings.HasPrefix(d.Name(), ".") {
 			names = append(names, p)
 		}
@@ -117,12 +139,16 @@ func staticVersion() string {
 
 	h := sha256.New()
 	for _, n := range names {
-		b, err := os.ReadFile(n)
+		b, err := fs.ReadFile(assets, n)
 		if err != nil {
 			continue
 		}
 		fmt.Fprintf(h, "%s:%x", n, sha256.Sum256(b))
 	}
+	// The generated stylesheet is not a file on the asset root in a build, and it
+	// changes whenever a component's styles.css does - so it is hashed directly
+	// or an edited component would keep serving from cache for a year.
+	fmt.Fprintf(h, "components.css:%x", sha256.Sum256(generated))
 	return hex.EncodeToString(h.Sum(nil))[:12]
 }
 
@@ -143,9 +169,10 @@ func componentsCSS(cs []Component) []byte {
 	return b.Bytes()
 }
 
-// reload re-reads templates and components from disk.
+// reload re-reads templates and components from the asset root - the embedded
+// copy in a build, the working directory under -dev.
 func (s *server) reload() error {
-	cs, err := loadComponents("components")
+	cs, err := loadComponents(assets, "components")
 	if err != nil {
 		return err
 	}
@@ -153,7 +180,7 @@ func (s *server) reload() error {
 	// One template set per page: layout.html is shared, but each page defines
 	// its own "content", so they cannot live in the same set.
 	parse := func(files ...string) *template.Template {
-		return template.Must(template.ParseFiles(files...))
+		return template.Must(template.ParseFS(assets, files...))
 	}
 	t := templates{
 		index:  parse("templates/layout.html", "templates/index.html", "templates/_cards.html"),
@@ -161,24 +188,28 @@ func (s *server) reload() error {
 		cards:  parse("templates/_cards.html"),
 	}
 
-	// Written to disk rather than served from memory so a plain-HTML consumer can
-	// copy static/ and get the same stylesheet the site uses.
+	// components.css is generated, so it is held in memory and served from there
+	// rather than being a file the request path depends on. It used to be written
+	// on every reload, which raced with the file server reading it.
 	//
-	// Temp file and rename, not WriteFile: rename is atomic, so a request being
-	// served the file either gets the old one whole or the new one whole. Writing
-	// in place truncates first, and a reader landing in that window gets a
-	// half-written stylesheet - which renders as one component, usually a late one
-	// alphabetically, silently losing its rules until the next load.
-	tmp := "static/.components.css.tmp"
-	if err := os.WriteFile(tmp, componentsCSS(cs), 0o644); err != nil {
-		return err
-	}
-	if err := os.Rename(tmp, "static/components.css"); err != nil {
-		return err
+	// Still written to disk under -dev, because static/ is committed: a consumer
+	// can copy the directory and get the same stylesheet the site serves, and the
+	// checked-in file stays in step with the component sources it came from. A
+	// temp file and a rename, so a concurrent reader gets one whole version.
+	css := componentsCSS(cs)
+	if s.dev {
+		tmp := "static/.components.css.tmp"
+		if err := os.WriteFile(tmp, css, 0o644); err != nil {
+			return err
+		}
+		if err := os.Rename(tmp, "static/components.css"); err != nil {
+			return err
+		}
 	}
 
 	s.mu.Lock()
-	s.components, s.tmpl, s.version = cs, t, staticVersion()
+	s.components, s.tmpl, s.componentsCSS = cs, t, css
+	s.version = staticVersion(css)
 	s.mu.Unlock()
 	return nil
 }
@@ -207,6 +238,17 @@ func (s *server) snapshot() ([]Component, templates) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	return s.components, s.tmpl
+}
+
+// handleComponentsCSS serves the generated stylesheet from memory. http.ServeContent
+// rather than a bare Write: it handles range requests and the conditional headers
+// the file server would have given this file for free.
+func (s *server) handleComponentsCSS(w http.ResponseWriter, r *http.Request) {
+	s.mu.RLock()
+	css := s.componentsCSS
+	s.mu.RUnlock()
+	w.Header().Set("Content-Type", "text/css; charset=utf-8")
+	http.ServeContent(w, r, "components.css", time.Time{}, bytes.NewReader(css))
 }
 
 func (s *server) assetVersion() string {

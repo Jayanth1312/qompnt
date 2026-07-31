@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"os"
-	"path/filepath"
+	"io/fs"
+	"path"
 	"regexp"
 	"sort"
 	"strings"
@@ -68,8 +68,8 @@ func (c Component) CreatedLabel() string { return c.Created.Format("Jan 2, 2006"
 func (c Component) TagLabel() string { return strings.Join(c.Tags, ", ") }
 
 // loadComponents walks dir and returns components in name order.
-func loadComponents(dir string) ([]Component, error) {
-	entries, err := os.ReadDir(dir)
+func loadComponents(fsys fs.FS, dir string) ([]Component, error) {
+	entries, err := fs.ReadDir(fsys, dir)
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +79,7 @@ func loadComponents(dir string) ([]Component, error) {
 		if !e.IsDir() {
 			continue
 		}
-		c, err := loadComponent(filepath.Join(dir, e.Name()))
+		c, err := loadComponent(fsys, path.Join(dir, e.Name()))
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", e.Name(), err)
 		}
@@ -90,11 +90,11 @@ func loadComponents(dir string) ([]Component, error) {
 	return out, nil
 }
 
-func loadComponent(dir string) (Component, error) {
+func loadComponent(fsys fs.FS, dir string) (Component, error) {
 	var c Component
-	c.Slug = filepath.Base(dir)
+	c.Slug = path.Base(dir)
 
-	raw, err := os.ReadFile(filepath.Join(dir, "meta.json"))
+	raw, err := fs.ReadFile(fsys, path.Join(dir, "meta.json"))
 	if err != nil {
 		return c, err
 	}
@@ -113,7 +113,7 @@ func loadComponent(dir string) (Component, error) {
 	c.Mechanism, c.Caveats, c.Support, c.Motion = m.Mechanism, m.Caveats, m.Support, m.Motion
 	c.Companion = m.Companion
 
-	preview, err := os.ReadFile(filepath.Join(dir, "preview.html"))
+	preview, err := fs.ReadFile(fsys, path.Join(dir, "preview.html"))
 	if err != nil {
 		return c, err
 	}
@@ -121,23 +121,23 @@ func loadComponent(dir string) (Component, error) {
 	c.PreviewSource = strings.TrimSpace(string(preview))
 
 	// options.html is optional: the toggles that reshape the preview in place.
-	if opts, err := os.ReadFile(filepath.Join(dir, "options.html")); err == nil {
+	if opts, err := fs.ReadFile(fsys, path.Join(dir, "options.html")); err == nil {
 		c.Options = template.HTML(opts)
 	}
 
 	// styles.css is optional: the rules a component needs beyond the tokens.
-	if css, err := os.ReadFile(filepath.Join(dir, "styles.css")); err == nil {
+	if css, err := fs.ReadFile(fsys, path.Join(dir, "styles.css")); err == nil {
 		c.Styles = string(css)
 	}
 
 	// extras.html is optional: markup shown below the code block, for the cases
 	// one preview cannot carry - a button group, say.
-	if extras, err := os.ReadFile(filepath.Join(dir, "extras.html")); err == nil {
+	if extras, err := fs.ReadFile(fsys, path.Join(dir, "extras.html")); err == nil {
 		c.Extras = template.HTML(extras)
 	}
 
-	srcDir := filepath.Join(dir, "src")
-	srcs, err := os.ReadDir(srcDir)
+	srcDir := path.Join(dir, "src")
+	srcs, err := fs.ReadDir(fsys, srcDir)
 	if err != nil {
 		return c, fmt.Errorf("src/: %w", err)
 	}
@@ -145,7 +145,7 @@ func loadComponent(dir string) (Component, error) {
 		if s.IsDir() {
 			continue
 		}
-		body, err := os.ReadFile(filepath.Join(srcDir, s.Name()))
+		body, err := fs.ReadFile(fsys, path.Join(srcDir, s.Name()))
 		if err != nil {
 			return c, err
 		}

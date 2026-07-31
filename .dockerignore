@@ -1,0 +1,12 @@
+# Everything the image needs is the Go sources plus the three embedded
+# directories. Keeping the rest out makes the build context small and stops a
+# stale local binary from ever being copied in.
+.git
+node_modules
+qompnt
+*.bin
+Designs
+audit
+expandable_tab_navigation
+*.md
+!README.md

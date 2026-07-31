@@ -2,8 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"io/fs"
 	"net/http"
-	"os"
 	"path"
 	"strings"
 )
@@ -155,7 +155,7 @@ func themeItem() (registryItem, error) {
 		CSSVars:     map[string]cssMap{"light": lightVars, "dark": darkVars},
 	}
 	for _, name := range []string{"tokens.css", "qompnt.css"} {
-		body, err := os.ReadFile(path.Join("static", name))
+		body, err := fs.ReadFile(assets, path.Join("static", name))
 		if err != nil {
 			return item, err
 		}
