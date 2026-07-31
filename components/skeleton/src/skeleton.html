@@ -1,0 +1,20 @@
+<!-- Blocks the shape of the content that is coming. Mark the region busy so the
+     wait is announced once, rather than the placeholders being read out. -->
+<div class="flex w-full max-w-[320px] flex-col gap-3" aria-busy="true" aria-live="polite">
+  <div class="flex items-center gap-3">
+    <div class="skeleton h-10 w-10 rounded-pill" aria-hidden="true"></div>
+    <div class="flex-1 space-y-2">
+      <div class="skeleton h-3 w-2/5 rounded-sm" aria-hidden="true"></div>
+      <div class="skeleton h-3 w-3/5 rounded-sm" aria-hidden="true"></div>
+    </div>
+  </div>
+  <div class="skeleton h-24 w-full rounded-md" aria-hidden="true"></div>
+  <div class="skeleton h-3 w-full rounded-sm" aria-hidden="true"></div>
+  <div class="skeleton h-3 w-4/5 rounded-sm" aria-hidden="true"></div>
+  <span class="sr-only">Loading</span>
+</div>
+
+<!-- Swapped for the real thing by the server: htmx replaces this element when
+     the request returns, so the skeleton never needs its own state. -->
+<div class="skeleton h-24 w-full rounded-md"
+     hx-get="/demo/progress" hx-trigger="load delay:1s" hx-swap="outerHTML"></div>

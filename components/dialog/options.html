@@ -1,0 +1,22 @@
+<label class="flex cursor-pointer items-center gap-2">
+  <input type="checkbox" class="h-4 w-4" style="accent-color: var(--primary)"
+         data-opt-target="[data-x-dialog-confirm]"
+         data-opt-on="bg-destructive hover:bg-destructive/90" data-opt-off="bg-primary hover:bg-primary/90">
+  Destructive confirm
+</label>
+
+<label class="flex cursor-pointer items-center gap-2">
+  <!-- data-opt-hide means checked = shown, the same as every other option in the
+       set. Labelled "Hide cancel" and unchecked, it read as inverted and did
+       nothing on the first click: unchecked already meant hidden, so turning it
+       on removed an attribute that was never there. -->
+  <input type="checkbox" checked class="h-4 w-4" style="accent-color: var(--primary)"
+         data-opt-target="[data-x-dialog-cancel]" data-opt-hide>
+  Cancel button
+</label>
+
+<label class="flex items-center gap-2">
+  Trigger label
+  <input type="text" placeholder="Delete component" data-opt-target="[data-x-dialog-trigger-label]"
+         class="w-44 rounded-md border border-border bg-background px-control-x py-control-y text-body-sm leading-none text-foreground placeholder:text-muted-foreground/70">
+</label>

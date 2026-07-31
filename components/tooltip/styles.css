@@ -1,0 +1,97 @@
+/* Tooltip: the text is a data attribute and the bubble is ::after, so there is
+   no extra element. Shown on hover and on keyboard focus; the arrow is ::before.
+   A pseudo-element cannot be referenced by aria-describedby - repeat the words
+   in aria-label. */
+.tip {
+  position: relative;
+}
+.tip::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%);
+  z-index: 30;
+  width: max-content;
+  max-width: 220px;
+  padding: var(--row-py) var(--row-px);
+  border-radius: var(--r-sm);
+  background: var(--foreground);
+  color: var(--background);
+  font-size: 13px;
+  line-height: 1.35;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+}
+.tip::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  /* The box is 10px tall (two 5px borders) and only its top half is drawn, so
+     the visible triangle starts 5px above `bottom`. At calc(100% + 3px) that put
+     the triangle at 100%+8px to 100%+13px - entirely underneath the bubble,
+     which starts at 100%+8px. It only became visible when the bubble faded and
+     went translucent, which is what read as "the arrow outlives the tooltip".
+     calc(100% - 2px) lands the triangle in the 5px gap where it belongs. */
+  bottom: calc(100% - 2px);
+  transform: translateX(-50%);
+  z-index: 30;
+  border: 5px solid transparent;
+  border-top-color: var(--foreground);
+  opacity: 0;
+  pointer-events: none;
+}
+.tip:hover::after,
+.tip:hover::before,
+.tip:focus-visible::after,
+.tip:focus-visible::before,
+.tip-open::after,
+.tip-open::before {
+  opacity: 1;
+}
+.tip-bottom::after {
+  bottom: auto;
+  top: calc(100% + 8px);
+}
+.tip-bottom::before {
+  bottom: auto;
+  top: calc(100% - 2px);
+  border-top-color: transparent;
+  border-bottom-color: var(--foreground);
+}
+
+/* Motion. The bubble is centred with transform: translateX(-50%), so the entry
+   offset uses the separate `translate` property instead - composing them on one
+   transform means restating the centring in every keyframe and getting it wrong
+   the first time.
+
+   The delay on the way in is the point of the whole rule: without it, dragging
+   the pointer across a toolbar fires every tooltip it passes. Leaving is
+   immediate, because a tooltip that lingers after you have moved on is worse
+   than one that never showed. */
+.tip::after,
+.tip::before {
+  translate: 0 4px;
+  transition:
+    opacity var(--motion) var(--ease),
+    translate var(--motion) var(--ease);
+}
+.tip:hover::after,
+.tip:hover::before,
+.tip:focus-visible::after,
+.tip:focus-visible::before,
+.tip-open::after,
+.tip-open::before {
+  translate: 0 0;
+  transition-delay: 300ms;
+}
+.tip:not(:hover)::after,
+.tip:not(:hover)::before {
+  transition-delay: 0s;
+}
+/* Below the anchor, so it rises from the other side. */
+.tip-bottom::after,
+.tip-bottom::before {
+  translate: 0 -4px;
+}

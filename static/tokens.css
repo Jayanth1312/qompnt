@@ -1,0 +1,650 @@
+/* The token contract.
+ *
+ * Two halves. COLOUR uses shadcn/ui's names verbatim - background/foreground
+ * pairs, card, popover, primary, secondary, muted, accent, destructive, border,
+ * input, ring - so any theme generated for shadcn drops straight in here, and
+ * anything written against qompnt reads familiar to anyone who has themed shadcn.
+ * STRUCTURE is the half shadcn leaves implicit: radius, control padding,
+ * elevation and type. Those are what make one design system not another, and
+ * they are why swapping a system here is a stylesheet swap rather than a rewrite.
+ *
+ * Components must consume these and never hardcode a colour, a radius or a pad.
+ * A component that bakes in `p-2` will ignore a density change, and the swap
+ * will look half-applied.
+ *
+ * ponytail: border width is not tokenised yet - `border` stays 1px. Add
+ * --border-width when a design system actually needs 0 or 2.
+ */
+
+:root {
+  /* -- colour: surfaces and text ------------------------------------------ */
+  --background: #faf9f5;
+  --foreground: #141413;
+  --card: #efe9de;
+  --card-foreground: #141413;
+  --popover: #faf9f5;
+  --popover-foreground: #141413;
+
+  --primary: #cc785c;
+  --primary-foreground: #ffffff;
+  --secondary: #e8e0d2;
+  --secondary-foreground: #141413;
+  --muted: #f5f0e8;
+  --muted-foreground: #6c6a64;
+  --accent: #efe9de;
+  --accent-foreground: #141413;
+  --destructive: #c64545;
+  --destructive-foreground: #ffffff;
+
+  --border: #e6dfd8;
+  --input: #e6dfd8;
+  --ring: #3b6ef6;
+
+  /* qompnt extras: the dark code surface, and status tones for toasts. */
+  --code: #1f1e1b;
+  --code-foreground: #faf9f5;
+
+  --success-bg: #eaf4ea;
+  --success-fg: #2f6b3a;
+  --success-bd: #c3e0c7;
+  --error-bg: #fbeceb;
+  --error-fg: #a33028;
+  --error-bd: #f0cbc7;
+  --info-bg: #e9eef9;
+  --info-fg: #2f5199;
+  --info-bd: #c8d5ef;
+
+  /* -- structure ---------------------------------------------------------- */
+  /* One base radius; the scale is derived, so a system sets a single number. */
+  --radius: 8px;
+  /* The scale is prefixed because Tailwind and UnoCSS generate --radius-* names
+     of their own from it; same value on both sides of a var() is a cycle, and a
+     cycle silently drops the property. */
+  --r-xs: calc(var(--radius) - 4px);
+  --r-sm: calc(var(--radius) - 2px);
+  --r-md: var(--radius);
+  --r-lg: calc(var(--radius) + 4px);
+  --r-xl: calc(var(--radius) + 8px);
+  --r-pill: 9999px;
+
+  /* Density, in three jobs rather than one. A design system is not uniformly
+     roomy or tight: it has a control height, a row rhythm, and a container step,
+     and they move independently.
+       control  buttons, inputs, selects, tabs - anything you aim at
+       row      menu options, list and table rows, sidebar links - things you scan
+       card     the padding inside a container: card, dialog, panel */
+  --control-px: 8px;
+  --control-py: 8px;
+  --row-px: 10px;
+  --row-py: 6px;
+  --pad-card: 20px;
+
+  --shadow-1: 0 2px 12px rgb(20 20 19 / 8%);
+  --shadow-2: 0 4px 20px rgb(20 20 19 / 10%);
+  /* The slider knob sits on the track, so it needs its own surface: light in
+     both themes, the way a physical control would be. */
+  --knob: #ffffff;
+
+  /* Motion. Three durations and one curve, because a design system has a speed
+     the way it has a radius: Linear is quick and flat, Apple is slower with more
+     ease-out. Every component animation reads these and never hardcodes a time,
+     so a system retimes the whole set by overriding four values - and so
+     [data-motion='off'] can zero them in one place.
+       fast   a control reacting under the pointer: press, hover, focus
+       base   a small element appearing: menu, tooltip, panel
+       slow   something with distance to travel: dialog, toast, drawer */
+  --motion-fast: 110ms;
+  --motion: 170ms;
+  --motion-slow: 260ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+
+  --type-sans: 'Opening Hours Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --type-display: Cambo, Garamond, 'Times New Roman', serif;
+  --type-mono: 'Fira Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+[data-theme='dark'] {
+  --background: #181715;
+  --foreground: #faf9f5;
+  --card: #252320;
+  --card-foreground: #faf9f5;
+  --popover: #1f1e1b;
+  --popover-foreground: #faf9f5;
+
+  /* Coral holds constant across themes - it is the brand constant. */
+  --primary: #cc785c;
+  --primary-foreground: #ffffff;
+  --secondary: #2e2b27;
+  --secondary-foreground: #faf9f5;
+  --muted: #1f1e1b;
+  --muted-foreground: #a09d96;
+  --accent: #252320;
+  --accent-foreground: #faf9f5;
+  --destructive: #c64545;
+  --destructive-foreground: #ffffff;
+
+  --border: #302d29;
+  --input: #302d29;
+  --ring: #4b7dff;
+
+  --code: #0f0e0d;
+  --code-foreground: #faf9f5;
+
+  --success-bg: #17231c;
+  --success-fg: #8ed6a0;
+  --success-bd: #2c4633;
+  --error-bg: #2a1917;
+  --error-fg: #f09e96;
+  --error-bd: #4d2b27;
+  --info-bg: #171d2b;
+  --info-fg: #9fbaf0;
+  --info-bd: #2b3a5c;
+
+  --shadow-1: 0 2px 12px rgb(0 0 0 / 40%);
+  --shadow-2: 0 4px 20px rgb(0 0 0 / 50%);
+  --knob: #f2f2ef;
+}
+
+/* For consumers on Tailwind 4, who compile this markup with their own build.
+   Colours arrive via the registry's cssVars; the structure and type scales
+   would not, so `rounded-md` and `px-control-x` would resolve to nothing or to
+   Tailwind's own values. Browsers ignore an unknown at-rule, so this block costs
+   plain-HTML consumers - and this site - nothing. */
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-code: var(--code);
+  --color-code-foreground: var(--code-foreground);
+
+  --spacing-control-x: var(--control-px);
+  --spacing-control-y: var(--control-py);
+  --spacing-row-x: var(--row-px);
+  --spacing-row-y: var(--row-py);
+  --spacing-card: var(--pad-card);
+
+  --shadow-e1: var(--shadow-1);
+  --shadow-e2: var(--shadow-2);
+
+  --radius-xs: var(--r-xs);
+  --radius-sm: var(--r-sm);
+  --radius-md: var(--r-md);
+  --radius-lg: var(--r-lg);
+  --radius-xl: var(--r-xl);
+  --radius-pill: var(--r-pill);
+
+  --text-display-xl: 64px;
+  --text-display-xl--line-height: 1.05;
+  --text-display-xl--letter-spacing: -1.5px;
+  --text-display-lg: 48px;
+  --text-display-lg--line-height: 1.1;
+  --text-display-lg--letter-spacing: -1px;
+  --text-display-md: 36px;
+  --text-display-md--line-height: 1.15;
+  --text-display-md--letter-spacing: -0.5px;
+  --text-display-sm: 28px;
+  --text-display-sm--line-height: 1.2;
+  --text-display-sm--letter-spacing: -0.3px;
+  --text-title-lg: 22px;
+  --text-title-lg--line-height: 1.3;
+  --text-title-md: 18px;
+  --text-title-md--line-height: 1.4;
+  --text-title-sm: 16px;
+  --text-title-sm--line-height: 1.4;
+  --text-body-md: 16px;
+  --text-body-md--line-height: 1.55;
+  --text-body-sm: 14px;
+  --text-body-sm--line-height: 1.55;
+  --text-caption: 13px;
+  --text-caption--line-height: 1.4;
+  --text-caption-up: 12px;
+  --text-caption-up--line-height: 1.4;
+  --text-caption-up--letter-spacing: 1.5px;
+  --text-mono: 14px;
+  --text-mono--line-height: 1.6;
+  --text-button: 14px;
+  --text-button--line-height: 1;
+
+  --font-display: var(--type-display);
+  --font-sans: var(--type-sans);
+  --font-mono: var(--type-mono);
+}
+
+/* A theme or design-system swap should land instantly rather than cross-fade
+   every colour on the page. This used to be a blanket `transition: none` on
+   everything, which also killed the components' own micro-interactions. It is
+   scoped to the swap instead: qompnt.js sets data-swapping on <html> for one
+   frame while it rewrites the tokens.
+   ponytail: one frame is set by a rAF pair in the toggle, not a duration here. */
+[data-swapping] *,
+[data-swapping] *::before,
+[data-swapping] *::after {
+  transition: none !important;
+}
+
+/* The motion switch.
+ *
+ * Zeroing the tokens covers everything written against the contract. The
+ * blanket rule underneath covers the rest - a utility class carrying its own
+ * duration, a third-party stylesheet - and clamps infinite animations
+ * (spinner, skeleton, the indeterminate progress sweep) to a single pass
+ * instead of leaving them spinning at zero duration.
+ *
+ * `animation-play-state` is deliberately not used: a paused spinner still reads
+ * as a frozen loading state. One pass and done is the honest still frame.
+ */
+[data-motion='off'] {
+  --motion-fast: 0s;
+  --motion: 0s;
+  --motion-slow: 0s;
+}
+[data-motion='off'] *,
+[data-motion='off'] *::before,
+[data-motion='off'] *::after {
+  transition-duration: 0s !important;
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+  animation-iteration-count: 1 !important;
+}
+
+/* The OS preference is the default when nothing has been chosen. An explicit
+   data-motion='on' is the user overriding their own system setting on this
+   site, so it has to win - hence :not(), rather than repeating the rule. */
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion='on']) {
+    --motion-fast: 0s;
+    --motion: 0s;
+    --motion-slow: 0s;
+  }
+  :root:not([data-motion='on']) *,
+  :root:not([data-motion='on']) *::before,
+  :root:not([data-motion='on']) *::after {
+    transition-duration: 0s !important;
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* A border with no colour named must be the system's border colour, not the
+ * text colour.
+ *
+ * Wind4's reset leaves border-color at currentColor, so a utility like `border`
+ * - width only - paints in whatever the text colour happens to be. On a dark
+ * theme that is near-white. It is invisible while border-width is 0, and the
+ * moment something adds `border` the box gets a white outline that then
+ * *transitions* to the real colour over --motion-fast, because border-color is
+ * in the contract's transition list. That was the white flash when toggling
+ * Select's background option.
+ *
+ * Setting the default here fixes it for every component at once rather than
+ * making each one remember to pair `border` with `border-border`.
+ */
+*,
+*::before,
+*::after {
+  border-color: var(--border);
+}
+
+html {
+  background: var(--background);
+  color-scheme: light;
+}
+[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Focus: one ring, flush against the control. The border takes the ring colour
+   and a 1px shadow thickens it to 2px - no gap, no second colour, and
+   `outline: none` with !important because the platform's own focus ring is the
+   pale layer that otherwise shows up between the two. */
+/* One ring, drawn once.
+ *
+ * This used to be a recoloured border plus `box-shadow: 0 0 0 1px` - two rings
+ * a pixel apart. Chrome resolves both corner radii the same way and they read
+ * as a single smooth ring; Firefox does not, and the two arcs disagree at the
+ * corners badly enough to look like a square box with chipped edges.
+ *
+ * `outline` follows border-radius on its own in every current engine, so one
+ * outline at 2px with a -1px offset sits exactly where the pair used to and has
+ * only one radius to get right. The border is left alone, which also means a
+ * focused control no longer changes its own border colour and cannot shift
+ * layout or fight a component that styles its border.
+ */
+:where(input, textarea, select, button, a, summary):focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -1px;
+}
+
+/* One transition for every interactive surface, at the contract level rather
+   than per component: hover, focus and checked states are the same four
+   properties everywhere, and a rule per component would be the same rule
+   sixteen times, drifting.
+ *
+ * :where() so it carries zero specificity - a component overriding the timing
+ * needs no !important, and this never beats a rule someone else wrote.
+ * The property list is explicit rather than `all`, because `all` also animates
+ * layout properties and turns every reflow into a slide. */
+:where(button, a, summary, label, input, select, textarea, [role='option'], [role='tab'], [role='menuitem'], tr) {
+  transition:
+    background-color var(--motion-fast) var(--ease),
+    border-color var(--motion-fast) var(--ease),
+    color var(--motion-fast) var(--ease),
+    box-shadow var(--motion-fast) var(--ease),
+    opacity var(--motion-fast) var(--ease),
+    transform var(--motion-fast) var(--ease);
+}
+
+/* Card previews on the index: the whole card is a link, but the preview holds a
+   live component. The container ignores the pointer so clicks land on the link
+   behind it; real controls take it back, so pressing a button or opening a
+   dropdown does not navigate. */
+.preview-inert {
+  pointer-events: none;
+}
+.preview-inert :is(a, button, summary, input, select, textarea, label, dialog) {
+  pointer-events: auto;
+}
+
+/* The Customize panel under a preview. Controls are laid out as cards and the
+   raw inputs are restyled here, so every options.html stays plain labels and
+   inputs - no wrapper markup, no classes to keep in sync. */
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 8px;
+}
+.options-grid > label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 40px;
+  padding: var(--row-py) var(--row-px);
+  border-radius: var(--r-md);
+  background: var(--muted);
+  color: var(--muted-foreground);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+.options-grid > label:has(input:checked) {
+  background: var(--accent);
+  color: var(--foreground);
+}
+.options-grid > span {
+  align-self: center;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+/* Checkbox as a switch: same input, no extra markup. */
+.options-grid input[type='checkbox'] {
+  appearance: none;
+  flex: none;
+  width: 32px;
+  height: 18px;
+  border-radius: var(--r-pill);
+  background: var(--secondary);
+  position: relative;
+  cursor: pointer;
+  /* The off state has to be legible on a dark theme whose --secondary sits
+     within a shade or two of the panel behind it - Vercel's does, and the
+     switches simply disappeared. A hairline gives the track an edge without
+     inventing a colour. */
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+/* And the knob has to separate from the track it sits on. Vercel asks for a
+   dark knob, which on its dark track left the whole switch one flat grey. A
+   relative tint solves it for every theme at once: the track darkens or
+   lightens away from the knob by a fixed amount rather than by a colour someone
+   has to pick per theme. */
+.options-grid input[type='checkbox']:not(:checked) {
+  background: color-mix(in oklab, var(--foreground) 14%, transparent);
+}
+.options-grid input[type='checkbox']::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: var(--r-pill);
+  /* --knob, not --background. A physical switch has a light knob in any light,
+     which is exactly what the token means and why the Slider already uses it.
+     --background follows the theme, so on every dark theme the knob went black
+     and the switch read as a hole rather than a control. A design system that
+     genuinely wants a dark knob overrides --knob. */
+  background: var(--knob);
+}
+.options-grid input[type='checkbox']:checked {
+  background: var(--primary);
+  box-shadow: none;
+}
+.options-grid input[type='checkbox']:checked::after {
+  left: 16px;
+}
+/* The panel's range controls are the Slider component itself. qompnt.js adds
+   the .slider class and keeps --p in step, so the rules in
+   components/slider/styles.css do the drawing - one implementation, and a
+   design-system swap moves the panel with everything else. Only the layout
+   inside the row is set here. */
+.options-grid input[type='range'] {
+  flex: 1;
+  min-width: 0;
+}
+
+/* A radio set that is one joined control rather than a column of rows.
+ *
+ * S / M / L / XL is a single decision, so it should look like a single control -
+ * the Button Group component, used by the panel that configures it. It spans the
+ * full grid width because a segmented control that stops halfway reads as a
+ * stray row.
+ *
+ * Equal columns so the segments are the same width whatever the labels say, and
+ * the same -1px collapse the component uses so the seams are one hairline. */
+.options-grid .opt-segments {
+  /* One grid cell, the same as every other option row - a segmented control is
+     one decision and should occupy one slot. Spanning the full width made it
+     shout over the rest of the panel.
+
+     order: -1 puts it first regardless of where it sits in the options file, so
+     the primary choice leads and the modifiers follow. */
+  order: -1;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  min-height: 40px;
+}
+.options-grid .opt-segments > label {
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  margin: 0;
+  padding: var(--control-py) var(--control-px);
+  border: 1px solid var(--border);
+  border-radius: 0;
+  background: var(--muted);
+  color: var(--muted-foreground);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+.options-grid .opt-segments > label + label {
+  margin-inline-start: -1px;
+}
+.options-grid .opt-segments > label:first-child {
+  border-start-start-radius: var(--r-md);
+  border-end-start-radius: var(--r-md);
+}
+.options-grid .opt-segments > label:last-child {
+  border-start-end-radius: var(--r-md);
+  border-end-end-radius: var(--r-md);
+}
+.options-grid .opt-segments > label:hover {
+  background: var(--accent);
+  color: var(--foreground);
+}
+/* The selected segment. :has() rather than a class, so the markup stays a plain
+   label wrapping a radio - the same shape as every other option. */
+.options-grid .opt-segments > label:has(input:checked) {
+  z-index: 1;
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: 500;
+}
+.options-grid .opt-segments > label:has(input:focus-visible) {
+  z-index: 1;
+  outline: 2px solid var(--ring);
+  outline-offset: -1px;
+}
+
+/* Radio groups read as segments: the dot goes, the row carries the state. */
+.options-grid input[type='radio'] {
+  appearance: none;
+  position: absolute;
+}
+/* Label first, control right - the DOM puts the input first for the label
+   association, so the row reverses only when it starts with one. */
+.options-grid > label:has(> input[type='checkbox']:first-child) {
+  flex-direction: row-reverse;
+}
+/* A radio is taken out of flow, so its row holds only the label - left align it
+   rather than letting space-between push it to the right edge. */
+.options-grid > label:has(> input[type='radio']) {
+  justify-content: flex-start;
+}
+
+.options-grid input[type='text'] {
+  flex: 1;
+  min-width: 0;
+  width: auto;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  background: var(--background);
+  color: var(--foreground);
+  padding: 6px 8px;
+  font-size: 13px;
+}
+
+/* A design system with only one scheme disables the toggle rather than
+   pretending to switch something that does not exist. */
+[data-theme-toggle][disabled] {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+/* Theme toggle: one icon per theme, chosen in CSS so the first paint is right. */
+[data-icon='sun'] {
+  display: none;
+}
+[data-theme='dark'] [data-icon='sun'] {
+  display: block;
+}
+[data-theme='dark'] [data-icon='moon'] {
+  display: none;
+}
+
+/* Preview / Code panes: two radios, no JavaScript. The whole switch is a
+   sibling selector, so it survives a swapped page and needs no state. */
+.panes > input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.panes > .strip > label {
+  color: var(--muted-foreground);
+  white-space: nowrap;
+}
+.panes > input:nth-of-type(1):checked ~ .strip > label:nth-child(1),
+.panes > input:nth-of-type(2):checked ~ .strip > label:nth-child(2),
+.panes > input:nth-of-type(3):checked ~ .strip > label:nth-child(3) {
+  background: var(--background);
+  color: var(--foreground);
+  box-shadow: var(--shadow-1);
+}
+.panes > .strip > label:hover {
+  color: var(--foreground);
+}
+.panes > .panels > * {
+  display: none !important;
+}
+.panes > input:nth-of-type(1):checked ~ .panels > *:nth-child(1),
+.panes > input:nth-of-type(2):checked ~ .panels > *:nth-child(2),
+.panes > input:nth-of-type(3):checked ~ .panels > *:nth-child(3) {
+  display: block !important;
+}
+
+/* Inline code in prose. A bare <code> inherits whatever colour the paragraph
+   has, which on a muted line is unreadable - and the display face draws blank
+   glyphs for < and >, so code voice is also what makes tag names visible.
+   Excludes code inside <pre>, which is already a styled block. */
+:not(pre) > code {
+  padding: 2px 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--muted);
+  color: var(--primary);
+  font-family: var(--type-mono);
+  font-size: 0.88em;
+  white-space: nowrap;
+}
+
+/* Status tones. Contract-level, not component-level: Alert and Toast both use
+   them, and a design system can retint all of it by moving the nine variables
+   above. One class drives surface, text, border, and which icon shows. */
+.tone-success {
+  background: var(--success-bg);
+  color: var(--success-fg);
+  border-color: var(--success-bd);
+}
+.tone-error {
+  background: var(--error-bg);
+  color: var(--error-fg);
+  border-color: var(--error-bd);
+}
+.tone-info {
+  background: var(--info-bg);
+  color: var(--info-fg);
+  border-color: var(--info-bd);
+}
+[data-tone-icon] {
+  display: none;
+}
+.tone-success [data-tone-icon='success'],
+.tone-error [data-tone-icon='error'],
+.tone-info [data-tone-icon='info'] {
+  display: block;
+}
+
+/* htmx request indicator: hidden until the request is in flight */
+.indicator {
+  opacity: 0;
+}
+.htmx-request .indicator,
+.htmx-request.indicator {
+  opacity: 1;
+}

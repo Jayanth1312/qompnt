@@ -1,0 +1,65 @@
+/* Notion: paper white, near-black ink, 4px radius, compact controls.
+   Extracted from Designs/DESIGN-notion.md into the token contract. Trademarks
+   belong to their owners; this is a token set, not an endorsement.
+   Dark values are documented in the source doc. */
+:root {
+  --background: #ffffff;
+  --foreground: #31302e;
+  --card: #f6f5f4;
+  --card-foreground: #31302e;
+  --popover: #ffffff;
+  --popover-foreground: #31302e;
+
+  --primary: #0075de;
+  --primary-foreground: #ffffff;
+  --secondary: #eae9e7;
+  --secondary-foreground: #31302e;
+  --muted: #f6f5f4;
+  --muted-foreground: #615d59;
+  --accent: #eef4fd;
+  --accent-foreground: #31302e;
+  --destructive: #d44c47;
+  --destructive-foreground: #ffffff;
+
+  --border: #e6e6e6;
+  --input: #e6e6e6;
+  --ring: #0075de;
+
+  --radius: 4px;
+  --knob-radius: 6px;
+  --control-px: 14px;
+  --control-py: 8px;
+  --row-px: 10px;
+  --row-py: 6px;
+  --pad-card: 16px;
+
+  --shadow-1: 0 1px 2px rgb(15 15 15 / 10%);
+  --shadow-2: 0 8px 24px rgb(15 15 15 / 14%);
+
+  --type-sans: Inter, -apple-system, "Segoe UI", sans-serif;
+  --type-display: Lyon, Georgia, serif;
+}
+
+[data-theme='dark'] {
+  --background: #191919;
+  --foreground: #f1f0ee;
+  --card: #202020;
+  --card-foreground: #f1f0ee;
+  --popover: #252525;
+  --popover-foreground: #f1f0ee;
+
+  --primary: #62aef0;
+  --primary-foreground: #191919;
+  --secondary: #2c2c2c;
+  --secondary-foreground: #f1f0ee;
+  --muted: #1d1d1d;
+  --muted-foreground: #a39e98;
+  --accent: #2c2c2c;
+  --accent-foreground: #f1f0ee;
+  --destructive: #ff7369;
+  --destructive-foreground: #ffffff;
+
+  --border: #2f2f2f;
+  --input: #2f2f2f;
+  --ring: #62aef0;
+}

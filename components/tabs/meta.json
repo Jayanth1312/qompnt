@@ -1,0 +1,15 @@
+{
+  "name": "Tabs",
+  "blurb": "Switch between panels of related content.",
+  "created": "2026-07-23",
+  "tags": [
+    "Navigation",
+    "HTMX"
+  ],
+  "mechanism": "Links to real URLs, upgraded by htmx to a partial swap. With JavaScript off you get three ordinary pages; the server decides which tab is active, so there is no client state.",
+  "caveats": [
+    "These are links with tab roles, not an ARIA tablist widget: there is no arrow-key roving focus, and each tab is a separate document to the browser.",
+    "If you need the widget semantics, drop the roles and call them what they are - navigation."
+  ],
+  "support": []
+}

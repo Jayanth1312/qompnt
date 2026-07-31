@@ -1,0 +1,15 @@
+{
+  "name": "Empty state",
+  "blurb": "What a list shows before it has anything in it.",
+  "created": "2026-08-02",
+  "tags": [
+    "Feedback",
+    "Display"
+  ],
+  "mechanism": "Static markup. The only decision is which of the three it is - nothing yet, nothing found, or something broke - because the wording changes and the action changes with it.",
+  "caveats": [
+    "Do not use it for errors that need retrying without saying what failed; \"No results\" and \"Search is down\" are different states and must read differently.",
+    "The icon is decorative and carries aria-hidden; the sentence does the work."
+  ],
+  "support": []
+}

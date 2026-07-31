@@ -1,0 +1,48 @@
+<!-- Primary: the signature coral CTA. Use it once per view. -->
+<button class="rounded-md bg-primary px-control-x py-control-y text-button font-500 text-primary-foreground
+               hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground/70">
+  Get started
+</button>
+
+<!-- Secondary: hairline border on canvas. -->
+<button class="rounded-md border border-border bg-background px-control-x py-control-y text-button font-500 text-foreground
+               hover:bg-accent">
+  Learn more
+</button>
+
+<!-- Ghost: no chrome until hover. -->
+<button class="rounded-md px-control-x py-control-y text-button font-500 text-muted-foreground hover:bg-accent hover:text-foreground">
+  Cancel
+</button>
+
+<!-- Small. -->
+<button class="rounded-sm bg-primary p-1.5 text-caption font-500 text-primary-foreground hover:bg-primary/90">
+  Add
+</button>
+
+<!-- With an icon: label first, icon after it. The 8px pad is uniform, so this
+     sits in the same box a text-only button would. -->
+<button class="inline-flex items-center gap-1.5 rounded-md bg-primary px-control-x py-control-y text-button font-500 text-primary-foreground hover:bg-primary/90">
+  Add
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+       stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+</button>
+
+<!-- Icon only: same padding again, so it comes out square. aria-label is not
+     optional here - there is no text for a screen reader to announce. -->
+<button aria-label="Add component"
+        class="grid place-items-center rounded-md border border-border bg-background px-control-x py-control-y text-foreground hover:bg-accent">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+       stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+</button>
+
+<!-- Loading: htmx toggles .htmx-request on this button for the request's
+     duration, which fades the .indicator child in. -->
+<button class="inline-flex items-center gap-2 rounded-md bg-primary px-control-x py-control-y text-button font-500 text-primary-foreground hover:bg-primary/90"
+        hx-post="/demo/echo" hx-swap="none">
+  <svg class="indicator animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none"
+       stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+    <path d="M12 3a9 9 0 1 0 9 9"/>
+  </svg>
+  Save
+</button>

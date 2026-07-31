@@ -1,0 +1,64 @@
+/* Apple: white on grey-white, blue accent, generous radius, roomy controls.
+   Extracted from Designs/DESIGN-apple.md into the token contract. Trademarks
+   belong to their owners; this is a token set, not an endorsement.
+   Dark values are documented in the source doc. */
+:root {
+  --background: #ffffff;
+  --foreground: #1d1d1f;
+  --card: #f5f5f7;
+  --card-foreground: #1d1d1f;
+  --popover: #ffffff;
+  --popover-foreground: #1d1d1f;
+
+  --primary: #0071e3;
+  --primary-foreground: #ffffff;
+  --secondary: #e8e8ed;
+  --secondary-foreground: #1d1d1f;
+  --muted: #f5f5f7;
+  --muted-foreground: #6e6e73;
+  --accent: #eeeef2;
+  --accent-foreground: #1d1d1f;
+  --destructive: #e30000;
+  --destructive-foreground: #ffffff;
+
+  --border: #d2d2d7;
+  --input: #d2d2d7;
+  --ring: #0071e3;
+
+  --radius: 12px;
+  --control-px: 18px;
+  --control-py: 11px;
+  --row-px: 14px;
+  --row-py: 8px;
+  --pad-card: 22px;
+
+  --shadow-1: 0 1px 3px rgb(0 0 0 / 8%);
+  --shadow-2: 0 12px 32px rgb(0 0 0 / 12%);
+
+  --type-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+  --type-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+}
+
+[data-theme='dark'] {
+  --background: #000000;
+  --foreground: #f5f5f7;
+  --card: #1d1d1f;
+  --card-foreground: #f5f5f7;
+  --popover: #1d1d1f;
+  --popover-foreground: #f5f5f7;
+
+  --primary: #2997ff;
+  --primary-foreground: #ffffff;
+  --secondary: #2a2a2c;
+  --secondary-foreground: #f5f5f7;
+  --muted: #1d1d1f;
+  --muted-foreground: #a1a1a6;
+  --accent: #272729;
+  --accent-foreground: #f5f5f7;
+  --destructive: #ff453a;
+  --destructive-foreground: #ffffff;
+
+  --border: #333336;
+  --input: #333336;
+  --ring: #2997ff;
+}

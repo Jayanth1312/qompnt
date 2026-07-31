@@ -1,0 +1,18 @@
+{
+  "name": "Level Slider",
+  "blurb": "A range whose stops have names - effort, size, density, any short ordered scale.",
+  "created": "2026-08-01",
+  "tags": [
+    "Form"
+  ],
+  "mechanism": "A native `<input type=range>` with `step=1`, plus a label per stop placed at its exact fraction of the track. Because it is a real range, arrow keys, Home/End and PageUp/PageDown all work and it announces as a slider - none of which is written here.",
+  "caveats": [
+    "The active stop is highlighted from a `data-v` attribute the inline `oninput` writes, because CSS cannot read an input's value. One rule per stop; fine for a control whose whole premise is few named stops.",
+    "The stop labels are `aria-hidden`: the input already announces its value, and reading the scale twice is worse than reading it once. Give the input an `aria-label` that names what is being chosen.",
+    "Six stops is about the limit before the labels collide on a narrow track. Past that, this is a select."
+  ],
+  "support": [
+    "`clip-path` on a range thumb for the pole variant - a thumb cannot host a pseudo-element, so the marker shape has to be cut out of the thumb itself."
+  ],
+  "motion": true
+}

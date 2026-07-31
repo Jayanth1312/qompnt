@@ -1,0 +1,58 @@
+<!-- Custom dropdown, not a native <select>: the popup is ours, so its padding and
+     radius match the buttons instead of the platform's list. <details> is the
+     disclosure primitive, so open/close and Enter/Space cost no JS, and a hidden
+     input carries the value so the field still posts like a select. -->
+<div class="flex flex-col items-start gap-1.5">
+
+  <details data-select class="relative inline-block">
+    <summary data-trigger class="flex cursor-pointer list-none items-center gap-1.5 rounded-md px-control-x py-control-y text-body-sm leading-none text-foreground hover:bg-accent">
+      <span data-select-label>Opus</span>
+      <svg data-select-chevron width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+           class="shrink-0 text-muted-foreground">
+        <path d="m6 9 6 6 6-6"/>
+      </svg>
+    </summary>
+
+    <input type="hidden" name="model" value="Opus">
+
+    <div role="listbox" class="absolute left-0 top-[calc(100%+4px)] min-w-[160px] z-20 rounded-md border border-border bg-popover p-1 shadow-e2">
+      <button type="button" role="option" aria-selected="true"
+              class="flex w-full items-center rounded-sm px-row-x py-row-y text-left text-body-sm leading-none text-foreground hover:bg-accent">
+        Opus
+      </button>
+      <button type="button" role="option" aria-selected="false"
+              class="flex w-full items-center rounded-sm px-row-x py-row-y text-left text-body-sm leading-none text-foreground hover:bg-accent">
+        Sonnet
+      </button>
+      <button type="button" role="option" aria-selected="false"
+              class="flex w-full items-center rounded-sm px-row-x py-row-y text-left text-body-sm leading-none text-foreground hover:bg-accent">
+        Haiku
+      </button>
+    </div>
+  </details>
+</div>
+
+<!-- One delegated handler drives every [data-select] on the page. Guarded so
+     pasting this snippet twice does not bind twice. -->
+<script>
+if (!window.__qompntSelect) {
+  window.__qompntSelect = true;
+  document.addEventListener('click', (e) => {
+    const opt = e.target.closest('[data-select] [role="option"]');
+    if (opt) {
+      const d = opt.closest('details');
+      const value = opt.dataset.value || opt.textContent.trim();
+      d.querySelector('[data-select-label]').textContent = value;
+      const input = d.querySelector('input[type="hidden"]');
+      if (input) input.value = value;
+      d.querySelectorAll('[role="option"]').forEach((o) => o.setAttribute('aria-selected', String(o === opt)));
+      d.open = false;
+      return;
+    }
+    document.querySelectorAll('details[data-select][open]').forEach((d) => {
+      if (!d.contains(e.target)) d.open = false;
+    });
+  });
+}
+</script>

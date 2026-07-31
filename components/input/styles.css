@@ -1,0 +1,43 @@
+/* Validation the platform already knows about.
+ *
+ * :user-invalid, not :invalid. :invalid is true the moment the page loads - an
+ * empty required field is invalid before anyone has touched it - so styling it
+ * greets every visitor with a form painted red. :user-invalid waits until the
+ * field has been interacted with and left, which is when the complaint is
+ * actually useful.
+ *
+ * This is why the error state is worth having as real state rather than as a
+ * class you toggle: the browser is already doing the checking, for `type`,
+ * `pattern`, `required`, `minlength` and the rest, in every locale, with the
+ * announcement wired up. The Error option below still exists for showing the
+ * look on demand, but it is no longer the only way in.
+ */
+.field input:user-invalid,
+.field textarea:user-invalid {
+  border-color: var(--destructive);
+}
+.field input:user-invalid + .field-error,
+.field textarea:user-invalid + .field-error {
+  display: block;
+}
+/* The message is in the markup and hidden, not injected - so it is in the
+   accessibility tree from the start and aria-describedby has something to
+   point at before the error ever fires. */
+.field-error {
+  display: none;
+  color: var(--destructive);
+}
+.field input:user-invalid ~ .field-hint {
+  display: none;
+}
+
+/* The forced look, for the option panel. Same rule, different trigger. */
+.field.is-invalid input {
+  border-color: var(--destructive);
+}
+.field.is-invalid .field-error {
+  display: block;
+}
+.field.is-invalid .field-hint {
+  display: none;
+}

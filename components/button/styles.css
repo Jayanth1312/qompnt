@@ -1,0 +1,14 @@
+/* Press. The colour and shadow transitions come from the contract in tokens.css,
+   which every interactive element shares; the only thing a button adds is giving
+   a little under the pointer.
+
+   transform, not padding or size: a button that shrinks its box reflows the row
+   it sits in, and a toolbar of them visibly shuffles on every click. transform
+   is composited and moves nothing around it.
+
+   Disabled is excluded on purpose - a control that refuses the click should not
+   acknowledge it. */
+button:active:not(:disabled),
+[role='button']:active:not([aria-disabled='true']) {
+  transform: scale(0.97);
+}

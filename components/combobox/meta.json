@@ -1,0 +1,18 @@
+{
+  "name": "Combobox",
+  "blurb": "A text field that filters a list of options as you type.",
+  "created": "2026-08-01",
+  "tags": [
+    "Form"
+  ],
+  "mechanism": "A real input plus a listbox we own, and about thirty lines of delegated JavaScript for filter, arrows, Escape and click-outside. The zero-JS alternative is `<input list>` + `<datalist>`, whose popup is browser chrome with no CSS hooks in any engine.",
+  "caveats": [
+    "Not a complete ARIA combobox: there is no aria-activedescendant, so a screen reader announces the focused option rather than the input reporting it.",
+    "Tab walks the options and Enter picks one; type-ahead inside the list is not implemented.",
+    "The datalist version is fully accessible and unstyleable. Pick which of the two matters more for your case."
+  ],
+  "support": [
+    "Styling the `<datalist>` popup is not supported in any engine, by design - it is browser chrome."
+  ],
+  "motion": true
+}

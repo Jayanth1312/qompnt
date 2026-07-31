@@ -1,0 +1,28 @@
+<label class="flex cursor-pointer items-center gap-2">
+  <input type="checkbox" data-opt-target="[data-x-slider-label]" data-opt-hide checked>
+  Label
+</label>
+
+<!-- Not a class: stepped is the `step` attribute, so the option names the
+     attribute and the value for each state. 0.1 snaps to ten stops; 0.01 is
+     fine enough to read as continuous. -->
+<label class="flex cursor-pointer items-center gap-2">
+  <input type="checkbox" data-opt-target="[data-x-range]"
+         data-opt-attr="step" data-opt-attr-on="0.1" data-opt-attr-off="0.01">
+  Stepped
+</label>
+
+<label class="flex cursor-pointer items-center gap-2">
+  <input type="checkbox" data-opt-target="[data-x-out]" data-opt-hide checked>
+  Value readout
+</label>
+
+<label class="flex cursor-pointer items-center gap-2">
+  <input type="checkbox" data-opt-target="[data-x-range]" data-opt-on="slider-thick">
+  Thick track
+</label>
+
+<label class="flex cursor-pointer items-center gap-2">
+  <input type="checkbox" data-opt-target="[data-x-range]" data-opt-on="opacity-50 pointer-events-none">
+  Disabled
+</label>

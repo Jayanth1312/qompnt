@@ -1,0 +1,15 @@
+{
+  "name": "Alert",
+  "blurb": "A short message that calls out something worth noticing.",
+  "created": "2026-08-02",
+  "tags": [
+    "Feedback",
+    "Display"
+  ],
+  "mechanism": "Static markup plus the same tone classes the Toast uses. Dismiss is a checkbox-and-:has() trick in the demo, but the honest version is one line of script or a server round-trip.",
+  "caveats": [
+    "An alert that matters must be announced: add role=\"alert\" for errors, or aria-live=\"polite\" for anything softer. Colour alone reaches nobody using a screen reader.",
+    "The dismiss shown here hides the alert but leaves it in the accessibility tree unless you also remove it - the checkbox version cannot do that."
+  ],
+  "support": []
+}

@@ -1,0 +1,54 @@
+<!-- A card is a container, not a look: an optional cover, a title, a line or two
+     of text, and one action. It owns the surface, the radius and one padding
+     step; everything inside is your markup. Same shape as shadcn/ui's Card -
+     header, content, footer - minus the five React components. -->
+<div class="card-tilt w-full max-w-[300px] overflow-hidden rounded-lg border border-border bg-card text-card-foreground">
+  <!-- Cover. A real <img> in your app; the gradient is a placeholder. -->
+  <div class="h-32 bg-gradient-to-br from-primary to-primary/60"></div>
+
+  <div class="p-card">
+    <h3 class="text-title-sm font-500">Card title</h3>
+    <p class="mt-1.5 text-body-sm text-muted-foreground">
+      Some quick example text to build on the card title and make up the bulk of the content.
+    </p>
+    <button class="mt-4 rounded-md bg-primary px-control-x py-control-y text-button font-500 text-primary-foreground hover:bg-primary/90">
+      Go somewhere
+    </button>
+  </div>
+</div>
+
+<!-- Sectioned: the same container with a ruled footer, for forms and dialogs
+     that live in a card. -->
+<div class="w-full max-w-[340px] rounded-lg border border-border bg-card p-card text-card-foreground">
+  <div class="flex items-start justify-between gap-4">
+    <div>
+      <h3 class="text-title-sm font-500">Login to your account</h3>
+      <p class="mt-1 text-body-sm text-muted-foreground">Enter your email below to login.</p>
+    </div>
+    <a href="#" class="shrink-0 text-body-sm font-500 text-primary no-underline hover:underline">Sign up</a>
+  </div>
+
+  <div class="mt-4 flex flex-col gap-1.5">
+    <label for="card-email" class="text-caption font-500">Email</label>
+    <input id="card-email" type="email" placeholder="you@example.com"
+           class="rounded-md border border-border bg-background px-control-x py-control-y text-body-sm leading-none text-foreground placeholder:text-muted-foreground/70">
+  </div>
+
+  <div class="mt-4 border-t border-border pt-4">
+    <button class="w-full rounded-md bg-primary px-control-x py-control-y text-button font-500 text-primary-foreground hover:bg-primary/90">
+      Login
+    </button>
+  </div>
+</div>
+
+<!-- Callout: the same container, filled. The button inverts to the page
+     background rather than introducing a second accent. -->
+<div class="w-full rounded-lg bg-primary p-card text-primary-foreground">
+  <h2 class="mb-2 font-display text-display-sm">Start building today</h2>
+  <p class="mb-5 max-w-[46ch] text-body-md text-primary-foreground/85">
+    Fifteen components, one stylesheet, no build step in your project.
+  </p>
+  <a href="#" class="inline-flex items-center rounded-md bg-background px-control-x py-control-y text-button font-500 text-foreground no-underline hover:bg-accent">
+    Get started
+  </a>
+</div>

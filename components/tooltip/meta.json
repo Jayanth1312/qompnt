@@ -1,0 +1,17 @@
+{
+  "name": "Tooltip",
+  "blurb": "A short label that appears on hover or focus.",
+  "created": "2026-08-02",
+  "tags": [
+    "Feedback",
+    "Overlay"
+  ],
+  "mechanism": "A ::after pseudo-element reading content from data-tip, shown on :hover and :focus-visible. No wrapper, no positioning library, no JavaScript - and no element in the DOM to forget to hide.",
+  "caveats": [
+    "A pseudo-element cannot be described by aria-describedby, so the tip is invisible to screen readers. Put the same words in aria-label (or visible text) - the tooltip is a convenience for sighted mouse users, not the only copy.",
+    "Touch has no hover: on a phone the tip appears only if the control takes focus. Never hide anything essential in here.",
+    "It cannot escape an ancestor with overflow: hidden. Inside a scrolling panel, use a popover instead."
+  ],
+  "support": [],
+  "motion": true
+}

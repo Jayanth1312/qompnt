@@ -1,0 +1,64 @@
+/* Stripe: violet on cool white, 8px radius, blue-grey text, soft elevation.
+   Extracted from Designs/DESIGN-stripe.md into the token contract. Trademarks
+   belong to their owners; this is a token set, not an endorsement.
+   Dark values are documented in the source doc. */
+:root {
+  --background: #ffffff;
+  --foreground: #0d253d;
+  --card: #f6f9fc;
+  --card-foreground: #0d253d;
+  --popover: #ffffff;
+  --popover-foreground: #0d253d;
+
+  --primary: #533afd;
+  --primary-foreground: #ffffff;
+  --secondary: #e3e8ee;
+  --secondary-foreground: #0d253d;
+  --muted: #f6f9fc;
+  --muted-foreground: #61718a;
+  --accent: #eef2f7;
+  --accent-foreground: #0d253d;
+  --destructive: #df1b41;
+  --destructive-foreground: #ffffff;
+
+  --border: #e3e8ee;
+  --input: #e3e8ee;
+  --ring: #533afd;
+
+  --radius: 8px;
+  --control-px: 16px;
+  --control-py: 9px;
+  --row-px: 12px;
+  --row-py: 8px;
+  --pad-card: 24px;
+
+  --shadow-1: 0 2px 5px rgb(50 50 93 / 10%);
+  --shadow-2: 0 15px 35px rgb(50 50 93 / 12%);
+
+  --type-sans: "Ideal Sans", Inter, -apple-system, "Segoe UI", sans-serif;
+  --type-display: "Ideal Sans", Inter, -apple-system, sans-serif;
+}
+
+[data-theme='dark'] {
+  --background: #0a1120;
+  --foreground: #f6f9fc;
+  --card: #111a2e;
+  --card-foreground: #f6f9fc;
+  --popover: #111a2e;
+  --popover-foreground: #f6f9fc;
+
+  --primary: #665efd;
+  --primary-foreground: #ffffff;
+  --secondary: #1c2540;
+  --secondary-foreground: #f6f9fc;
+  --muted: #0f1728;
+  --muted-foreground: #94a3b8;
+  --accent: #1c2540;
+  --accent-foreground: #f6f9fc;
+  --destructive: #ff5c7c;
+  --destructive-foreground: #ffffff;
+
+  --border: #1f2a44;
+  --input: #1f2a44;
+  --ring: #665efd;
+}

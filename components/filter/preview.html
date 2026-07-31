@@ -1,0 +1,32 @@
+<details data-select class="relative inline-block">
+  <summary data-x-trigger class="flex cursor-pointer list-none items-center gap-1.5 rounded-md bg-accent px-control-x py-control-y text-body-sm leading-none text-muted-foreground hover:bg-secondary">
+    Filter by
+    <span data-select-label class="font-500 text-foreground">All</span>
+    <svg data-select-chevron width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+      <path d="m6 9 6 6 6-6"/>
+    </svg>
+  </summary>
+  <input type="hidden" name="filter" value="">
+  <div role="listbox"
+       class="absolute left-0 top-[calc(100%+4px)] z-20 w-40 rounded-md border border-border bg-popover p-1 shadow-e2">
+    <button type="button" role="option" aria-selected="true" data-value=""
+            class="flex w-full items-center justify-between rounded-sm px-row-x py-row-y text-left text-body-sm leading-none text-foreground hover:bg-accent">
+      All
+      <svg data-check width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.5" stroke-linecap="round" aria-hidden="true" class="text-[var(--focus)]"><path d="m5 13 4 4L19 7"/></svg>
+    </button>
+    <button type="button" role="option" aria-selected="false"
+            class="flex w-full items-center justify-between rounded-sm px-row-x py-row-y text-left text-body-sm leading-none text-foreground hover:bg-accent">
+      Chat
+      <svg data-check width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.5" stroke-linecap="round" aria-hidden="true" class="text-[var(--focus)]"><path d="m5 13 4 4L19 7"/></svg>
+    </button>
+    <button type="button" role="option" aria-selected="false"
+            class="flex w-full items-center justify-between rounded-sm px-row-x py-row-y text-left text-body-sm leading-none text-foreground hover:bg-accent">
+      Code
+      <svg data-check width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.5" stroke-linecap="round" aria-hidden="true" class="text-[var(--focus)]"><path d="m5 13 4 4L19 7"/></svg>
+    </button>
+  </div>
+</details>

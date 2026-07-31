@@ -1,0 +1,16 @@
+{
+  "name": "Skeleton",
+  "blurb": "Placeholder blocks that hold the shape of content while it loads.",
+  "created": "2026-08-02",
+  "tags": [
+    "Feedback",
+    "Display"
+  ],
+  "mechanism": "One class, one keyframe. The shimmer is a moving background-position on a gradient, so there is no extra element and nothing to clean up when the real content arrives.",
+  "caveats": [
+    "A skeleton is decoration: mark the region aria-busy=\"true\" and hide the blocks with aria-hidden, or a screen reader reads a wall of nothing.",
+    "Shimmer is motion. The keyframe stops under prefers-reduced-motion and falls back to a flat block."
+  ],
+  "support": [],
+  "motion": true
+}

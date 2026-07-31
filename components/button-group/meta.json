@@ -1,0 +1,18 @@
+{
+  "name": "Button Group",
+  "blurb": "Buttons welded into one control - the interior corners square off and the shared edges collapse to a single line.",
+  "created": "2026-08-01",
+  "tags": [
+    "Action",
+    "Form"
+  ],
+  "mechanism": "`:first-child` and `:last-child` round only the outer ends, and a -1px inline margin collapses each pair of abutting borders into one hairline. Logical properties throughout, so a right-to-left locale rounds the correct ends with no second rule set.",
+  "caveats": [
+    "Segments are separate buttons, so each still needs its own accessible name - an icons-only group without `aria-label` per button is three unnamed controls.",
+    "For a group where one segment is selected and stays selected, this is the wrong component: that is a radio group, and Tabs or the segmented rows in the Customize panel are the pattern."
+  ],
+  "support": [
+    "Nothing newer than logical border-radius properties."
+  ],
+  "motion": true
+}

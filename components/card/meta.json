@@ -1,0 +1,15 @@
+{
+  "name": "Card",
+  "blurb": "A surface that groups a cover, a title, some text, and one action.",
+  "created": "2026-07-26",
+  "tags": [
+    "Layout",
+    "Display"
+  ],
+  "mechanism": "Static markup: a surface, a radius, one padding step, and a rule above the footer. overflow-hidden makes a cover image inherit the corners.",
+  "caveats": [
+    "A whole-card link swallows any control inside it, and a button inside an anchor is invalid HTML. Link the title, or stretch a link behind the card and hand the pointer back to the controls (this site does the latter)."
+  ],
+  "support": [],
+  "motion": true
+}

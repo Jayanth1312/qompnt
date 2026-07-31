@@ -1,0 +1,14 @@
+{
+  "name": "Badge",
+  "blurb": "A small label for a status, a category, or a count.",
+  "created": "2026-07-25",
+  "tags": [
+    "Display"
+  ],
+  "mechanism": "Static markup: an inline-flex pill. No state, no script.",
+  "caveats": [
+    "A colour-only badge carries no meaning for a screen reader. The status variant pairs its dot with a text label for that reason.",
+    "The remove button needs an aria-label; the \u00d7 glyph alone announces as nothing useful."
+  ],
+  "support": []
+}

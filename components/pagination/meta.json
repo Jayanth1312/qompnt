@@ -1,0 +1,16 @@
+{
+  "name": "Pagination",
+  "blurb": "Page numbers with previous and next links.",
+  "created": "2026-08-03",
+  "tags": [
+    "Navigation"
+  ],
+  "mechanism": "Links to real URLs - `?page=3` is a page you can bookmark, share and reload. htmx upgrades them to a partial swap; with JavaScript off they are ordinary navigation.",
+  "caveats": [
+    "Give the container `<nav aria-label=\"Pagination\">` and the current page `aria-current=\"page\"`; without it, every number sounds the same.",
+    "Disabled previous/next should be a `<span>`, not a link with `pointer-events: none` - a disabled link is still focusable and still announced as a link.",
+    "The numbers need a real hit area on touch: 40px is the floor, which is why they use the control padding rather than being bare text."
+  ],
+  "support": [],
+  "motion": false
+}

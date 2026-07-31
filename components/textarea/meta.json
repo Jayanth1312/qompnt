@@ -1,0 +1,16 @@
+{
+  "name": "Textarea",
+  "blurb": "A multi-line text field that grows with what you type.",
+  "created": "2026-07-28",
+  "tags": [
+    "Form"
+  ],
+  "mechanism": "field-sizing: content grows the box in CSS. The inline oninput is the fallback for engines that do not have it yet.",
+  "caveats": [
+    "A character counter needs to be announced (aria-live) if it is the only warning before the limit."
+  ],
+  "support": [
+    "`field-sizing: content` \u2014 Baseline 2026, newly available since June 2026.",
+    "The inline `oninput` fallback covers every engine older than that."
+  ]
+}

@@ -1,0 +1,31 @@
+<!-- accent-color tints the native control with one property - no pseudo-element
+     stack, and the platform keeps drawing the checkmark and focus behaviour. -->
+<label class="flex cursor-pointer items-center gap-2.5 text-body-sm leading-none text-foreground">
+  <input type="checkbox" checked class="h-4 w-4 rounded-xs accent-primary" style="accent-color: var(--primary)">
+  Email me about new components
+</label>
+
+<fieldset class="flex flex-col gap-2.5">
+  <legend class="mb-2 text-caption font-500 text-foreground">Theme</legend>
+  <label class="flex cursor-pointer items-center gap-2.5 text-body-sm leading-none text-foreground">
+    <input type="radio" name="theme" value="light" checked class="h-4 w-4" style="accent-color: var(--primary)">
+    Light
+  </label>
+  <label class="flex cursor-pointer items-center gap-2.5 text-body-sm leading-none text-foreground">
+    <input type="radio" name="theme" value="dark" class="h-4 w-4" style="accent-color: var(--primary)">
+    Dark
+  </label>
+</fieldset>
+
+<!-- Switch: a checkbox whose track and knob are drawn with peer- classes. -->
+<label class="flex cursor-pointer items-center justify-between gap-4 text-body-sm leading-none text-foreground">
+  Reduce motion
+  <input type="checkbox" class="peer sr-only">
+  <!-- .switch is the timing hook: the knob is an ::after, which no utility class
+       can reach. See styles.css. -->
+  <span class="switch relative h-6 w-10 shrink-0 rounded-pill bg-secondary
+               peer-checked:bg-primary
+               after:absolute after:left-0.5 after:top-0.5 after:h-5 after:w-5 after:rounded-pill
+               after:bg-background after:content-['']
+               peer-checked:after:translate-x-4"></span>
+</label>

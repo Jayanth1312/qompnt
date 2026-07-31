@@ -1,0 +1,99 @@
+/* A page cell is square, and it has to stay square while the design system
+ * changes underneath it.
+ *
+ * Symmetric padding does not give a square box: the height is the line box plus
+ * two paddings, the width is one glyph plus two paddings, and a digit is much
+ * narrower than a line is tall. That is why `px-control-x py-control-y` alone
+ * produced an upright rectangle.
+ *
+ * So the height is pinned to the line box - `line-height: 1` makes `1lh` equal
+ * the font size - and the same figure becomes the minimum width. Both sides are
+ * then `font-size + 2 × --control-py`, and both move together when a design
+ * system changes its density or its type scale.
+ *
+ * A minimum rather than a fixed width, because "12" and "128" have to keep
+ * their horizontal padding and grow. Only the single digits are square, which
+ * is the only case anyone reads as square anyway.
+ */
+.page {
+  display: grid;
+  place-items: center;
+  line-height: 1;
+  padding: var(--control-py) var(--control-px);
+  min-inline-size: calc(1lh + var(--control-py) * 2);
+  border-radius: var(--r-md);
+}
+
+/* Previous / Next are text, not digits: they keep the control padding and drop
+   the square minimum, or a two-word label sits in a lopsided box. */
+.page-edge {
+  display: grid;
+  place-items: center;
+  line-height: 1;
+  padding: var(--control-py) var(--control-px);
+  border-radius: var(--r-md);
+  /* A surface, so they read as controls. Unstyled they were indistinguishable
+     from the ellipsis sitting next to them. */
+  background: var(--secondary);
+  color: var(--foreground);
+  cursor: pointer;
+}
+.page-edge:hover {
+  background: var(--accent);
+}
+.page-edge:active {
+  transform: scale(0.94);
+}
+
+/* Real pages, no script.
+ *
+ * The demo used to be a still frame: every href was "#" and the current page
+ * was hard-coded. A radio group makes it genuinely work - the checked radio is
+ * which page you are on, and the styling follows from it - so the component
+ * demonstrates pagination instead of illustrating it.
+ *
+ * In an app the pages are links to real URLs and the server marks the current
+ * one; this is the zero-backend version of the same state. */
+.pages input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.pages label {
+  cursor: pointer;
+  color: var(--foreground);
+}
+.pages label:hover {
+  background: var(--accent);
+}
+.pages input:checked + label {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: 500;
+}
+.pages input:focus-visible + label {
+  outline: 2px solid var(--ring);
+  outline-offset: -1px;
+}
+/* Press feedback. The pages are controls, so they answer a click like one -
+   the same dip every button in the set gives. */
+.pages label:active {
+  transform: scale(0.94);
+}
+/* Outline variant: the current page is ringed rather than filled. */
+.pages.pages-outline input:checked + label {
+  background: transparent;
+  color: var(--foreground);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+/* Previous is disabled on the first page and Next on the last, from the state
+   itself rather than from a hard-coded attribute - :has() reads which radio is
+   checked and turns the edge control off. */
+/* Explicit hooks rather than :first-of-type - each input sits in its own <li>,
+   so every one of them is the first of its type in its own parent and the
+   selector matched them all. */
+.pages:has([data-page-first]:checked) [data-page-prev],
+.pages:has([data-page-last]:checked) [data-page-next] {
+  pointer-events: none;
+  opacity: 0.45;
+}

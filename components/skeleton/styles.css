@@ -1,0 +1,17 @@
+/* Skeleton: one class, one keyframe. The shimmer is a moving background
+   position, so a placeholder is a div with a size and nothing else. */
+.skeleton {
+  background:
+    linear-gradient(90deg, transparent 0 20%, var(--background) 35% 50%, transparent 65%) 0 / 250% 100% no-repeat,
+    var(--secondary);
+  animation: skeleton-shimmer 1.4s linear infinite;
+}
+.skeleton-still {
+  animation: none;
+  background: var(--secondary);
+}
+@keyframes skeleton-shimmer {
+  to {
+    background-position: 100% 0;
+  }
+}

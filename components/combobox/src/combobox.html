@@ -1,0 +1,104 @@
+<!-- Why this one is not pure HTML.
+     The zero-JS version is <input list="models"> plus a <datalist>. It works, it
+     is one line, and it is genuinely the right answer when the list is short:
+
+       <input list="models" name="model" class="...">
+       <datalist id="models"><option>Opus</option>...</datalist>
+
+     But the popup that datalist opens is browser chrome. It has no CSS hooks in
+     any engine - not a pseudo-element, not a part() - so it follows the browser
+     and OS theme and ignores yours. There is no override; that is the trade.
+     If a dark app opening a light system popup is fine, use datalist and delete
+     the script below.
+
+     This version owns the list, so it matches the rest of the set. The input is
+     still a real input, the options are still buttons, and the value still
+     posts through a hidden field. -->
+<div data-combobox class="relative w-full max-w-[280px]">
+  <input type="text" role="combobox" aria-expanded="false" aria-autocomplete="list"
+         placeholder="Search models…" autocomplete="off"
+         class="w-full rounded-md border border-border bg-background px-control-x py-control-y text-body-sm leading-none text-foreground placeholder:text-muted-foreground/70">
+  <input type="hidden" name="model" value="">
+
+  <div role="listbox" hidden
+       class="absolute left-0 right-0 top-[calc(100%+4px)] z-20 max-h-56 overflow-y-auto rounded-md border border-border bg-popover p-1 shadow-e2">
+    <button type="button" role="option" aria-selected="false"
+            class="flex w-full items-center rounded-sm px-row-x py-row-y text-left text-body-sm leading-none text-foreground hover:bg-accent">Opus</button>
+    <button type="button" role="option" aria-selected="false"
+            class="flex w-full items-center rounded-sm px-row-x py-row-y text-left text-body-sm leading-none text-foreground hover:bg-accent">Sonnet</button>
+    <button type="button" role="option" aria-selected="false"
+            class="flex w-full items-center rounded-sm px-row-x py-row-y text-left text-body-sm leading-none text-foreground hover:bg-accent">Haiku</button>
+    <button type="button" role="option" aria-selected="false"
+            class="flex w-full items-center rounded-sm px-row-x py-row-y text-left text-body-sm leading-none text-foreground hover:bg-accent">Opus 4.1</button>
+    <button type="button" role="option" aria-selected="false"
+            class="flex w-full items-center rounded-sm px-row-x py-row-y text-left text-body-sm leading-none text-foreground hover:bg-accent">Sonnet 4.5</button>
+    <button type="button" role="option" aria-selected="false"
+            class="flex w-full items-center rounded-sm px-row-x py-row-y text-left text-body-sm leading-none text-foreground hover:bg-accent">Haiku 4.5</button>
+    <button type="button" role="option" aria-selected="false"
+            class="flex w-full items-center rounded-sm px-row-x py-row-y text-left text-body-sm leading-none text-foreground hover:bg-accent">Opus 3</button>
+    <button type="button" role="option" aria-selected="false"
+            class="flex w-full items-center rounded-sm px-row-x py-row-y text-left text-body-sm leading-none text-foreground hover:bg-accent">Sonnet 3.7</button>
+    <button type="button" role="option" aria-selected="false"
+            class="flex w-full items-center rounded-sm px-row-x py-row-y text-left text-body-sm leading-none text-foreground hover:bg-accent">Fable</button>
+    <p data-combobox-empty hidden class="px-row-x py-row-y text-body-sm text-muted-foreground">No match</p>
+  </div>
+</div>
+
+<!-- One delegated handler serves every combobox on the page. Filtering, Escape,
+     arrow keys, click-outside; anything more belongs in your app, not here. -->
+<script>
+if (!window.__qompntCombobox) {
+  window.__qompntCombobox = true;
+  const opts = (box) => [...box.querySelectorAll('[role="option"]')];
+
+  document.addEventListener('input', (e) => {
+    const input = e.target.closest('[data-combobox] input[role="combobox"]');
+    if (!input) return;
+    const box = input.closest('[data-combobox]');
+    const q = input.value.trim().toLowerCase();
+    let shown = 0;
+    opts(box).forEach((o) => {
+      const hit = o.textContent.trim().toLowerCase().includes(q);
+      o.hidden = !hit;
+      if (hit) shown++;
+    });
+    box.querySelector('[data-combobox-empty]').hidden = shown > 0;
+    box.querySelector('[role="listbox"]').hidden = false;
+    input.setAttribute('aria-expanded', 'true');
+  });
+
+  document.addEventListener('click', (e) => {
+    const opt = e.target.closest('[data-combobox] [role="option"]');
+    if (opt) {
+      const box = opt.closest('[data-combobox]');
+      const value = opt.textContent.trim();
+      box.querySelector('input[role="combobox"]').value = value;
+      box.querySelector('input[type="hidden"]').value = value;
+      opts(box).forEach((o) => o.setAttribute('aria-selected', String(o === opt)));
+      box.querySelector('[role="listbox"]').hidden = true;
+      return;
+    }
+    const input = e.target.closest('[data-combobox] input[role="combobox"]');
+    if (input) input.closest('[data-combobox]').querySelector('[role="listbox"]').hidden = false;
+
+    document.querySelectorAll('[data-combobox]').forEach((box) => {
+      if (!box.contains(e.target)) box.querySelector('[role="listbox"]').hidden = true;
+    });
+  });
+
+  document.addEventListener('keydown', (e) => {
+    const box = e.target.closest('[data-combobox]');
+    if (!box) return;
+    if (e.key === 'Escape') {
+      box.querySelector('[role="listbox"]').hidden = true;
+      return;
+    }
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    e.preventDefault();
+    const list = opts(box).filter((o) => !o.hidden);
+    const i = list.indexOf(document.activeElement);
+    const next = e.key === 'ArrowDown' ? i + 1 : i - 1;
+    (list[next] || list[e.key === 'ArrowDown' ? 0 : list.length - 1])?.focus();
+  });
+}
+</script>

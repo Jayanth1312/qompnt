@@ -1,0 +1,72 @@
+<!-- Filter: the Select component's dropdown with a two-tone trigger - "Filter by"
+     stays muted, the chosen value is the emphasis - and a check on the active
+     option instead of a chevron beside it. No border, just a soft fill, because
+     a filter is a control you scan past, not one you aim at. -->
+<details data-select class="relative inline-block">
+  <summary data-trigger class="flex cursor-pointer list-none items-center gap-1.5 rounded-md bg-accent px-control-x py-control-y text-body-sm leading-none text-muted-foreground hover:bg-secondary">
+    Filter by
+    <span data-select-label class="font-500 text-foreground">All</span>
+    <svg data-select-chevron width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+      <path d="m6 9 6 6 6-6"/>
+    </svg>
+  </summary>
+
+  <!-- The value the form submits. data-value carries it when it differs from the
+       label - an empty one means "no filter". -->
+  <input type="hidden" name="filter" value="">
+
+  <div role="listbox"
+       class="absolute left-0 top-[calc(100%+4px)] z-20 w-40 rounded-md border border-border bg-popover p-1 shadow-e2">
+    <button type="button" role="option" aria-selected="true" data-value=""
+            class="flex w-full items-center justify-between rounded-sm px-row-x py-row-y text-left text-body-sm leading-none text-foreground hover:bg-accent">
+      All
+      <svg data-check width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.5" stroke-linecap="round" aria-hidden="true" class="text-[var(--focus)]">
+        <path d="m5 13 4 4L19 7"/>
+      </svg>
+    </button>
+    <button type="button" role="option" aria-selected="false"
+            class="flex w-full items-center justify-between rounded-sm px-row-x py-row-y text-left text-body-sm leading-none text-foreground hover:bg-accent">
+      Chat
+      <svg data-check width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.5" stroke-linecap="round" aria-hidden="true" class="text-[var(--focus)]">
+        <path d="m5 13 4 4L19 7"/>
+      </svg>
+    </button>
+    <button type="button" role="option" aria-selected="false"
+            class="flex w-full items-center justify-between rounded-sm px-row-x py-row-y text-left text-body-sm leading-none text-foreground hover:bg-accent">
+      Code
+      <svg data-check width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.5" stroke-linecap="round" aria-hidden="true" class="text-[var(--focus)]">
+        <path d="m5 13 4 4L19 7"/>
+      </svg>
+    </button>
+  </div>
+</details>
+
+<!-- Same handler as the Select component - one copy serves both, and the guard
+     means pasting both snippets on one page still binds once.
+     To refetch on change, put hx-get on each option and let the server filter. -->
+<script>
+if (!window.__qompntSelect) {
+  window.__qompntSelect = true;
+  document.addEventListener('click', (e) => {
+    const opt = e.target.closest('[data-select] [role="option"]');
+    if (opt) {
+      const d = opt.closest('details');
+      const label = opt.textContent.trim();
+      const value = opt.hasAttribute('data-value') ? opt.dataset.value : label;
+      d.querySelector('[data-select-label]').textContent = label;
+      const hidden = d.querySelector('input[type="hidden"]');
+      if (hidden) hidden.value = value;
+      d.querySelectorAll('[role="option"]').forEach((o) => o.setAttribute('aria-selected', String(o === opt)));
+      d.open = false;
+      return;
+    }
+    document.querySelectorAll('details[data-select][open]').forEach((d) => {
+      if (!d.contains(e.target)) d.open = false;
+    });
+  });
+}
+</script>

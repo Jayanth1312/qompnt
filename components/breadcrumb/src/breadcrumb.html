@@ -1,0 +1,11 @@
+<!-- An ordered list, because the order is the meaning. The separator is a
+     pseudo-element: decorative, unselectable, and invisible to screen readers.
+     The last item is not a link - aria-current says you are already here. -->
+<nav aria-label="Breadcrumb">
+  <ol class="crumbs flex flex-wrap items-center gap-1.5 text-body-sm text-muted-foreground">
+    <li><a href="/" class="rounded-sm no-underline hover:text-foreground">Home</a></li>
+    <li><a href="/components" class="rounded-sm no-underline hover:text-foreground">Components</a></li>
+    <li><a href="/components/navigation" class="rounded-sm no-underline hover:text-foreground">Navigation</a></li>
+    <li><span aria-current="page" class="font-500 text-foreground">Breadcrumb</span></li>
+  </ol>
+</nav>

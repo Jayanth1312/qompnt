@@ -1,0 +1,15 @@
+{
+  "name": "Select",
+  "blurb": "A dropdown for choosing one option from a short list.",
+  "created": "2026-07-27",
+  "tags": [
+    "Form"
+  ],
+  "mechanism": "`<details>` for the disclosure, one delegated click handler, and a hidden input so the value posts like a native select.",
+  "caveats": [
+    "You give up type-to-select, arrow keys and the iOS wheel picker. Tab walks the options and Enter picks one.",
+    "It announces as a disclosure with options inside, not as a select. A native `<select>` with appearance-none is the accessible choice when the open list does not have to match your design."
+  ],
+  "support": [],
+  "motion": true
+}

@@ -1,0 +1,16 @@
+{
+  "name": "Spinner",
+  "blurb": "A rotating indicator for waits with no known end.",
+  "created": "2026-08-02",
+  "tags": [
+    "Feedback",
+    "Display"
+  ],
+  "mechanism": "An SVG arc and one rotate keyframe. Inside a button, htmx's .htmx-request class fades it in for exactly the length of the request, so the button needs no state of its own.",
+  "caveats": [
+    "A spinner says \"something is happening\" and nothing else. Pair it with text for anything over a second or two.",
+    "It is decorative: aria-hidden on the SVG, and put the words in a live region if the wait needs announcing.",
+    "Motion stops under prefers-reduced-motion; the arc stays, static."
+  ],
+  "support": []
+}

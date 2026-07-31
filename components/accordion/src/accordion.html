@@ -1,0 +1,95 @@
+<!-- Native <details>. The `name` attribute makes the group exclusive - opening
+     one closes the rest - which is the whole accordion behaviour, in an
+     attribute, with keyboard support and find-in-page already handled. Browsers
+     without it simply allow several open at once. -->
+<div data-accordion class="w-full divide-y divide-border">
+    <details name="policy" open class="group">
+        <summary
+            class="flex cursor-pointer list-none items-center justify-between gap-3 px-row-x py-row-y text-body-md font-500 text-foreground"
+        >
+            How we protect your data
+            <svg
+                data-chevron
+                class="shrink-0 text-muted-foreground"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+            >
+                <path d="m9 6 6 6-6 6" />
+            </svg>
+        </summary>
+        <ul
+            class="list-disc space-y-2 pb-4 pl-8 pr-control-x text-body-sm text-foreground marker:text-muted-foreground/70"
+        >
+            <li>Data is encrypted in transit and at rest.</li>
+            <li>Access is scoped per workspace, and every read is logged.</li>
+        </ul>
+    </details>
+
+    <details name="policy" class="group">
+        <summary
+            class="flex cursor-pointer list-none items-center justify-between gap-3 px-row-x py-row-y text-body-md font-500 text-foreground"
+        >
+            How we use your data
+            <svg
+                data-chevron
+                class="shrink-0 text-muted-foreground"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+            >
+                <path d="m9 6 6 6-6 6" />
+            </svg>
+        </summary>
+        <ul
+            class="list-disc space-y-2 pb-4 pl-8 pr-control-x text-body-sm text-foreground marker:text-muted-foreground/70"
+        >
+            <li>
+                With your permission, chats and coding sessions train and
+                improve the models.
+            </li>
+        </ul>
+    </details>
+
+    <details name="policy" class="group">
+        <summary
+            class="flex cursor-pointer list-none items-center justify-between gap-3 px-row-x py-row-y text-body-md font-500 text-foreground"
+        >
+            How to opt out
+            <svg
+                data-chevron
+                class="shrink-0 text-muted-foreground"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+            >
+                <path d="m9 6 6 6-6 6" />
+            </svg>
+        </summary>
+        <ul
+            class="list-disc space-y-2 pb-4 pl-8 pr-control-x text-body-sm text-foreground marker:text-muted-foreground/70"
+        >
+            <li>
+                Every setting lives in your account, and takes effect on save.
+            </li>
+        </ul>
+    </details>
+</div>

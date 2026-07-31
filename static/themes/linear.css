@@ -1,0 +1,44 @@
+/* Linear is a dark-first system: the product ships dark and that is the palette
+   the source doc documents, so those values are the base here rather than living
+   behind a toggle. The switcher forces dark and disables the theme toggle.
+   Trademarks belong to their owners; this is a token set, not an endorsement. */
+:root,
+[data-theme='dark'] {
+  --background: #0f1011;
+  --foreground: #f7f8f8;
+  --card: #191a1c;
+  --card-foreground: #f7f8f8;
+  --popover: #191a1c;
+  --popover-foreground: #f7f8f8;
+
+  --primary: #828fff;
+  --primary-foreground: #0f1011;
+  --secondary: #23252a;
+  --secondary-foreground: #f7f8f8;
+  --muted: #151617;
+  --muted-foreground: #8a8f98;
+  --accent: #23252a;
+  --accent-foreground: #f7f8f8;
+  --destructive: #eb5757;
+  --destructive-foreground: #ffffff;
+
+  --border: #23252a;
+  --input: #23252a;
+  --ring: #828fff;
+
+  --code: #0a0b0c;
+  --code-foreground: #f7f8f8;
+
+  --radius: 8px;
+  --control-px: 14px;
+  --control-py: 8px;
+  --row-px: 10px;
+  --row-py: 6px;
+  --pad-card: 16px;
+
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 24%);
+  --shadow-2: 0 12px 32px rgb(0 0 0 / 32%);
+
+  --type-sans: Inter, -apple-system, 'Segoe UI', sans-serif;
+  --type-display: Inter, -apple-system, sans-serif;
+}

@@ -1,0 +1,84 @@
+/* Slider: a filled track and a knob that sits proud of it.
+   --knob-radius comes from the design system, so the same slider is a lozenge
+   here, a square in Brutalist, and a circle wherever --radius is large.
+   WebKit has no ::-moz-range-progress equivalent, so the fill is a gradient
+   driven by --p, which the component sets on input. */
+.slider {
+  --p: 50;
+  --slider-track: 8px;
+  --slider-knob-w: 26px;
+  --slider-knob-h: 20px;
+  appearance: none;
+  width: 100%;
+  height: var(--slider-knob-h);
+  background: transparent;
+  cursor: pointer;
+}
+.slider.slider-thick {
+  --slider-track: 12px;
+  --slider-knob-h: 26px;
+  --slider-knob-w: 32px;
+}
+.slider::-webkit-slider-runnable-track {
+  height: var(--slider-track);
+  border-radius: var(--r-pill);
+  background: linear-gradient(
+    to right,
+    var(--primary) calc(var(--p) * 1%),
+    var(--secondary) calc(var(--p) * 1%)
+  );
+}
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  width: var(--slider-knob-w);
+  height: var(--slider-knob-h);
+  margin-top: calc((var(--slider-track) - var(--slider-knob-h)) / 2);
+  border: none;
+  border-radius: var(--knob-radius, var(--r-pill));
+  background: var(--knob);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 28%);
+}
+.slider::-moz-range-track {
+  height: var(--slider-track);
+  border-radius: var(--r-pill);
+  background: var(--secondary);
+}
+.slider::-moz-range-progress {
+  height: var(--slider-track);
+  border-radius: var(--r-pill);
+  background: var(--primary);
+}
+.slider::-moz-range-thumb {
+  width: var(--slider-knob-w);
+  height: var(--slider-knob-h);
+  border: none;
+  border-radius: var(--knob-radius, var(--r-pill));
+  background: var(--knob);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 28%);
+}
+
+/* Motion. The knob grows under the thumb while dragging, which is the only
+   feedback a slider gives that the value is live.
+
+   Each vendor pseudo-element needs its own rule. One selector list containing
+   both drops the entire rule in both engines: an unrecognised pseudo-element
+   invalidates the whole selector, not just its own branch. That is also why
+   there is no shared block above them. */
+.slider::-webkit-slider-thumb {
+  transition:
+    transform var(--motion-fast) var(--ease),
+    box-shadow var(--motion-fast) var(--ease);
+}
+.slider:active::-webkit-slider-thumb {
+  transform: scale(1.12);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 32%);
+}
+.slider::-moz-range-thumb {
+  transition:
+    transform var(--motion-fast) var(--ease),
+    box-shadow var(--motion-fast) var(--ease);
+}
+.slider:active::-moz-range-thumb {
+  transform: scale(1.12);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 32%);
+}

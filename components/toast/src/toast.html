@@ -1,0 +1,50 @@
+<!-- The stack. Lives once per page, near the end of <body>.
+     aria-live means new toasts are announced without stealing focus.
+     ponytail: cap it. Four is plenty - past that they run off the screen and
+     stop being readable, so the oldest is dropped as new ones arrive (qompnt.js). -->
+<div id="toasts" role="status" aria-live="polite"
+     class="fixed top-6 right-6 z-50 flex w-[min(360px,calc(100vw-3rem))] flex-col gap-2"></div>
+
+<!-- Any action can raise one. The response is a toast, swapped to the top of
+     the stack; the action's own target is untouched. -->
+<button type="button"
+        hx-post="/demo/toast"
+        hx-target="#toasts"
+        hx-swap="afterbegin"
+        class="rounded-md bg-primary px-control-x py-control-y text-button font-500 text-primary-foreground hover:bg-primary/90">
+  Save changes
+</button>
+
+<!-- What the server returns. One row: icon, message, dismiss. The tone class
+     carries surface, text, border and which of the three icons shows (see
+     tokens.css), so success, error and info are one word apart.
+     items-start, not items-center: when the message wraps, the icon and the
+     dismiss button stay on the first line. 18px icons against a 20px line put
+     all three optical centres on the same axis.
+     The lifetime is a CSS animation, not a JS timer: it holds, fades, and the
+     animationend handler removes the node. -->
+<div class="toast-life tone-success flex items-start gap-2 rounded-lg border px-control-x py-control-y
+            shadow-e2"
+     onanimationend="this.remove()">
+  <svg data-tone-icon="success" class="mt-px shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none"
+       stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/>
+  </svg>
+  <svg data-tone-icon="error" class="mt-px shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none"
+       stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/>
+  </svg>
+  <svg data-tone-icon="info" class="mt-px shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none"
+       stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.5v.5"/>
+  </svg>
+
+  <p class="min-w-0 flex-1 text-body-sm leading-5">Changes saved</p>
+
+  <button type="button" aria-label="Dismiss"
+          onclick="this.closest('.toast-life').remove()"
+          class="mt-px grid shrink-0 place-items-center rounded-sm opacity-70 hover:opacity-100">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+  </button>
+</div>

@@ -1,0 +1,21 @@
+<!-- The tip is an attribute, not an element: ::after reads data-tip, so there is
+     nothing extra in the DOM and nothing to keep in sync.
+     aria-label repeats it, because a pseudo-element is invisible to a screen
+     reader and aria-describedby cannot point at one. -->
+<button class="tip rounded-md border border-border bg-background px-control-x py-control-y text-button font-500 text-foreground hover:bg-accent"
+        data-tip="Copies the markup" aria-label="Copy — copies the markup">
+  Copy
+</button>
+
+<!-- On an icon-only control, where a tooltip earns its place. -->
+<button class="tip grid place-items-center rounded-md px-control-x py-control-y text-muted-foreground hover:bg-accent hover:text-foreground"
+        data-tip="Delete component" aria-label="Delete component">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+       stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M9 7V5h6v2M7 7l1 13h8l1-13"/></svg>
+</button>
+
+<!-- Below instead of above, for anything near the top of the page. -->
+<span class="tip tip-bottom underline decoration-dotted underline-offset-4"
+      tabindex="0" data-tip="Tokens are CSS variables" aria-label="Contract — tokens are CSS variables">
+  contract
+</span>

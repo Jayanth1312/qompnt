@@ -1,0 +1,52 @@
+/* Lifetime: slide in, hold, fade. A CSS animation rather than a JS timer, so
+   nothing has to be cancelled when the user dismisses a toast early - the
+   animationend handler removes the node.
+
+   The tone classes (.tone-success / .tone-error / .tone-info) are contract-level
+   and ship with tokens.css: Alert uses the same three. */
+@keyframes toast-life {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  6%,
+  88% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+.toast-life {
+  animation: toast-life 4.5s ease forwards;
+}
+
+/* The one animation the motion switch must not turn off.
+ *
+ * 4.5s here is a lifetime, not a decoration: the animationend handler is what
+ * removes the node. Letting the global rule in tokens.css zero this duration
+ * would fire animationend immediately and a toast would be gone before it was
+ * read - motion off would mean toasts off.
+ *
+ * So the duration is held and the timing function is swapped instead.
+ * steps(1, end) jumps between the keyframes rather than interpolating: the
+ * toast appears, waits its full 4.5s, and disappears, with nothing sliding or
+ * fading. Same behaviour, no movement.
+ *
+ * !important because it is overriding an !important - the global switch has to
+ * be blunt to catch utility classes, and this is the documented exemption. */
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion='on']) .toast-life {
+    animation: toast-life 4.5s steps(1, end) forwards;
+  }
+  :root:not([data-motion='on']) .toast-life {
+    animation-duration: 4.5s !important;
+    animation-timing-function: steps(1, end) !important;
+  }
+}
+[data-motion='off'] .toast-life {
+  animation-duration: 4.5s !important;
+  animation-timing-function: steps(1, end) !important;
+}

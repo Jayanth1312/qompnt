@@ -1,0 +1,157 @@
+/* Stepper.
+   State comes from a radio per step, so which step you are on is real form state
+   rather than a class someone has to keep in sync:
+     li:has(input:checked)        the current step
+     li:has(~ li input:checked)   every step before it, therefore completed
+   That is what turns the tick on and paints the track behind you. It needs
+   :has(), which is the one component here that does. */
+.steps {
+  display: flex;
+  width: 100%;
+}
+.steps > li {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+.steps .dot {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--r-pill);
+  background: var(--secondary);
+  color: var(--muted-foreground);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+}
+.steps .tick,
+.steps .load {
+  display: none;
+}
+
+/* Connector: drawn by each step after the first, stopping short of both dots so
+   the line meets their edges instead of running under them. */
+.steps > li + li::before {
+  content: '';
+  position: absolute;
+  top: 12px;
+  right: calc(50% + 17px);
+  left: calc(-50% + 17px);
+  height: 2px;
+  background: var(--secondary);
+}
+
+/* Completed: any step with a later step selected. */
+.steps > li:has(~ li input:checked) .dot {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+.steps > li:has(~ li input:checked) .num {
+  display: none;
+}
+.steps > li:has(~ li input:checked) .tick {
+  display: block;
+}
+.steps > li:has(~ li input:checked) .step-label {
+  color: var(--foreground);
+}
+.steps > li:has(~ li input:checked) + li::before {
+  background: var(--primary);
+}
+
+/* Current. */
+.steps > li:has(input:checked) .dot {
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--primary);
+  color: var(--foreground);
+}
+.steps > li:has(input:checked) .step-label {
+  color: var(--foreground);
+  font-weight: 500;
+}
+.steps.steps-loading > li:has(input:checked) .num {
+  display: none;
+}
+.steps.steps-loading > li:has(input:checked) .load {
+  display: block;
+  color: var(--primary);
+}
+
+.steps label {
+  display: contents;
+  cursor: pointer;
+}
+.steps .step-label {
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+
+/* Vertical: the same list, the connector rotated.
+   Centring the ITEMS was wrong - each row is a dot plus a label of its own
+   length, so centring them individually staggered the dots down a zig-zag and
+   the connector no longer met them. The rows align to the start, which keeps
+   every dot on one axis, and the list centres as a block instead. */
+.steps.steps-vertical {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 28px;
+  width: fit-content;
+  margin-inline: auto;
+}
+.steps.steps-vertical > li {
+  flex: none;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+}
+/* The connector spans the whole gap between two dots. It was a fixed 18px
+   against an 18px gap, which left the column looking cramped and stopped it
+   growing when the gap does; deriving both from the same figure means changing
+   the gap above is the only edit needed. */
+.steps.steps-vertical > li + li::before {
+  top: -28px;
+  bottom: auto;
+  left: 12px;
+  right: auto;
+  width: 2px;
+  height: 28px;
+}
+.steps.steps-plain > li::before {
+  display: none;
+}
+
+/* Motion. The state is a radio, so every change here is a checked/unchecked
+   flip - the dot recolours, the connector behind it fills, and the tick appears.
+   The first two are property changes and transition; the tick is display:none to
+   display:block, which does not, so it gets a keyframe on the way in. */
+.steps .dot {
+  transition:
+    background-color var(--motion) var(--ease),
+    box-shadow var(--motion) var(--ease),
+    color var(--motion) var(--ease);
+}
+
+/* Slower than the dot: the line has distance to cover, and the eye should read
+   the progress travelling towards the step it just completed. */
+.steps > li + li::before {
+  transition: background-color var(--motion-slow) var(--ease);
+}
+
+.steps > li:has(~ li input:checked) .tick {
+  animation: step-tick var(--motion) var(--ease);
+}
+@keyframes step-tick {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}

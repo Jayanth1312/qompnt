@@ -1,0 +1,65 @@
+/* Buttons welded into one control.
+ *
+ * The join is the whole component: interior corners square off, the shared
+ * edges collapse to one line, and the group reads as a single object with
+ * segments rather than three buttons that happen to touch.
+ *
+ * :first-child / :last-child rather than a class per position, so adding or
+ * removing a segment needs no edit here. Logical properties, so a right-to-left
+ * locale rounds the correct ends without a second rule set.
+ */
+.btn-group {
+  display: inline-flex;
+  isolation: isolate;
+}
+.btn-group > * {
+  position: relative;
+  border-radius: 0;
+}
+.btn-group > :first-child {
+  border-start-start-radius: var(--r-md);
+  border-end-start-radius: var(--r-md);
+}
+.btn-group > :last-child {
+  border-start-end-radius: var(--r-md);
+  border-end-end-radius: var(--r-md);
+}
+/* One hairline between segments instead of two abutting borders, which would
+   read as a 2px seam against every 1px edge elsewhere in the set. */
+.btn-group > * + * {
+  margin-inline-start: -1px;
+}
+/* The hovered or focused segment comes forward, or its ring is clipped by the
+   neighbour overlapping it. */
+.btn-group > *:hover,
+.btn-group > *:focus-visible {
+  z-index: 1;
+}
+
+/* Icon-only segments are square, from the same figure the Pagination cell uses:
+   the line box plus two paddings on both axes. */
+.btn-group.btn-group-icon > * {
+  min-inline-size: calc(1lh + var(--control-py) * 2);
+}
+
+/* Content variants.
+ *
+ * These were three radios each hiding a different overlapping set of elements,
+ * and the options handler runs every radio in a group - the checked one and the
+ * losers. So "Text" showed the label, then "Icon + label" (unchecked) hid both
+ * the icon AND the label, and the buttons came out empty. Overlapping hide
+ * targets cannot express a three-way choice.
+ *
+ * Disjoint classes on the group can: each variant owns one class, the handler
+ * adds the winner's and removes the losers', and what shows is decided here. */
+.btn-group.bg-text .bg-icon {
+  display: none;
+}
+.btn-group.bg-icons .bg-label {
+  display: none;
+}
+/* Icons-only segments go square, from the same figure Pagination uses: the line
+   box plus two paddings on both axes. */
+.btn-group.bg-icons > * {
+  min-inline-size: calc(1lh + var(--control-py) * 2);
+}

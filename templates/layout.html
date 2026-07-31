@@ -1,0 +1,148 @@
+{{define "layout"}}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{if .C}}{{.C.Name}} — Qompnt{{else}}Qompnt — HTML components, ten design systems{{end}}</title>
+<meta name="description" content="{{if .C}}{{.C.Blurb}}{{else}}HTML components built on native elements and a token contract. Swap the whole design system with one stylesheet. Copy them, or install with shadcn.{{end}}">
+<link href="https://fonts.cdnfonts.com/css/opening-hours-sans" rel="stylesheet">
+<link href="https://fonts.cdnfonts.com/css/cambo" rel="stylesheet">
+<link href="https://fonts.cdnfonts.com/css/fira-mono" rel="stylesheet">
+<link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+<!-- Phosphor, for this site's own chrome only. Component markup keeps inline
+     SVG on purpose: an icon copied out of here must not need a second
+     stylesheet to render. See README, "Icons". -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<link rel="stylesheet" href="/static/tokens.css">
+<link rel="stylesheet" href="/static/qompnt.css">
+<!-- Generated from components/*/styles.css - see componentsCSS in main.go. -->
+<link rel="stylesheet" href="/static/components.css">
+<!-- The design system is one stylesheet layered over the contract in tokens.css.
+     Empty href = the default system. -->
+<link id="ds" rel="stylesheet" href="">
+<script>
+// Both applied before first paint, so neither the theme nor the design system
+// flashes the wrong one.
+try {
+  var t = localStorage.getItem('qompnt-theme');
+  if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  document.documentElement.dataset.theme = t;
+
+  var ds = localStorage.getItem('qompnt-ds');
+  if (ds) {
+    document.documentElement.dataset.ds = ds;
+    document.getElementById('ds').href = '/static/themes/' + ds + '.css';
+  }
+
+  // Motion, same reason: the attribute has to be on <html> before the first
+  // paint or a page loaded with motion off still plays its entry animations
+  // once. Written explicitly as 'on' or 'off' rather than left absent, because
+  // 'on' is a real choice - it overrides the OS preference, and tokens.css
+  // reads it as such.
+  var m = localStorage.getItem('qompnt-motion');
+  if (!m) m = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'off' : 'on';
+  document.documentElement.dataset.motion = m;
+} catch (e) {}
+</script>
+</head>
+<body class="bg-background font-sans text-foreground antialiased" hx-boost="true">
+  <main class="mx-auto max-w-[688px] px-5 py-16">
+    {{template "content" .}}
+  </main>
+  <!-- Toast stack, so the Toast preview has somewhere to land. -->
+  <div id="toasts" role="status" aria-live="polite"
+       class="fixed top-6 right-6 z-50 flex w-[min(360px,calc(100vw-3rem))] flex-col gap-2"></div>
+
+  <script src="/static/htmx.js"></script>
+  <script src="/static/qompnt.js"></script>
+</body>
+</html>{{end}}
+
+{{define "mark"}}
+<!-- Four cells, each rounded on its outer corner: a component pulled apart.
+     currentColor at text-primary, so the mark takes the accent of whichever
+     design system is loaded rather than a fixed brand colour fighting them. -->
+<svg viewBox="0 0 256 256" width="18" height="18" fill="currentColor" aria-hidden="true" class="shrink-0 text-primary">
+  <path d="M 100 136 C 111.046 136 120 144.954 120 156 L 120 256 L 100 256 C 44.772 256 0 211.228 0 156 L 0 136 Z M 256 256 L 136 256 L 136 156 C 136 144.954 144.954 136 156 136 L 256 136 Z M 120 100 C 120 111.046 111.046 120 100 120 L 0 120 L 0 100 C 0 44.772 44.772 0 100 0 L 120 0 Z M 156 0 C 211.228 0 256 44.772 256 100 L 256 120 L 156 120 C 144.954 120 136 111.046 136 100 L 136 0 Z"/>
+</svg>
+{{end}}
+
+{{define "themetoggle"}}
+<!-- Both icons ship; tokens.css shows the one for the current theme. Swapping in
+     CSS rather than JS means the right icon is there on the first paint. -->
+<button type="button" data-theme-toggle
+        aria-label="Toggle dark mode"
+        class="grid p-2 shrink-0 place-items-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground">
+  <i data-icon="moon" class="ph ph-moon text-[15px]" aria-hidden="true"></i>
+  <i data-icon="sun" class="ph ph-sun text-[15px]" aria-hidden="true"></i>
+</button>
+{{end}}
+
+{{define "dsswitch"}}
+<!-- Design system switcher. Each system is one stylesheet of tokens layered over
+     the contract, so switching swaps a <link> href and nothing else - same
+     markup, same classes, different radius, density, colour and type. -->
+<details data-select data-ds-switch class="relative">
+  <summary class="flex cursor-pointer list-none items-center gap-1.5 rounded-md px-control-x py-control-y text-body-sm leading-none text-muted-foreground hover:bg-accent">
+    <span data-select-label class="font-500 text-foreground">Claude</span>
+    <i data-select-chevron class="ph ph-caret-down shrink-0 text-[14px]" aria-hidden="true"></i>
+  </summary>
+
+  <div role="listbox"
+       class="absolute right-0 top-[calc(100%+4px)] z-20 max-h-80 w-44 overflow-y-auto rounded-md border border-border bg-popover p-1 shadow-e2">
+    <button type="button" role="option" aria-selected="true" data-ds-option="" data-ds-schemes="light dark"
+            class="flex w-full items-center justify-between rounded-sm px-row-x py-row-y text-left text-body-sm leading-none text-foreground hover:bg-accent">
+      Claude
+      <i data-check class="ph ph-check text-[13px] text-ring" aria-hidden="true"></i>
+    </button>
+    <button type="button" role="option" aria-selected="false" data-ds-option="apple" data-ds-schemes="light dark"
+            class="flex w-full items-center justify-between rounded-sm px-row-x py-row-y text-left text-body-sm leading-none text-foreground hover:bg-accent">
+      Apple
+      <i data-check class="ph ph-check text-[13px] text-ring" aria-hidden="true"></i>
+    </button>
+    <button type="button" role="option" aria-selected="false" data-ds-option="clickhouse" data-ds-schemes="dark"
+            class="flex w-full items-center justify-between rounded-sm px-row-x py-row-y text-left text-body-sm leading-none text-foreground hover:bg-accent">
+      ClickHouse
+      <i data-check class="ph ph-check text-[13px] text-ring" aria-hidden="true"></i>
+    </button>
+    <button type="button" role="option" aria-selected="false" data-ds-option="cohere" data-ds-schemes="light dark"
+            class="flex w-full items-center justify-between rounded-sm px-row-x py-row-y text-left text-body-sm leading-none text-foreground hover:bg-accent">
+      Cohere
+      <i data-check class="ph ph-check text-[13px] text-ring" aria-hidden="true"></i>
+    </button>
+    <button type="button" role="option" aria-selected="false" data-ds-option="coinbase" data-ds-schemes="light dark"
+            class="flex w-full items-center justify-between rounded-sm px-row-x py-row-y text-left text-body-sm leading-none text-foreground hover:bg-accent">
+      Coinbase
+      <i data-check class="ph ph-check text-[13px] text-ring" aria-hidden="true"></i>
+    </button>
+    <button type="button" role="option" aria-selected="false" data-ds-option="cursor" data-ds-schemes="light dark"
+            class="flex w-full items-center justify-between rounded-sm px-row-x py-row-y text-left text-body-sm leading-none text-foreground hover:bg-accent">
+      Cursor
+      <i data-check class="ph ph-check text-[13px] text-ring" aria-hidden="true"></i>
+    </button>
+    <button type="button" role="option" aria-selected="false" data-ds-option="linear" data-ds-schemes="dark"
+            class="flex w-full items-center justify-between rounded-sm px-row-x py-row-y text-left text-body-sm leading-none text-foreground hover:bg-accent">
+      Linear
+      <i data-check class="ph ph-check text-[13px] text-ring" aria-hidden="true"></i>
+    </button>
+    <button type="button" role="option" aria-selected="false" data-ds-option="notion" data-ds-schemes="light dark"
+            class="flex w-full items-center justify-between rounded-sm px-row-x py-row-y text-left text-body-sm leading-none text-foreground hover:bg-accent">
+      Notion
+      <i data-check class="ph ph-check text-[13px] text-ring" aria-hidden="true"></i>
+    </button>
+    <button type="button" role="option" aria-selected="false" data-ds-option="stripe" data-ds-schemes="light dark"
+            class="flex w-full items-center justify-between rounded-sm px-row-x py-row-y text-left text-body-sm leading-none text-foreground hover:bg-accent">
+      Stripe
+      <i data-check class="ph ph-check text-[13px] text-ring" aria-hidden="true"></i>
+    </button>
+    <button type="button" role="option" aria-selected="false" data-ds-option="vercel" data-ds-schemes="light dark"
+            class="flex w-full items-center justify-between rounded-sm px-row-x py-row-y text-left text-body-sm leading-none text-foreground hover:bg-accent">
+      Vercel
+      <i data-check class="ph ph-check text-[13px] text-ring" aria-hidden="true"></i>
+    </button>
+  </div>
+</details>
+{{end}}
+
+

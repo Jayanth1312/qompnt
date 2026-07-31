@@ -1,0 +1,19 @@
+{
+  "name": "Accordion",
+  "blurb": "Stacked sections that expand to show their content, one at a time.",
+  "created": "2026-07-31",
+  "tags": [
+    "Display",
+    "Navigation"
+  ],
+  "mechanism": "Native `<details name=\"\u2026\">`. The name attribute makes the group exclusive, so open/close, keyboard, and find-in-page are the browser's job. Zero JavaScript.",
+  "caveats": [
+    "Exclusive mode needs a browser that supports the name attribute; older ones simply allow several panels open at once, which degrades cleanly.",
+    "A `<details>` is a disclosure widget, not an ARIA accordion. Screen readers announce \"expandable\", not \"tab 2 of 3\" - correct here, but not identical to a scripted accordion."
+  ],
+  "support": [
+    "`<details>` \u2014 Baseline since January 2020.",
+    "The `name` attribute (exclusive mode) is newer: Chrome and Edge 120, Safari 17.2 (December 2023), Firefox 130 (September 2024)."
+  ],
+  "motion": true
+}

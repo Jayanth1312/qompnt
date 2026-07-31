@@ -1,0 +1,35 @@
+<!-- Pagination that actually paginates, with no script. The checked radio is
+     which page you are on; Previous and Next disable themselves at the ends via
+     :has(). In an app these are links to real URLs and the server marks the
+     current page - this is the same state, held client-side. -->
+<nav aria-label="Pagination">
+  <ul class="pages flex items-center gap-1 text-body-sm">
+    <li>
+      <span data-page-prev class="page-edge text-muted-foreground">Previous</span>
+    </li>
+
+    <li>
+      <input type="radio" name="page" id="page-1" data-page-first checked aria-label="Page 1">
+      <label for="page-1" class="page">1</label>
+    </li>
+    <li>
+      <input type="radio" name="page" id="page-2" aria-label="Page 2">
+      <label for="page-2" class="page">2</label>
+    </li>
+    <li>
+      <input type="radio" name="page" id="page-3" aria-label="Page 3">
+      <label for="page-3" class="page">3</label>
+    </li>
+
+    <li><span class="px-1 text-muted-foreground/70" aria-hidden="true">…</span></li>
+
+    <li>
+      <input type="radio" name="page" id="page-12" data-page-last aria-label="Page 12">
+      <label for="page-12" class="page">12</label>
+    </li>
+
+    <li>
+      <span data-page-next class="page-edge text-muted-foreground">Next</span>
+    </li>
+  </ul>
+</nav>

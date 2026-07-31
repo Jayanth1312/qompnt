@@ -1,0 +1,21 @@
+/* Breadcrumb separators: decorative, so they are pseudo-elements - never
+   selected when you copy the trail, never read out. */
+.crumbs > li + li::before {
+  content: '›';
+  margin-right: 6px;
+  color: var(--muted-foreground);
+  opacity: 0.6;
+}
+.crumbs.crumbs-slash > li + li::before {
+  content: '/';
+}
+
+/* Navbar: the checkbox hack. A hidden checkbox holds the state and a sibling
+   selector reveals the panel - the only zero-JS way for one element to react to
+   another's state. */
+.navbar .nav-menu {
+  display: none;
+}
+.navbar input:checked ~ .nav-menu {
+  display: block;
+}

@@ -1,0 +1,18 @@
+{
+  "name": "Dialog",
+  "blurb": "A modal window that holds focus until it is dismissed.",
+  "created": "2026-07-22",
+  "tags": [
+    "Overlay",
+    "HTMX"
+  ],
+  "mechanism": "Native `<dialog>` with showModal(): focus trapping, Escape to close, inert background and the top layer, all from the platform. A form with method=\"dialog\" closes it without script.",
+  "caveats": [
+    "showModal() is one line of JavaScript; a :target or checkbox modal avoids it but loses the focus trap and the inert background, which is the whole point.",
+    "Give the dialog an accessible name (aria-labelledby pointing at its heading) - it has none by default."
+  ],
+  "support": [
+    "`<dialog>` and `showModal()` \u2014 Baseline since March 2022."
+  ],
+  "motion": true
+}

@@ -1,0 +1,14 @@
+{
+  "name": "Breadcrumb",
+  "blurb": "The trail of pages above the one you are on.",
+  "created": "2026-08-03",
+  "tags": [
+    "Navigation"
+  ],
+  "mechanism": "An ordered list of links. Separators are `::after` on each item, so they are never read out and never end up in a copied selection. The current page is a plain `<span>` with `aria-current=\"page\"` - a link to where you already are is a dead end.",
+  "caveats": [
+    "Wrap it in `<nav aria-label=\"Breadcrumb\">`, or it announces as an unnamed list among however many other lists the page has.",
+    "Truncating the middle with an ellipsis hides structure. If the trail is long enough to need that, the hierarchy is probably too deep."
+  ],
+  "support": []
+}

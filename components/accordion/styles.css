@@ -1,0 +1,58 @@
+/* Accordion: the chevron points right when closed, down when open. */
+details[open] > summary [data-chevron] {
+  transform: rotate(90deg);
+}
+[data-chevron] {
+  transition: transform var(--motion) var(--ease);
+}
+
+/* Opening.
+ *
+ * <details> is display-toggled and display is not animatable, which is where
+ * most libraries give up and measure scrollHeight in JS. Two CSS techniques get
+ * there; the one that survived is not the one this file started with.
+ *
+ * Rejected: `::details-content { block-size: 0 }` animating to `block-size:
+ * auto`. That needs `interpolate-size: allow-keywords` to make `auto` a legal
+ * endpoint - and Firefox 153 ships ::details-content WITHOUT interpolate-size.
+ * So the @supports test passed, the rule applied, and the height jumped: a
+ * feature query that guarded the wrong half of the requirement. Verified in
+ * Firefox 153 and Chromium.
+ *
+ * Used instead: the details is a two-row grid and the content row goes from
+ * 0fr to 1fr. Fractional rows have been interpolable for years, so this needs
+ * no keyword interpolation and animates the content's real height in both
+ * engines - measured 22 -> 54px per frame in Firefox, 18 -> 45px in Chromium.
+ *
+ * Still gated on ::details-content, because that is what guarantees the content
+ * is a single grid item. Without it the children are separate items and the
+ * second row would only clip the first of them - an engine that lacks it gets
+ * an instant open and correct layout, which is the right way to degrade.
+ *
+ * Every disclosure, not just [data-accordion]: the Sidebar's collapsible groups
+ * are <details> too. [data-select] is excluded because a dropdown is a menu, not
+ * a panel - it has its own drop animation in the Select component, and animating
+ * its height as well makes the menu unfold rather than appear.
+ */
+@supports selector(::details-content) {
+  details:not([data-select]) {
+    display: grid;
+    grid-template-rows: auto 0fr;
+    transition: grid-template-rows var(--motion) var(--ease);
+  }
+  details:not([data-select])[open] {
+    grid-template-rows: auto 1fr;
+  }
+  /* The clip. Without it the content keeps its full height and simply overflows
+     the collapsed row, so the panel never looks closed.
+
+     content-visibility with allow-discrete is what makes the CLOSE animate.
+     Opening worked without it because the content is laid out before the row
+     grows; closing did not, because the engine flips the content to hidden the
+     instant [open] goes and the row then shrinks around nothing already
+     invisible. allow-discrete holds that flip until the transition has run. */
+  details:not([data-select])::details-content {
+    overflow: hidden;
+    transition: content-visibility var(--motion) var(--ease) allow-discrete;
+  }
+}

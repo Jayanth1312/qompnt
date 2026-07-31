@@ -1,0 +1,17 @@
+{
+  "name": "Progress",
+  "blurb": "A bar showing how far along a task is, or that it is still running.",
+  "created": "2026-08-01",
+  "tags": [
+    "Display",
+    "Form"
+  ],
+  "mechanism": "Native `<progress>`. Three vendor pseudo-elements do the styling because no engine exposes a single hook. Drop the value attribute (or add .is-indeterminate) and it sweeps.",
+  "caveats": [
+    "The element announces a percentage; a label beside it is still worth adding for sighted users on long tasks.",
+    "Indeterminate progress tells a screen reader nothing about duration. Say what is happening in text."
+  ],
+  "support": [
+    "`::-webkit-progress-value` and `::-moz-progress-bar` are vendor-specific with no shared version: each engine needs its own rule, and always has."
+  ]
+}

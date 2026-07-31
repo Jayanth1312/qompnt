@@ -1,0 +1,86 @@
+<div class="opt-segments">
+  <label>
+    <input type="radio" name="btnsize" data-opt-target="[data-x-btn]" data-opt-on="px-1.5 py-1.5 text-caption">
+    S
+  </label>
+  <label>
+    <input type="radio" name="btnsize" checked data-opt-target="[data-x-btn]" data-opt-on="px-control-x py-control-y text-button">
+    M
+  </label>
+  <label>
+    <input type="radio" name="btnsize" data-opt-target="[data-x-btn]" data-opt-on="px-2.5 py-2.5 text-body-sm">
+    L
+  </label>
+  <label>
+    <input type="radio" name="btnsize" data-opt-target="[data-x-btn]" data-opt-on="px-3 py-3 text-title-sm">
+    XL
+  </label>
+</div>
+
+<label class="flex cursor-pointer items-center gap-2">
+  <input type="radio" name="variant" checked class="h-4 w-4" style="accent-color: var(--primary)"
+         data-opt-target="[data-x-btn]" data-opt-on="bg-primary text-primary-foreground hover:bg-primary/90">
+  Default
+</label>
+
+<label class="flex cursor-pointer items-center gap-2">
+  <input type="radio" name="variant" class="h-4 w-4" style="accent-color: var(--primary)"
+         data-opt-target="[data-x-btn]" data-opt-on="bg-accent text-foreground hover:bg-secondary">
+  Secondary
+</label>
+
+<label class="flex cursor-pointer items-center gap-2">
+  <input type="radio" name="variant" class="h-4 w-4" style="accent-color: var(--primary)"
+         data-opt-target="[data-x-btn]" data-opt-on="border border-border text-foreground hover:bg-accent">
+  Outline
+</label>
+
+<label class="flex cursor-pointer items-center gap-2">
+  <input type="radio" name="variant" class="h-4 w-4" style="accent-color: var(--primary)"
+         data-opt-target="[data-x-btn]" data-opt-on="text-muted-foreground hover:bg-accent hover:text-foreground">
+  Ghost
+</label>
+
+<label class="flex cursor-pointer items-center gap-2">
+  <input type="radio" name="variant" class="h-4 w-4" style="accent-color: var(--primary)"
+         data-opt-target="[data-x-btn]" data-opt-on="bg-destructive text-primary-foreground hover:opacity-90">
+  Destructive
+</label>
+
+<label class="flex cursor-pointer items-center gap-2">
+  <input type="radio" name="variant" class="h-4 w-4" style="accent-color: var(--primary)"
+         data-opt-target="[data-x-btn]" data-opt-on="text-primary underline hover:text-primary/80">
+  Link
+</label>
+
+
+
+<label class="flex cursor-pointer items-center gap-2">
+  <input type="checkbox" class="h-4 w-4" style="accent-color: var(--primary)"
+         data-opt-target="[data-x-btn]" data-opt-on="rounded-pill" data-opt-off="rounded-md">
+  Rounded
+</label>
+
+<label class="flex cursor-pointer items-center gap-2">
+  <input type="checkbox" class="h-4 w-4" style="accent-color: var(--primary)"
+         data-opt-target="[data-x-btn-icon]" data-opt-hide>
+  With icon
+</label>
+
+<label class="flex cursor-pointer items-center gap-2">
+  <input type="checkbox" class="h-4 w-4" style="accent-color: var(--primary)"
+         data-opt-target="[data-x-btn-label]" data-opt-hide checked>
+  Label
+</label>
+
+<label class="flex cursor-pointer items-center gap-2">
+  <input type="checkbox" class="h-4 w-4" style="accent-color: var(--primary)"
+         data-opt-target="[data-x-btn-spinner]" data-opt-hide>
+  Spinner
+</label>
+
+<label class="flex items-center gap-2">
+  Text
+  <input type="text" placeholder="Get started" data-opt-target="[data-x-btn-label]"
+         class="w-32 rounded-md border border-border bg-background px-control-x py-control-y text-body-sm leading-none text-foreground placeholder:text-muted-foreground/70">
+</label>

@@ -1,0 +1,17 @@
+/* The list is shown by removing [hidden], which is a display change - so this is
+   a keyframe on the visible state rather than a transition. It restarts on every
+   open because display:none resets the animation.
+
+   Its own keyframes rather than Select's: the two components ship separately,
+   and a shared name would make installing Combobox alone quietly drop the
+   animation. Five duplicated lines is cheaper than that failure. */
+[data-combobox] [role='listbox']:not([hidden]) {
+  animation: combobox-menu-in var(--motion) var(--ease);
+  transform-origin: top center;
+}
+@keyframes combobox-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scaleY(0.96);
+  }
+}

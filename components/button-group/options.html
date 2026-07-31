@@ -1,0 +1,18 @@
+<!-- Content: three mutually exclusive shapes, so radios. The options grid draws
+     a radio row as a segment, which means this control is itself a button
+     group - the panel demonstrating the component it is configuring. -->
+<div class="opt-segments">
+  <label><input type="radio" name="bgcontent" checked data-opt-target="[data-x-bg]" data-opt-on="bg-text"> Text</label>
+  <label><input type="radio" name="bgcontent" data-opt-target="[data-x-bg]" data-opt-on="bg-both"> Icon + label</label>
+  <label><input type="radio" name="bgcontent" data-opt-target="[data-x-bg]" data-opt-on="bg-icons"> Icons</label>
+</div>
+
+<!-- Size as segments rather than a range. Four named steps is a choice, not a
+     quantity - the same reasoning that separates Level Slider from Slider - and
+     a slider for four stops makes you aim at a thing a button would just say. -->
+<div class="opt-segments">
+  <label><input type="radio" name="bgsize" data-opt-target="[data-x-bg] button" data-opt-on="px-1.5 py-1.5 text-caption"> S</label>
+  <label><input type="radio" name="bgsize" checked data-opt-target="[data-x-bg] button" data-opt-on="px-control-x py-control-y text-button"> M</label>
+  <label><input type="radio" name="bgsize" data-opt-target="[data-x-bg] button" data-opt-on="px-2.5 py-2.5 text-body-sm"> L</label>
+  <label><input type="radio" name="bgsize" data-opt-target="[data-x-bg] button" data-opt-on="px-3 py-3 text-title-sm"> XL</label>
+</div>

@@ -1,0 +1,64 @@
+/* Cohere: deep green on warm paper, squared corners, wide controls.
+   Extracted from Designs/DESIGN-cohere.md into the token contract. Trademarks
+   belong to their owners; this is a token set, not an endorsement.
+   Dark values are documented in the source doc. */
+:root {
+  --background: #fafafa;
+  --foreground: #17171c;
+  --card: #eeece7;
+  --card-foreground: #17171c;
+  --popover: #ffffff;
+  --popover-foreground: #17171c;
+
+  --primary: #003c33;
+  --primary-foreground: #ffffff;
+  --secondary: #e0ded7;
+  --secondary-foreground: #17171c;
+  --muted: #f2f2f2;
+  --muted-foreground: #75758a;
+  --accent: #edfce9;
+  --accent-foreground: #17171c;
+  --destructive: #b3261e;
+  --destructive-foreground: #ffffff;
+
+  --border: #d9d9dd;
+  --input: #d9d9dd;
+  --ring: #003c33;
+
+  --radius: 4px;
+  --control-px: 20px;
+  --control-py: 11px;
+  --row-px: 16px;
+  --row-py: 9px;
+  --pad-card: 24px;
+
+  --shadow-1: none;
+  --shadow-2: 0 10px 28px rgb(0 0 0 / 18%);
+
+  --type-sans: Inter, "Helvetica Neue", sans-serif;
+  --type-display: "Cambo", Georgia, serif;
+}
+
+[data-theme='dark'] {
+  --background: #17171c;
+  --foreground: #f2f2f2;
+  --card: #212121;
+  --card-foreground: #f2f2f2;
+  --popover: #212121;
+  --popover-foreground: #f2f2f2;
+
+  --primary: #39a08c;
+  --primary-foreground: #071829;
+  --secondary: #2a2a30;
+  --secondary-foreground: #f2f2f2;
+  --muted: #1c1c22;
+  --muted-foreground: #93939f;
+  --accent: #22322e;
+  --accent-foreground: #f2f2f2;
+  --destructive: #ff6b60;
+  --destructive-foreground: #ffffff;
+
+  --border: #2f2f38;
+  --input: #2f2f38;
+  --ring: #39a08c;
+}

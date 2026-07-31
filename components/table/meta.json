@@ -1,0 +1,16 @@
+{
+  "name": "Table",
+  "blurb": "Rows of data with a header, sized by the row density token.",
+  "created": "2026-08-04",
+  "tags": [
+    "Data display"
+  ],
+  "mechanism": "A real `<table>` with `<thead>` and `<tbody>`, so column headers are announced with every cell and a screen reader can navigate it as a grid. Rows pad from `--row-px` / `--row-py`, the same rhythm menus and sidebars use. Sortable headers are `<button>`s inside `<th>` carrying `aria-sort`.",
+  "caveats": [
+    "A table used for layout is worse than a div; if the data is not tabular, this is the wrong element.",
+    "Zebra striping helps scanning and hurts contrast: the striped rows here stay above 4.5:1, but check yours if you re-tint them.",
+    "On narrow screens the container scrolls sideways. That is the honest fallback - collapsing a table into cards loses the column relationship."
+  ],
+  "support": [],
+  "motion": true
+}

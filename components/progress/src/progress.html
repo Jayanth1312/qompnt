@@ -1,0 +1,18 @@
+<!-- A real <progress>. It announces itself to screen readers, carries its value
+     in the DOM where a server can set it, and needs no JS. The cost is three
+     vendor pseudo-elements instead of one class - see tokens.css. -->
+<progress class="progress" value="64" max="100">64%</progress>
+
+<!-- Labelled: the number lives beside the bar, not inside it. -->
+<div class="flex w-full items-center gap-3">
+  <progress class="progress" value="64" max="100">64%</progress>
+  <span class="shrink-0 text-caption tabular-nums text-muted-foreground">64%</span>
+</div>
+
+<!-- Indeterminate: omit `value` and the bar sweeps. Same element. -->
+<progress class="progress" max="100"></progress>
+
+<!-- Driven by the server: htmx swaps this whole element on a poll, so progress
+     is state on the server rather than a timer in the browser. -->
+<progress class="progress" value="64" max="100"
+          hx-get="/demo/progress" hx-trigger="every 900ms" hx-swap="outerHTML">64%</progress>

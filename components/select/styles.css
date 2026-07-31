@@ -1,0 +1,43 @@
+/* Custom select: kill the disclosure triangle, flip the chevron when open, and
+   mark the chosen option. Utility classes cannot reach ::-webkit-details-marker. */
+summary::-webkit-details-marker {
+  display: none;
+}
+details[data-select][open] > summary [data-select-chevron] {
+  transform: rotate(180deg);
+}
+[data-select] [role='option'][aria-selected='true'] {
+  background: var(--accent);
+}
+/* Checkmark reserves its space even when hidden, so rows never shift width. */
+[data-select] [role='option'] [data-check] {
+  visibility: hidden;
+}
+[data-select] [role='option'][aria-selected='true'] [data-check] {
+  visibility: visible;
+}
+
+/* Motion. The chevron turns, and the menu drops rather than appearing. A
+   <details> panel is display-toggled, so the open state is a keyframe: there is
+   nothing to transition from when the box did not exist a frame ago.
+
+   Closing is instant. <details> removes the panel from the box tree the moment
+   [open] goes, and holding it there for an exit animation means JS deferring the
+   attribute - a real behaviour change for a component whose selling point is
+   that it has none.
+
+   Transform-origin at the top edge so the menu grows away from the trigger it
+   is anchored to, not from its own middle. */
+[data-select-chevron] {
+  transition: transform var(--motion) var(--ease);
+}
+details[data-select][open] > [role='listbox'] {
+  animation: select-menu-in var(--motion) var(--ease);
+  transform-origin: top center;
+}
+@keyframes select-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scaleY(0.96);
+  }
+}

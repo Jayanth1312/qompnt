@@ -1,0 +1,12 @@
+<!-- Auto-growing textarea. field-sizing:content does the growing in CSS; the
+     inline oninput is the fallback for browsers without it. -->
+<div class="flex flex-col gap-1.5">
+  <label for="note" class="text-caption font-500 text-foreground">Note</label>
+  <textarea id="note" name="note" rows="3" maxlength="280" placeholder="Say something considered."
+            style="field-sizing: content"
+            oninput="if (!CSS.supports('field-sizing','content')) { this.style.height='auto'; this.style.height=this.scrollHeight+'px' }
+                     this.nextElementSibling.firstElementChild.textContent = this.value.length"
+            class="min-h-[84px] max-h-[320px] resize-none rounded-md border border-border bg-background px-control-x py-control-y
+                   text-body-sm leading-none text-foreground placeholder:text-muted-foreground/70"></textarea>
+  <p class="self-end text-caption text-muted-foreground/70"><span>0</span> / 280</p>
+</div>

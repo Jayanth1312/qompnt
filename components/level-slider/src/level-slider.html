@@ -1,0 +1,20 @@
+<div class="level flex w-full max-w-[420px] flex-col gap-1.5" data-v="1">
+  <!-- Demo copy, not part of the component: the ends of the scale in words. -->
+  <div class="level-ends">
+    <span>Faster</span>
+    <span>Smarter</span>
+  </div>
+
+  <input type="range" class="slider" min="0" max="5" step="1" value="1" style="--p: 20"
+         aria-label="Effort"
+         oninput="this.style.setProperty('--p', (this.value - this.min) / (this.max - this.min) * 100); this.closest('.level').dataset.v = this.value">
+
+  <div class="level-stops" aria-hidden="true">
+    <span style="--stop: 0">low</span>
+    <span style="--stop: .2">medium</span>
+    <span style="--stop: .4">high</span>
+    <span style="--stop: .6">xhigh</span>
+    <span style="--stop: .8">max</span>
+    <span style="--stop: 1">god</span>
+  </div>
+</div>

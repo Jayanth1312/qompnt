@@ -1,0 +1,17 @@
+{
+  "name": "Slider",
+  "blurb": "A control for picking a number in a range by dragging.",
+  "created": "2026-08-01",
+  "tags": [
+    "Form"
+  ],
+  "mechanism": "Native `<input type=\"range\">`. Track and thumb are vendor pseudo-elements; the filled portion is a gradient driven by a --p custom property, because WebKit has no equivalent of ::-moz-range-progress.",
+  "caveats": [
+    "The readout is an `<output>` updated by an inline expression. Without it the value is announced but not visible.",
+    "Fine steps are precise with a keyboard and fiddly with a mouse; pick the step for the task, not for the look."
+  ],
+  "support": [
+    "`::-webkit-slider-thumb` and `::-moz-range-thumb` are vendor-specific: each engine needs its own rule."
+  ],
+  "motion": true
+}

@@ -1,0 +1,56 @@
+/* Spinner: one rotation, stopped for anyone who asked for less motion. */
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* The three looping loaders, stopped together.
+ *
+ * animation-name: none, not the global switch's zeroed duration. A 0s duration
+ * still runs one pass, which leaves the loop parked on its final frame - and for
+ * the shimmer and the sweep that frame is the gradient at the far end of its
+ * travel, a bright band sitting off to one side of the element. Dropping the
+ * animation entirely is the honest still state.
+ *
+ * The Skeleton's flat fill has to be restated for the same reason: its
+ * background is the moving gradient, so removing the animation without
+ * replacing the paint leaves the band frozen mid-element. */
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion='on']) .spin,
+  :root:not([data-motion='on']) .skeleton,
+  :root:not([data-motion='on']) .progress:indeterminate,
+  :root:not([data-motion='on']) .progress.is-indeterminate {
+    animation: none;
+  }
+  :root:not([data-motion='on']) .skeleton {
+    background: var(--secondary);
+  }
+}
+[data-motion='off'] .skeleton,
+[data-motion='off'] .progress:indeterminate,
+[data-motion='off'] .progress.is-indeterminate {
+  animation: none;
+}
+
+/* .spin is not in that list, and is exempted from the global switch outright.
+ *
+ * The switch is for motion that decorates a component. A spinner's rotation is
+ * the component: a still spinner is a grey ring that says nothing, and the
+ * Stepper's loading step stops reporting that it is loading. Same reasoning as
+ * the Toast's lifetime, which is exempted in its own file.
+ *
+ * prefers-reduced-motion still stops it, deliberately: that setting is a health
+ * request from the OS, not a preview control, and a stopped spinner is the
+ * accepted answer to it. */
+[data-motion='off'] .spin {
+  animation: spin 0.9s linear infinite !important;
+}
+[data-motion='off'] .skeleton {
+  background: var(--secondary);
+}
+
+/* .spin is reused by the Stepper (loading step) and by any button with a
+   loading indicator. It lives here because this is the component it names. */

@@ -1,0 +1,16 @@
+{
+  "name": "Filter",
+  "blurb": "A dropdown that narrows a list, with the current choice in its label.",
+  "created": "2026-07-30",
+  "tags": [
+    "Form",
+    "Navigation"
+  ],
+  "mechanism": "`<details>` for the open/close state plus one delegated click handler that mirrors the choice into a hidden input. The trigger label is split so \"Filter by\" stays muted.",
+  "caveats": [
+    "A `<details>` used as a menu announces as a disclosure, not as a listbox, despite the roles on the options.",
+    "No arrow-key navigation between options; Tab moves through them."
+  ],
+  "support": [],
+  "motion": true
+}

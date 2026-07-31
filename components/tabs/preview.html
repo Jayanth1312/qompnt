@@ -1,0 +1,26 @@
+<div class="w-full max-w-[420px]">
+  <div data-x-tabs data-tabs class="flex w-full flex-col gap-3">
+    <!-- The strip is never swapped, which is what lets the indicator travel.
+         Each radio carries the request; only the panel's contents change. -->
+    <div data-x-tablist role="tablist" class="tabstrip w-fit">
+      <span class="tab-indicator" aria-hidden="true"></span>
+
+      <input type="radio" name="tab" id="tab-overview" checked role="tab" aria-controls="tabpanel"
+             hx-get="/demo/tabs/overview" hx-target="#tabpanel" hx-trigger="change">
+      <label for="tab-overview">Overview</label>
+
+      <input type="radio" name="tab" id="tab-pricing" role="tab" aria-controls="tabpanel"
+             hx-get="/demo/tabs/pricing" hx-target="#tabpanel" hx-trigger="change">
+      <label for="tab-pricing">Pricing</label>
+
+      <input type="radio" name="tab" id="tab-limits" role="tab" aria-controls="tabpanel"
+             hx-get="/demo/tabs/limits" hx-target="#tabpanel" hx-trigger="change">
+      <label for="tab-limits">Limits</label>
+    </div>
+
+    <div id="tabpanel" data-x-panel role="tabpanel"
+         class="rounded-lg border border-border p-card text-body-md text-foreground">
+      Opus, Sonnet, and Haiku share one API surface.
+    </div>
+  </div>
+</div>

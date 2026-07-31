@@ -1,0 +1,33 @@
+node_modules/
+qompnt
+
+# One-off Playwright probes and audit passes, hardcoded to a dev server on a
+# fixed port. They answered a question once and are kept locally for the next
+# time; they are not part of the build and nothing runs them.
+/t2.mjs
+/t3.mjs
+/tabs.mjs
+/audit/
+
+# Working notes: the design spec, the plans, the brand teardowns behind
+# static/themes/, and a prototype that has not landed. Kept on disk because they
+# are how the decisions get made, out of the repo because nothing builds, serves
+# or consumes them - README.md is the doc this project publishes.
+/DESIGN.MD
+/PLAN.md
+/RELEASE.md
+/RESEARCH.md
+/big_updates.md
+/comps.md
+/Designs/
+/expandable_tab_navigation/
+
+# Per-component working notes. component.go loads meta.json, preview.html,
+# styles.css, options.html, extras.html and src/* - never these.
+components/*/notes.md
+
+/component_test.go
+
+# static/qompnt.css and static/components.css are generated but intentionally
+# committed - they are what consumers download, and nothing here should need Node
+# or Go to serve the site.

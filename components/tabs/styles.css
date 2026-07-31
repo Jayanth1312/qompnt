@@ -1,0 +1,83 @@
+/* The indicator slides; the panel still comes from the server.
+ *
+ * Those two used to be in conflict. The strip was re-rendered by htmx on every
+ * change, so the "active" pill was a different element each time and had
+ * nothing to animate from. The fix is to stop swapping the strip: htmx now
+ * targets the panel's innerHTML, the strip is never replaced, and one indicator
+ * element persists across tab changes and can therefore move.
+ *
+ * Which tab is active is client state (a radio), and what the tab contains is
+ * server state (hx-get). That split is what buys the animation without giving
+ * up the round trip - and it fixes the "Panel surface" option resetting too,
+ * because the wrapper carrying the option's classes is no longer thrown away.
+ *
+ * Equal-width tabs and no gap, so the indicator is exactly 1/n wide and each
+ * step is exactly 100% of itself. With a gap, every position needs its own
+ * calc() and they drift as labels change length.
+ */
+/* Grid, not flex. `flex: 1` only equalises the LEFTOVER space, so with a
+   content-width strip the tabs keep their natural, unequal widths - and the
+   indicator, which is exactly 1/n of the strip, then lines up with none of
+   them. That was the half-covered pill. grid-auto-columns: 1fr makes the
+   columns equal whether the strip is content-width or stretched. */
+.tabstrip {
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  padding: 4px;
+  border-radius: var(--r-md);
+  background: var(--secondary);
+}
+/* The radios are the state. Off-screen rather than display:none, because a
+   hidden input is not focusable and the strip has to be keyboard reachable. */
+.tabstrip input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.tabstrip label {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  padding: var(--control-py) var(--control-px);
+  border-radius: var(--r-sm);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition: color var(--motion-fast) var(--ease);
+}
+.tabstrip input:checked + label {
+  color: var(--foreground);
+}
+/* Focus lands on the radio, which is invisible - so the ring is drawn on its
+   label instead, or keyboard users get no focus indication at all. */
+.tabstrip input:focus-visible + label {
+  outline: 2px solid var(--ring);
+  outline-offset: -1px;
+}
+
+.tab-indicator {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc((100% - 8px) / var(--tab-count, 3));
+  border-radius: var(--r-sm);
+  background: var(--background);
+  box-shadow: var(--shadow-1);
+  transition: translate var(--motion) var(--ease);
+}
+.tabstrip:has(input:nth-of-type(2):checked) .tab-indicator {
+  translate: 100% 0;
+}
+.tabstrip:has(input:nth-of-type(3):checked) .tab-indicator {
+  translate: 200% 0;
+}
+.tabstrip:has(input:nth-of-type(4):checked) .tab-indicator {
+  translate: 300% 0;
+}

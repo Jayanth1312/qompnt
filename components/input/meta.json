@@ -1,0 +1,15 @@
+{
+  "name": "Input",
+  "blurb": "Text fields with labels, hints, error states, and an expanding search.",
+  "created": "2026-07-29",
+  "tags": [
+    "Form",
+    "HTMX"
+  ],
+  "mechanism": "Native inputs, styled. The expanding search is two halves in the markup with [hidden] swapping which one shows - instant, no animation, one layout.",
+  "caveats": [
+    "The expanding search moves focus on open. That is the intent, but it means a keyboard user who tabs past it lands somewhere new.",
+    "Error state must be announced, not just coloured: pair it with aria-invalid and a message the field points at."
+  ],
+  "support": []
+}

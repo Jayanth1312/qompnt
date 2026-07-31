@@ -1,0 +1,61 @@
+/* Dialog: in and out, both directions, no JavaScript.
+ *
+ * A modal is the one place where an entry-only animation is obviously wrong -
+ * the backdrop snapping off is what makes a dialog feel like it broke rather
+ * than closed. Getting the exit for free needs three things that only recently
+ * landed together:
+ *
+ *   @starting-style    the values to animate FROM, for an element that was
+ *                      display:none a frame ago and so has no previous style
+ *   display …allow-discrete   keeps the box rendered until the transition ends
+ *                      instead of dropping it the moment [open] goes
+ *   overlay …allow-discrete   the same, for the top layer showModal() puts it in
+ *                      - without it the dialog leaves the top layer at once and
+ *                      the exit plays underneath the backdrop
+ *
+ * Chrome 117+, Safari 17.4+. Older browsers ignore all three and get an
+ * instant open and close, which is exactly what they do today - the base
+ * `opacity: 0` never strands a visible dialog, because [open] is what makes it
+ * displayed in the first place.
+ *
+ * This is why `<form method="dialog">` still works untouched: the close is a
+ * plain attribute removal, and the transition is what reacts to it.
+ */
+dialog {
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+  transition:
+    opacity var(--motion) var(--ease),
+    transform var(--motion) var(--ease),
+    overlay var(--motion) var(--ease) allow-discrete,
+    display var(--motion) var(--ease) allow-discrete;
+}
+dialog[open] {
+  opacity: 1;
+  transform: none;
+}
+@starting-style {
+  dialog[open] {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+/* The backdrop is a separate box with its own style rules; it does not inherit
+   the dialog's transition and has to repeat it. Slower than the panel, so the
+   dim settles after the dialog has arrived rather than racing it. */
+dialog::backdrop {
+  opacity: 0;
+  transition:
+    opacity var(--motion-slow) var(--ease),
+    overlay var(--motion-slow) var(--ease) allow-discrete,
+    display var(--motion-slow) var(--ease) allow-discrete;
+}
+dialog[open]::backdrop {
+  opacity: 1;
+}
+@starting-style {
+  dialog[open]::backdrop {
+    opacity: 0;
+  }
+}

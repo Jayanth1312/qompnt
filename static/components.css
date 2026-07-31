@@ -1,0 +1,1350 @@
+/* GENERATED - do not edit.
+   Concatenated from components/<name>/styles.css by the server on load.
+   Edit the component's file; this is only the delivery format. */
+
+/* ---- accordion ---- */
+/* Accordion: the chevron points right when closed, down when open. */
+details[open] > summary [data-chevron] {
+  transform: rotate(90deg);
+}
+[data-chevron] {
+  transition: transform var(--motion) var(--ease);
+}
+
+/* Opening.
+ *
+ * <details> is display-toggled and display is not animatable, which is where
+ * most libraries give up and measure scrollHeight in JS. Two CSS techniques get
+ * there; the one that survived is not the one this file started with.
+ *
+ * Rejected: `::details-content { block-size: 0 }` animating to `block-size:
+ * auto`. That needs `interpolate-size: allow-keywords` to make `auto` a legal
+ * endpoint - and Firefox 153 ships ::details-content WITHOUT interpolate-size.
+ * So the @supports test passed, the rule applied, and the height jumped: a
+ * feature query that guarded the wrong half of the requirement. Verified in
+ * Firefox 153 and Chromium.
+ *
+ * Used instead: the details is a two-row grid and the content row goes from
+ * 0fr to 1fr. Fractional rows have been interpolable for years, so this needs
+ * no keyword interpolation and animates the content's real height in both
+ * engines - measured 22 -> 54px per frame in Firefox, 18 -> 45px in Chromium.
+ *
+ * Still gated on ::details-content, because that is what guarantees the content
+ * is a single grid item. Without it the children are separate items and the
+ * second row would only clip the first of them - an engine that lacks it gets
+ * an instant open and correct layout, which is the right way to degrade.
+ *
+ * Every disclosure, not just [data-accordion]: the Sidebar's collapsible groups
+ * are <details> too. [data-select] is excluded because a dropdown is a menu, not
+ * a panel - it has its own drop animation in the Select component, and animating
+ * its height as well makes the menu unfold rather than appear.
+ */
+@supports selector(::details-content) {
+  details:not([data-select]) {
+    display: grid;
+    grid-template-rows: auto 0fr;
+    transition: grid-template-rows var(--motion) var(--ease);
+  }
+  details:not([data-select])[open] {
+    grid-template-rows: auto 1fr;
+  }
+  /* The clip. Without it the content keeps its full height and simply overflows
+     the collapsed row, so the panel never looks closed.
+
+     content-visibility with allow-discrete is what makes the CLOSE animate.
+     Opening worked without it because the content is laid out before the row
+     grows; closing did not, because the engine flips the content to hidden the
+     instant [open] goes and the row then shrinks around nothing already
+     invisible. allow-discrete holds that flip until the transition has run. */
+  details:not([data-select])::details-content {
+    overflow: hidden;
+    transition: content-visibility var(--motion) var(--ease) allow-discrete;
+  }
+}
+
+/* ---- breadcrumb ---- */
+/* Breadcrumb separators: decorative, so they are pseudo-elements - never
+   selected when you copy the trail, never read out. */
+.crumbs > li + li::before {
+  content: '›';
+  margin-right: 6px;
+  color: var(--muted-foreground);
+  opacity: 0.6;
+}
+.crumbs.crumbs-slash > li + li::before {
+  content: '/';
+}
+
+/* Navbar: the checkbox hack. A hidden checkbox holds the state and a sibling
+   selector reveals the panel - the only zero-JS way for one element to react to
+   another's state. */
+.navbar .nav-menu {
+  display: none;
+}
+.navbar input:checked ~ .nav-menu {
+  display: block;
+}
+
+/* ---- button ---- */
+/* Press. The colour and shadow transitions come from the contract in tokens.css,
+   which every interactive element shares; the only thing a button adds is giving
+   a little under the pointer.
+
+   transform, not padding or size: a button that shrinks its box reflows the row
+   it sits in, and a toolbar of them visibly shuffles on every click. transform
+   is composited and moves nothing around it.
+
+   Disabled is excluded on purpose - a control that refuses the click should not
+   acknowledge it. */
+button:active:not(:disabled),
+[role='button']:active:not([aria-disabled='true']) {
+  transform: scale(0.97);
+}
+
+/* ---- button-group ---- */
+/* Buttons welded into one control.
+ *
+ * The join is the whole component: interior corners square off, the shared
+ * edges collapse to one line, and the group reads as a single object with
+ * segments rather than three buttons that happen to touch.
+ *
+ * :first-child / :last-child rather than a class per position, so adding or
+ * removing a segment needs no edit here. Logical properties, so a right-to-left
+ * locale rounds the correct ends without a second rule set.
+ */
+.btn-group {
+  display: inline-flex;
+  isolation: isolate;
+}
+.btn-group > * {
+  position: relative;
+  border-radius: 0;
+}
+.btn-group > :first-child {
+  border-start-start-radius: var(--r-md);
+  border-end-start-radius: var(--r-md);
+}
+.btn-group > :last-child {
+  border-start-end-radius: var(--r-md);
+  border-end-end-radius: var(--r-md);
+}
+/* One hairline between segments instead of two abutting borders, which would
+   read as a 2px seam against every 1px edge elsewhere in the set. */
+.btn-group > * + * {
+  margin-inline-start: -1px;
+}
+/* The hovered or focused segment comes forward, or its ring is clipped by the
+   neighbour overlapping it. */
+.btn-group > *:hover,
+.btn-group > *:focus-visible {
+  z-index: 1;
+}
+
+/* Icon-only segments are square, from the same figure the Pagination cell uses:
+   the line box plus two paddings on both axes. */
+.btn-group.btn-group-icon > * {
+  min-inline-size: calc(1lh + var(--control-py) * 2);
+}
+
+/* Content variants.
+ *
+ * These were three radios each hiding a different overlapping set of elements,
+ * and the options handler runs every radio in a group - the checked one and the
+ * losers. So "Text" showed the label, then "Icon + label" (unchecked) hid both
+ * the icon AND the label, and the buttons came out empty. Overlapping hide
+ * targets cannot express a three-way choice.
+ *
+ * Disjoint classes on the group can: each variant owns one class, the handler
+ * adds the winner's and removes the losers', and what shows is decided here. */
+.btn-group.bg-text .bg-icon {
+  display: none;
+}
+.btn-group.bg-icons .bg-label {
+  display: none;
+}
+/* Icons-only segments go square, from the same figure Pagination uses: the line
+   box plus two paddings on both axes. */
+.btn-group.bg-icons > * {
+  min-inline-size: calc(1lh + var(--control-py) * 2);
+}
+
+/* ---- card ---- */
+/* Hover lift.
+ *
+ * The ask was a tilt that follows the cursor. That is a function of pointer
+ * position inside the element and CSS has no pointer coordinates, so it cannot
+ * be done here - only with a script writing --px/--py on pointermove. This is
+ * the CSS-only half: a fixed tilt with perspective, which reads as the card
+ * picking itself up rather than as it tracking you.
+ *
+ * ponytail: fixed angles. Swap to a --px/--py pair driven by pointermove if the
+ * tracking version is ever wanted; the transform below is already shaped for it.
+ */
+.card-tilt {
+  transition:
+    transform var(--motion) var(--ease),
+    box-shadow var(--motion) var(--ease);
+}
+.card-tilt:hover {
+  transform: perspective(900px) rotateX(2.5deg) rotateY(-3.5deg) translateY(-4px);
+  box-shadow: var(--shadow-2);
+}
+/* A card is often a link target. Pressing it should undo the lift, not add to
+   it, or the click has no bottom to it. */
+.card-tilt:active {
+  transform: perspective(900px) translateY(-1px);
+}
+
+/* ---- checkbox ---- */
+/* Checkbox and radio are native and drawn by the platform from accent-color, so
+   there is nothing to animate inside them - the tick is the OS's. The press is
+   ours.
+
+   The switch is the opposite: its track and knob are our own boxes, so both
+   travel. The knob is an ::after, which the contract's transition rule does not
+   reach (it lists elements, not pseudo-elements), so it is timed here. */
+input[type='checkbox']:active:not(:disabled),
+input[type='radio']:active:not(:disabled) {
+  transform: scale(0.92);
+}
+
+.switch,
+.switch::after {
+  transition:
+    background-color var(--motion) var(--ease),
+    transform var(--motion) var(--ease);
+}
+
+/* ---- combobox ---- */
+/* The list is shown by removing [hidden], which is a display change - so this is
+   a keyframe on the visible state rather than a transition. It restarts on every
+   open because display:none resets the animation.
+
+   Its own keyframes rather than Select's: the two components ship separately,
+   and a shared name would make installing Combobox alone quietly drop the
+   animation. Five duplicated lines is cheaper than that failure. */
+[data-combobox] [role='listbox']:not([hidden]) {
+  animation: combobox-menu-in var(--motion) var(--ease);
+  transform-origin: top center;
+}
+@keyframes combobox-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scaleY(0.96);
+  }
+}
+
+/* ---- dialog ---- */
+/* Dialog: in and out, both directions, no JavaScript.
+ *
+ * A modal is the one place where an entry-only animation is obviously wrong -
+ * the backdrop snapping off is what makes a dialog feel like it broke rather
+ * than closed. Getting the exit for free needs three things that only recently
+ * landed together:
+ *
+ *   @starting-style    the values to animate FROM, for an element that was
+ *                      display:none a frame ago and so has no previous style
+ *   display …allow-discrete   keeps the box rendered until the transition ends
+ *                      instead of dropping it the moment [open] goes
+ *   overlay …allow-discrete   the same, for the top layer showModal() puts it in
+ *                      - without it the dialog leaves the top layer at once and
+ *                      the exit plays underneath the backdrop
+ *
+ * Chrome 117+, Safari 17.4+. Older browsers ignore all three and get an
+ * instant open and close, which is exactly what they do today - the base
+ * `opacity: 0` never strands a visible dialog, because [open] is what makes it
+ * displayed in the first place.
+ *
+ * This is why `<form method="dialog">` still works untouched: the close is a
+ * plain attribute removal, and the transition is what reacts to it.
+ */
+dialog {
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+  transition:
+    opacity var(--motion) var(--ease),
+    transform var(--motion) var(--ease),
+    overlay var(--motion) var(--ease) allow-discrete,
+    display var(--motion) var(--ease) allow-discrete;
+}
+dialog[open] {
+  opacity: 1;
+  transform: none;
+}
+@starting-style {
+  dialog[open] {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+/* The backdrop is a separate box with its own style rules; it does not inherit
+   the dialog's transition and has to repeat it. Slower than the panel, so the
+   dim settles after the dialog has arrived rather than racing it. */
+dialog::backdrop {
+  opacity: 0;
+  transition:
+    opacity var(--motion-slow) var(--ease),
+    overlay var(--motion-slow) var(--ease) allow-discrete,
+    display var(--motion-slow) var(--ease) allow-discrete;
+}
+dialog[open]::backdrop {
+  opacity: 1;
+}
+@starting-style {
+  dialog[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+/* ---- filter ---- */
+/* Filter shares Select's dropdown rules - the menu, the chevron flip, the
+   check on the active option - because it is the same disclosure with a
+   different trigger. They ship with the Select component:
+
+     npx shadcn@latest add <registry>/r/select.json
+
+   The only thing Filter adds is a two-tone trigger label, which is markup. */
+
+/* ---- input ---- */
+/* Validation the platform already knows about.
+ *
+ * :user-invalid, not :invalid. :invalid is true the moment the page loads - an
+ * empty required field is invalid before anyone has touched it - so styling it
+ * greets every visitor with a form painted red. :user-invalid waits until the
+ * field has been interacted with and left, which is when the complaint is
+ * actually useful.
+ *
+ * This is why the error state is worth having as real state rather than as a
+ * class you toggle: the browser is already doing the checking, for `type`,
+ * `pattern`, `required`, `minlength` and the rest, in every locale, with the
+ * announcement wired up. The Error option below still exists for showing the
+ * look on demand, but it is no longer the only way in.
+ */
+.field input:user-invalid,
+.field textarea:user-invalid {
+  border-color: var(--destructive);
+}
+.field input:user-invalid + .field-error,
+.field textarea:user-invalid + .field-error {
+  display: block;
+}
+/* The message is in the markup and hidden, not injected - so it is in the
+   accessibility tree from the start and aria-describedby has something to
+   point at before the error ever fires. */
+.field-error {
+  display: none;
+  color: var(--destructive);
+}
+.field input:user-invalid ~ .field-hint {
+  display: none;
+}
+
+/* The forced look, for the option panel. Same rule, different trigger. */
+.field.is-invalid input {
+  border-color: var(--destructive);
+}
+.field.is-invalid .field-error {
+  display: block;
+}
+.field.is-invalid .field-hint {
+  display: none;
+}
+
+/* ---- level-slider ---- */
+/* A range whose stops have names.
+ *
+ * Mechanically this is the Slider - same track, same fill, same tokens - so it
+ * reuses that class rather than redrawing it. What it adds is a label per stop
+ * and the fact that the value is a choice rather than a quantity.
+ *
+ * Keyboard costs nothing: a native range with step=1 already gives arrow keys,
+ * Home/End and PageUp/PageDown, announced with the right role and value. That
+ * is the whole reason not to build this out of divs.
+ */
+.level {
+  --stops: 5;
+}
+
+/* The labels are absolutely placed at their exact fraction of the track rather
+   than laid out in equal columns. A range's thumb travels from half a knob in
+   to half a knob from the end, so equal columns centre their labels on the wrong
+   points - the drift is invisible in the middle and obvious at both ends. The
+   row is inset by half a knob to match that travel, and each label names its own
+   position. */
+.level-stops {
+  position: relative;
+  height: 1.3em;
+  margin-inline: calc(var(--slider-knob-w, 26px) / 2);
+  font-size: 13px;
+  line-height: 1.3;
+}
+.level-stops > * {
+  position: absolute;
+  left: calc(var(--stop) * 100%);
+  transform: translateX(-50%);
+  white-space: nowrap;
+  color: var(--muted-foreground);
+  transition: color var(--motion-fast) var(--ease);
+}
+
+/* The selected stop. CSS cannot read an input's value, so the component writes
+   it to data-v on the wrapper - the same inline oninput the Slider already uses
+   to drive its fill - and the match happens here. One rule per stop, which is
+   fine for a control that exists precisely because the stops are few and
+   named. */
+.level[data-v='0'] .level-stops > :nth-child(1),
+.level[data-v='1'] .level-stops > :nth-child(2),
+.level[data-v='2'] .level-stops > :nth-child(3),
+.level[data-v='3'] .level-stops > :nth-child(4),
+.level[data-v='4'] .level-stops > :nth-child(5),
+.level[data-v='5'] .level-stops > :nth-child(6) {
+  color: var(--primary);
+  font-weight: 500;
+}
+
+/* Captions at the ends of the scale - "Faster" / "Smarter". Part of the demo in
+   the reference, but the layout for them belongs here so the component can take
+   them without anyone re-deriving the spacing. */
+.level-ends {
+  display: flex;
+  justify-content: space-between;
+  margin-inline: calc(var(--slider-knob-w, 26px) / 2);
+  font-size: 13px;
+  color: var(--muted-foreground);
+}
+
+/* The marker is the default, not a variant. A round knob says "drag me
+ * anywhere"; this control has six places to be, and a marker pointing at the
+ * track says "the scale is here" - which is what the stops are for. The round
+ * knob is still available as .level-knob for a scale that reads as a sweep.
+ *
+ * clip-path rather than a border triangle, because a range thumb cannot host a
+ * pseudo-element to build one from. The corners stay rounded because clip-path
+ * cuts the border-box after the radius is applied, so the shoulders are soft and
+ * only the point is sharp - the earlier pentagon was hard-edged all the way
+ * round and read as a shard.
+ *
+ * Per-vendor blocks throughout: one selector list containing both vendor
+ * pseudo-elements is dropped whole by both engines.
+ */
+.level input::-webkit-slider-thumb {
+  width: 18px;
+  height: 20px;
+  margin-top: calc((var(--slider-track) - 20px) / 2 - 5px);
+  border-radius: 6px 6px 2px 2px;
+  background: var(--foreground);
+  clip-path: polygon(0 0, 100% 0, 100% 52%, 50% 100%, 0 52%);
+}
+.level input::-moz-range-thumb {
+  width: 18px;
+  height: 20px;
+  border-radius: 6px 6px 2px 2px;
+  background: var(--foreground);
+  clip-path: polygon(0 0, 100% 0, 100% 52%, 50% 100%, 0 52%);
+}
+
+/* Round-knob variant: hand the thumb back to the Slider's own look. */
+.level input.level-knob::-webkit-slider-thumb {
+  width: var(--slider-knob-w);
+  height: var(--slider-knob-h);
+  margin-top: calc((var(--slider-track) - var(--slider-knob-h)) / 2);
+  border-radius: var(--knob-radius, var(--r-pill));
+  background: var(--knob);
+  clip-path: none;
+}
+.level input.level-knob::-moz-range-thumb {
+  width: var(--slider-knob-w);
+  height: var(--slider-knob-h);
+  border-radius: var(--knob-radius, var(--r-pill));
+  background: var(--knob);
+  clip-path: none;
+}
+
+/* ---- pagination ---- */
+/* A page cell is square, and it has to stay square while the design system
+ * changes underneath it.
+ *
+ * Symmetric padding does not give a square box: the height is the line box plus
+ * two paddings, the width is one glyph plus two paddings, and a digit is much
+ * narrower than a line is tall. That is why `px-control-x py-control-y` alone
+ * produced an upright rectangle.
+ *
+ * So the height is pinned to the line box - `line-height: 1` makes `1lh` equal
+ * the font size - and the same figure becomes the minimum width. Both sides are
+ * then `font-size + 2 × --control-py`, and both move together when a design
+ * system changes its density or its type scale.
+ *
+ * A minimum rather than a fixed width, because "12" and "128" have to keep
+ * their horizontal padding and grow. Only the single digits are square, which
+ * is the only case anyone reads as square anyway.
+ */
+.page {
+  display: grid;
+  place-items: center;
+  line-height: 1;
+  padding: var(--control-py) var(--control-px);
+  min-inline-size: calc(1lh + var(--control-py) * 2);
+  border-radius: var(--r-md);
+}
+
+/* Previous / Next are text, not digits: they keep the control padding and drop
+   the square minimum, or a two-word label sits in a lopsided box. */
+.page-edge {
+  display: grid;
+  place-items: center;
+  line-height: 1;
+  padding: var(--control-py) var(--control-px);
+  border-radius: var(--r-md);
+  /* A surface, so they read as controls. Unstyled they were indistinguishable
+     from the ellipsis sitting next to them. */
+  background: var(--secondary);
+  color: var(--foreground);
+  cursor: pointer;
+}
+.page-edge:hover {
+  background: var(--accent);
+}
+.page-edge:active {
+  transform: scale(0.94);
+}
+
+/* Real pages, no script.
+ *
+ * The demo used to be a still frame: every href was "#" and the current page
+ * was hard-coded. A radio group makes it genuinely work - the checked radio is
+ * which page you are on, and the styling follows from it - so the component
+ * demonstrates pagination instead of illustrating it.
+ *
+ * In an app the pages are links to real URLs and the server marks the current
+ * one; this is the zero-backend version of the same state. */
+.pages input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.pages label {
+  cursor: pointer;
+  color: var(--foreground);
+}
+.pages label:hover {
+  background: var(--accent);
+}
+.pages input:checked + label {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: 500;
+}
+.pages input:focus-visible + label {
+  outline: 2px solid var(--ring);
+  outline-offset: -1px;
+}
+/* Press feedback. The pages are controls, so they answer a click like one -
+   the same dip every button in the set gives. */
+.pages label:active {
+  transform: scale(0.94);
+}
+/* Outline variant: the current page is ringed rather than filled. */
+.pages.pages-outline input:checked + label {
+  background: transparent;
+  color: var(--foreground);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+/* Previous is disabled on the first page and Next on the last, from the state
+   itself rather than from a hard-coded attribute - :has() reads which radio is
+   checked and turns the edge control off. */
+/* Explicit hooks rather than :first-of-type - each input sits in its own <li>,
+   so every one of them is the first of its type in its own parent and the
+   selector matched them all. */
+.pages:has([data-page-first]:checked) [data-page-prev],
+.pages:has([data-page-last]:checked) [data-page-next] {
+  pointer-events: none;
+  opacity: 0.45;
+}
+
+/* ---- progress ---- */
+/* Progress. No engine exposes a single hook, so the bar and the value are styled
+   separately per vendor; height and radius still come from the contract. */
+.progress {
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border: none;
+  border-radius: var(--r-pill);
+  background: var(--secondary);
+  overflow: hidden;
+}
+.progress-thick {
+  height: 10px;
+}
+.progress::-webkit-progress-bar {
+  background: var(--secondary);
+  border-radius: var(--r-pill);
+}
+.progress::-webkit-progress-value {
+  background: var(--primary);
+  border-radius: var(--r-pill);
+}
+.progress::-moz-progress-bar {
+  background: var(--primary);
+  border-radius: var(--r-pill);
+}
+/* Indeterminate. Dropping the value attribute is the native way in;
+   .is-indeterminate is the same look for a bar that still carries a value -
+   which is what a toggle needs, since it cannot remove an attribute.
+   WebKit paints ::-webkit-progress-bar over the element background, so the
+   sweep has to be set on the pseudo-element as well as the element. */
+.progress:indeterminate,
+.progress.is-indeterminate,
+.progress:indeterminate::-webkit-progress-bar,
+.progress.is-indeterminate::-webkit-progress-bar {
+  background:
+    linear-gradient(90deg, transparent 0 15%, var(--primary) 15% 45%, transparent 45%) 0 / 250% 100% no-repeat,
+    var(--secondary);
+  animation: progress-sweep 1.2s linear infinite;
+}
+.progress.is-indeterminate::-webkit-progress-value {
+  opacity: 0;
+}
+.progress.is-indeterminate::-moz-progress-bar {
+  opacity: 0;
+}
+@keyframes progress-sweep {
+  to {
+    background-position: 100% 0;
+  }
+}
+
+/* Motion. The fill grows to the new value instead of jumping, so a bar that is
+   updated from the server reads as progress rather than as a redraw. Slow,
+   because this is the one animation here with real distance to cover.
+
+   Per-vendor rules for the same reason as the Slider's thumb: a selector list
+   with an unknown pseudo-element is dropped whole. */
+.progress::-webkit-progress-value {
+  transition: inline-size var(--motion-slow) var(--ease);
+}
+.progress::-moz-progress-bar {
+  transition: inline-size var(--motion-slow) var(--ease);
+}
+
+/* ---- select ---- */
+/* Custom select: kill the disclosure triangle, flip the chevron when open, and
+   mark the chosen option. Utility classes cannot reach ::-webkit-details-marker. */
+summary::-webkit-details-marker {
+  display: none;
+}
+details[data-select][open] > summary [data-select-chevron] {
+  transform: rotate(180deg);
+}
+[data-select] [role='option'][aria-selected='true'] {
+  background: var(--accent);
+}
+/* Checkmark reserves its space even when hidden, so rows never shift width. */
+[data-select] [role='option'] [data-check] {
+  visibility: hidden;
+}
+[data-select] [role='option'][aria-selected='true'] [data-check] {
+  visibility: visible;
+}
+
+/* Motion. The chevron turns, and the menu drops rather than appearing. A
+   <details> panel is display-toggled, so the open state is a keyframe: there is
+   nothing to transition from when the box did not exist a frame ago.
+
+   Closing is instant. <details> removes the panel from the box tree the moment
+   [open] goes, and holding it there for an exit animation means JS deferring the
+   attribute - a real behaviour change for a component whose selling point is
+   that it has none.
+
+   Transform-origin at the top edge so the menu grows away from the trigger it
+   is anchored to, not from its own middle. */
+[data-select-chevron] {
+  transition: transform var(--motion) var(--ease);
+}
+details[data-select][open] > [role='listbox'] {
+  animation: select-menu-in var(--motion) var(--ease);
+  transform-origin: top center;
+}
+@keyframes select-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scaleY(0.96);
+  }
+}
+
+/* ---- sidebar-nav ---- */
+/* The group chevron rotation comes from the Accordion component, which owns
+   that rule - both are <details>. Install accordion alongside this, or copy
+   the four lines. */
+/* Which item is selected is a radio group, so the demo actually selects - it
+   used to be five dead <a href="#"> and a hard-coded aria-current, which showed
+   the styling but let you do nothing with it.
+
+   In an app these are links and the server sets aria-current; the rule below is
+   written for both, so swapping the radios back out for real links changes the
+   markup and not this file. */
+.sidebar input[type='radio'] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.sidebar .navlink {
+  display: block;
+  padding: var(--row-py) var(--row-px);
+  border-radius: var(--r-md);
+  color: var(--muted-foreground);
+  cursor: pointer;
+  text-decoration: none;
+}
+.sidebar .navlink:hover {
+  background: var(--accent);
+  color: var(--foreground);
+}
+.sidebar input:focus-visible + .navlink {
+  outline: 2px solid var(--ring);
+  outline-offset: -1px;
+}
+.sidebar input:checked + .navlink,
+.sidebar [aria-current='page'] {
+  background: var(--accent);
+  color: var(--foreground);
+  font-weight: 500;
+}
+.sidebar.sidebar-rail input:checked + .navlink,
+.sidebar.sidebar-rail [aria-current='page'] {
+  background: transparent;
+  border-left: 2px solid var(--primary);
+  border-radius: 0;
+}
+
+/* Table. Cells pad from the row tokens, so a table sits at the same rhythm as
+   the menus and the sidebar in whichever design system is loaded. */
+.tbl th,
+.tbl td {
+  padding: calc(var(--row-py) * 1.6) var(--row-px);
+  text-align: left;
+  vertical-align: middle;
+}
+.tbl thead th {
+  color: var(--muted-foreground);
+  font-weight: 400;
+  font-size: 0.92em;
+}
+.tbl tbody td {
+  color: var(--muted-foreground);
+}
+.tbl.tbl-rules tbody tr + tr {
+  border-top: 1px solid var(--border);
+}
+.tbl.tbl-rules thead tr {
+  border-bottom: 1px solid var(--border);
+}
+/* A relative tint, not a token. --muted is a real surface colour, and on any
+   page whose panel is already --muted the stripe lands on the same value and
+   vanishes - which is exactly what happened on this site's dark preview panel,
+   where --muted and the panel background are the same three bytes. Mixing
+   against the foreground means the stripe is always a step away from whatever
+   it is sitting on. */
+.tbl.tbl-zebra tbody tr:nth-child(even) {
+  background: color-mix(in oklab, var(--foreground) 5%, transparent);
+}
+.tbl.tbl-hover tbody tr:hover {
+  background: var(--accent);
+}
+
+/* ---- skeleton ---- */
+/* Skeleton: one class, one keyframe. The shimmer is a moving background
+   position, so a placeholder is a div with a size and nothing else. */
+.skeleton {
+  background:
+    linear-gradient(90deg, transparent 0 20%, var(--background) 35% 50%, transparent 65%) 0 / 250% 100% no-repeat,
+    var(--secondary);
+  animation: skeleton-shimmer 1.4s linear infinite;
+}
+.skeleton-still {
+  animation: none;
+  background: var(--secondary);
+}
+@keyframes skeleton-shimmer {
+  to {
+    background-position: 100% 0;
+  }
+}
+
+/* ---- slider ---- */
+/* Slider: a filled track and a knob that sits proud of it.
+   --knob-radius comes from the design system, so the same slider is a lozenge
+   here, a square in Brutalist, and a circle wherever --radius is large.
+   WebKit has no ::-moz-range-progress equivalent, so the fill is a gradient
+   driven by --p, which the component sets on input. */
+.slider {
+  --p: 50;
+  --slider-track: 8px;
+  --slider-knob-w: 26px;
+  --slider-knob-h: 20px;
+  appearance: none;
+  width: 100%;
+  height: var(--slider-knob-h);
+  background: transparent;
+  cursor: pointer;
+}
+.slider.slider-thick {
+  --slider-track: 12px;
+  --slider-knob-h: 26px;
+  --slider-knob-w: 32px;
+}
+.slider::-webkit-slider-runnable-track {
+  height: var(--slider-track);
+  border-radius: var(--r-pill);
+  background: linear-gradient(
+    to right,
+    var(--primary) calc(var(--p) * 1%),
+    var(--secondary) calc(var(--p) * 1%)
+  );
+}
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  width: var(--slider-knob-w);
+  height: var(--slider-knob-h);
+  margin-top: calc((var(--slider-track) - var(--slider-knob-h)) / 2);
+  border: none;
+  border-radius: var(--knob-radius, var(--r-pill));
+  background: var(--knob);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 28%);
+}
+.slider::-moz-range-track {
+  height: var(--slider-track);
+  border-radius: var(--r-pill);
+  background: var(--secondary);
+}
+.slider::-moz-range-progress {
+  height: var(--slider-track);
+  border-radius: var(--r-pill);
+  background: var(--primary);
+}
+.slider::-moz-range-thumb {
+  width: var(--slider-knob-w);
+  height: var(--slider-knob-h);
+  border: none;
+  border-radius: var(--knob-radius, var(--r-pill));
+  background: var(--knob);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 28%);
+}
+
+/* Motion. The knob grows under the thumb while dragging, which is the only
+   feedback a slider gives that the value is live.
+
+   Each vendor pseudo-element needs its own rule. One selector list containing
+   both drops the entire rule in both engines: an unrecognised pseudo-element
+   invalidates the whole selector, not just its own branch. That is also why
+   there is no shared block above them. */
+.slider::-webkit-slider-thumb {
+  transition:
+    transform var(--motion-fast) var(--ease),
+    box-shadow var(--motion-fast) var(--ease);
+}
+.slider:active::-webkit-slider-thumb {
+  transform: scale(1.12);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 32%);
+}
+.slider::-moz-range-thumb {
+  transition:
+    transform var(--motion-fast) var(--ease),
+    box-shadow var(--motion-fast) var(--ease);
+}
+.slider:active::-moz-range-thumb {
+  transform: scale(1.12);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 32%);
+}
+
+/* ---- spinner ---- */
+/* Spinner: one rotation, stopped for anyone who asked for less motion. */
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* The three looping loaders, stopped together.
+ *
+ * animation-name: none, not the global switch's zeroed duration. A 0s duration
+ * still runs one pass, which leaves the loop parked on its final frame - and for
+ * the shimmer and the sweep that frame is the gradient at the far end of its
+ * travel, a bright band sitting off to one side of the element. Dropping the
+ * animation entirely is the honest still state.
+ *
+ * The Skeleton's flat fill has to be restated for the same reason: its
+ * background is the moving gradient, so removing the animation without
+ * replacing the paint leaves the band frozen mid-element. */
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion='on']) .spin,
+  :root:not([data-motion='on']) .skeleton,
+  :root:not([data-motion='on']) .progress:indeterminate,
+  :root:not([data-motion='on']) .progress.is-indeterminate {
+    animation: none;
+  }
+  :root:not([data-motion='on']) .skeleton {
+    background: var(--secondary);
+  }
+}
+[data-motion='off'] .skeleton,
+[data-motion='off'] .progress:indeterminate,
+[data-motion='off'] .progress.is-indeterminate {
+  animation: none;
+}
+
+/* .spin is not in that list, and is exempted from the global switch outright.
+ *
+ * The switch is for motion that decorates a component. A spinner's rotation is
+ * the component: a still spinner is a grey ring that says nothing, and the
+ * Stepper's loading step stops reporting that it is loading. Same reasoning as
+ * the Toast's lifetime, which is exempted in its own file.
+ *
+ * prefers-reduced-motion still stops it, deliberately: that setting is a health
+ * request from the OS, not a preview control, and a stopped spinner is the
+ * accepted answer to it. */
+[data-motion='off'] .spin {
+  animation: spin 0.9s linear infinite !important;
+}
+[data-motion='off'] .skeleton {
+  background: var(--secondary);
+}
+
+/* .spin is reused by the Stepper (loading step) and by any button with a
+   loading indicator. It lives here because this is the component it names. */
+
+/* ---- stepper ---- */
+/* Stepper.
+   State comes from a radio per step, so which step you are on is real form state
+   rather than a class someone has to keep in sync:
+     li:has(input:checked)        the current step
+     li:has(~ li input:checked)   every step before it, therefore completed
+   That is what turns the tick on and paints the track behind you. It needs
+   :has(), which is the one component here that does. */
+.steps {
+  display: flex;
+  width: 100%;
+}
+.steps > li {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+.steps .dot {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--r-pill);
+  background: var(--secondary);
+  color: var(--muted-foreground);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+}
+.steps .tick,
+.steps .load {
+  display: none;
+}
+
+/* Connector: drawn by each step after the first, stopping short of both dots so
+   the line meets their edges instead of running under them. */
+.steps > li + li::before {
+  content: '';
+  position: absolute;
+  top: 12px;
+  right: calc(50% + 17px);
+  left: calc(-50% + 17px);
+  height: 2px;
+  background: var(--secondary);
+}
+
+/* Completed: any step with a later step selected. */
+.steps > li:has(~ li input:checked) .dot {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+.steps > li:has(~ li input:checked) .num {
+  display: none;
+}
+.steps > li:has(~ li input:checked) .tick {
+  display: block;
+}
+.steps > li:has(~ li input:checked) .step-label {
+  color: var(--foreground);
+}
+.steps > li:has(~ li input:checked) + li::before {
+  background: var(--primary);
+}
+
+/* Current. */
+.steps > li:has(input:checked) .dot {
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--primary);
+  color: var(--foreground);
+}
+.steps > li:has(input:checked) .step-label {
+  color: var(--foreground);
+  font-weight: 500;
+}
+.steps.steps-loading > li:has(input:checked) .num {
+  display: none;
+}
+.steps.steps-loading > li:has(input:checked) .load {
+  display: block;
+  color: var(--primary);
+}
+
+.steps label {
+  display: contents;
+  cursor: pointer;
+}
+.steps .step-label {
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+
+/* Vertical: the same list, the connector rotated.
+   Centring the ITEMS was wrong - each row is a dot plus a label of its own
+   length, so centring them individually staggered the dots down a zig-zag and
+   the connector no longer met them. The rows align to the start, which keeps
+   every dot on one axis, and the list centres as a block instead. */
+.steps.steps-vertical {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 28px;
+  width: fit-content;
+  margin-inline: auto;
+}
+.steps.steps-vertical > li {
+  flex: none;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+}
+/* The connector spans the whole gap between two dots. It was a fixed 18px
+   against an 18px gap, which left the column looking cramped and stopped it
+   growing when the gap does; deriving both from the same figure means changing
+   the gap above is the only edit needed. */
+.steps.steps-vertical > li + li::before {
+  top: -28px;
+  bottom: auto;
+  left: 12px;
+  right: auto;
+  width: 2px;
+  height: 28px;
+}
+.steps.steps-plain > li::before {
+  display: none;
+}
+
+/* Motion. The state is a radio, so every change here is a checked/unchecked
+   flip - the dot recolours, the connector behind it fills, and the tick appears.
+   The first two are property changes and transition; the tick is display:none to
+   display:block, which does not, so it gets a keyframe on the way in. */
+.steps .dot {
+  transition:
+    background-color var(--motion) var(--ease),
+    box-shadow var(--motion) var(--ease),
+    color var(--motion) var(--ease);
+}
+
+/* Slower than the dot: the line has distance to cover, and the eye should read
+   the progress travelling towards the step it just completed. */
+.steps > li + li::before {
+  transition: background-color var(--motion-slow) var(--ease);
+}
+
+.steps > li:has(~ li input:checked) .tick {
+  animation: step-tick var(--motion) var(--ease);
+}
+@keyframes step-tick {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+
+/* ---- table ---- */
+/* Table. Cells pad from the row tokens, so a table sits at the same rhythm as
+   the menus and the sidebar in whichever design system is loaded. */
+.tbl th,
+.tbl td {
+  padding: calc(var(--row-py) * 1.6) var(--row-px);
+  text-align: left;
+  vertical-align: middle;
+}
+.tbl thead th {
+  color: var(--muted-foreground);
+  font-weight: 400;
+  font-size: 0.92em;
+}
+.tbl tbody td {
+  color: var(--muted-foreground);
+}
+.tbl.tbl-rules tbody tr + tr {
+  border-top: 1px solid var(--border);
+}
+.tbl.tbl-rules thead tr {
+  border-bottom: 1px solid var(--border);
+}
+/* A relative tint, not a token. --muted is a real surface colour, and on any
+   page whose panel is already --muted the stripe lands on the same value and
+   vanishes - which is exactly what happened on this site's dark preview panel,
+   where --muted and the panel background are the same three bytes. Mixing
+   against the foreground means the stripe is always a step away from whatever
+   it is sitting on. */
+.tbl.tbl-zebra tbody tr:nth-child(even) {
+  background: color-mix(in oklab, var(--foreground) 5%, transparent);
+}
+.tbl.tbl-hover tbody tr:hover {
+  background: var(--accent);
+}
+
+/* ---- tabs ---- */
+/* The indicator slides; the panel still comes from the server.
+ *
+ * Those two used to be in conflict. The strip was re-rendered by htmx on every
+ * change, so the "active" pill was a different element each time and had
+ * nothing to animate from. The fix is to stop swapping the strip: htmx now
+ * targets the panel's innerHTML, the strip is never replaced, and one indicator
+ * element persists across tab changes and can therefore move.
+ *
+ * Which tab is active is client state (a radio), and what the tab contains is
+ * server state (hx-get). That split is what buys the animation without giving
+ * up the round trip - and it fixes the "Panel surface" option resetting too,
+ * because the wrapper carrying the option's classes is no longer thrown away.
+ *
+ * Equal-width tabs and no gap, so the indicator is exactly 1/n wide and each
+ * step is exactly 100% of itself. With a gap, every position needs its own
+ * calc() and they drift as labels change length.
+ */
+/* Grid, not flex. `flex: 1` only equalises the LEFTOVER space, so with a
+   content-width strip the tabs keep their natural, unequal widths - and the
+   indicator, which is exactly 1/n of the strip, then lines up with none of
+   them. That was the half-covered pill. grid-auto-columns: 1fr makes the
+   columns equal whether the strip is content-width or stretched. */
+.tabstrip {
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  padding: 4px;
+  border-radius: var(--r-md);
+  background: var(--secondary);
+}
+/* The radios are the state. Off-screen rather than display:none, because a
+   hidden input is not focusable and the strip has to be keyboard reachable. */
+.tabstrip input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.tabstrip label {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  padding: var(--control-py) var(--control-px);
+  border-radius: var(--r-sm);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition: color var(--motion-fast) var(--ease);
+}
+.tabstrip input:checked + label {
+  color: var(--foreground);
+}
+/* Focus lands on the radio, which is invisible - so the ring is drawn on its
+   label instead, or keyboard users get no focus indication at all. */
+.tabstrip input:focus-visible + label {
+  outline: 2px solid var(--ring);
+  outline-offset: -1px;
+}
+
+.tab-indicator {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc((100% - 8px) / var(--tab-count, 3));
+  border-radius: var(--r-sm);
+  background: var(--background);
+  box-shadow: var(--shadow-1);
+  transition: translate var(--motion) var(--ease);
+}
+.tabstrip:has(input:nth-of-type(2):checked) .tab-indicator {
+  translate: 100% 0;
+}
+.tabstrip:has(input:nth-of-type(3):checked) .tab-indicator {
+  translate: 200% 0;
+}
+.tabstrip:has(input:nth-of-type(4):checked) .tab-indicator {
+  translate: 300% 0;
+}
+
+/* ---- toast ---- */
+/* Lifetime: slide in, hold, fade. A CSS animation rather than a JS timer, so
+   nothing has to be cancelled when the user dismisses a toast early - the
+   animationend handler removes the node.
+
+   The tone classes (.tone-success / .tone-error / .tone-info) are contract-level
+   and ship with tokens.css: Alert uses the same three. */
+@keyframes toast-life {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  6%,
+  88% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+.toast-life {
+  animation: toast-life 4.5s ease forwards;
+}
+
+/* The one animation the motion switch must not turn off.
+ *
+ * 4.5s here is a lifetime, not a decoration: the animationend handler is what
+ * removes the node. Letting the global rule in tokens.css zero this duration
+ * would fire animationend immediately and a toast would be gone before it was
+ * read - motion off would mean toasts off.
+ *
+ * So the duration is held and the timing function is swapped instead.
+ * steps(1, end) jumps between the keyframes rather than interpolating: the
+ * toast appears, waits its full 4.5s, and disappears, with nothing sliding or
+ * fading. Same behaviour, no movement.
+ *
+ * !important because it is overriding an !important - the global switch has to
+ * be blunt to catch utility classes, and this is the documented exemption. */
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion='on']) .toast-life {
+    animation: toast-life 4.5s steps(1, end) forwards;
+  }
+  :root:not([data-motion='on']) .toast-life {
+    animation-duration: 4.5s !important;
+    animation-timing-function: steps(1, end) !important;
+  }
+}
+[data-motion='off'] .toast-life {
+  animation-duration: 4.5s !important;
+  animation-timing-function: steps(1, end) !important;
+}
+
+/* ---- tooltip ---- */
+/* Tooltip: the text is a data attribute and the bubble is ::after, so there is
+   no extra element. Shown on hover and on keyboard focus; the arrow is ::before.
+   A pseudo-element cannot be referenced by aria-describedby - repeat the words
+   in aria-label. */
+.tip {
+  position: relative;
+}
+.tip::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%);
+  z-index: 30;
+  width: max-content;
+  max-width: 220px;
+  padding: var(--row-py) var(--row-px);
+  border-radius: var(--r-sm);
+  background: var(--foreground);
+  color: var(--background);
+  font-size: 13px;
+  line-height: 1.35;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+}
+.tip::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  /* The box is 10px tall (two 5px borders) and only its top half is drawn, so
+     the visible triangle starts 5px above `bottom`. At calc(100% + 3px) that put
+     the triangle at 100%+8px to 100%+13px - entirely underneath the bubble,
+     which starts at 100%+8px. It only became visible when the bubble faded and
+     went translucent, which is what read as "the arrow outlives the tooltip".
+     calc(100% - 2px) lands the triangle in the 5px gap where it belongs. */
+  bottom: calc(100% - 2px);
+  transform: translateX(-50%);
+  z-index: 30;
+  border: 5px solid transparent;
+  border-top-color: var(--foreground);
+  opacity: 0;
+  pointer-events: none;
+}
+.tip:hover::after,
+.tip:hover::before,
+.tip:focus-visible::after,
+.tip:focus-visible::before,
+.tip-open::after,
+.tip-open::before {
+  opacity: 1;
+}
+.tip-bottom::after {
+  bottom: auto;
+  top: calc(100% + 8px);
+}
+.tip-bottom::before {
+  bottom: auto;
+  top: calc(100% - 2px);
+  border-top-color: transparent;
+  border-bottom-color: var(--foreground);
+}
+
+/* Motion. The bubble is centred with transform: translateX(-50%), so the entry
+   offset uses the separate `translate` property instead - composing them on one
+   transform means restating the centring in every keyframe and getting it wrong
+   the first time.
+
+   The delay on the way in is the point of the whole rule: without it, dragging
+   the pointer across a toolbar fires every tooltip it passes. Leaving is
+   immediate, because a tooltip that lingers after you have moved on is worse
+   than one that never showed. */
+.tip::after,
+.tip::before {
+  translate: 0 4px;
+  transition:
+    opacity var(--motion) var(--ease),
+    translate var(--motion) var(--ease);
+}
+.tip:hover::after,
+.tip:hover::before,
+.tip:focus-visible::after,
+.tip:focus-visible::before,
+.tip-open::after,
+.tip-open::before {
+  translate: 0 0;
+  transition-delay: 300ms;
+}
+.tip:not(:hover)::after,
+.tip:not(:hover)::before {
+  transition-delay: 0s;
+}
+/* Below the anchor, so it rises from the other side. */
+.tip-bottom::after,
+.tip-bottom::before {
+  translate: 0 -4px;
+}

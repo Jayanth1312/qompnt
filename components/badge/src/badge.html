@@ -1,0 +1,26 @@
+<!-- Neutral pill: the default category tag. -->
+<span class="inline-flex items-center rounded-pill bg-accent px-2.5 py-1.5 text-caption leading-none font-500 text-foreground">
+  Design
+</span>
+
+<!-- Coral: reserved for NEW / BETA. Uppercase with 1.5px tracking. -->
+<span class="inline-flex items-center rounded-pill bg-primary px-2.5 py-1.5 text-caption-up leading-none font-500 uppercase text-primary-foreground">
+  New
+</span>
+
+<!-- Status dot + label. -->
+<span class="inline-flex items-center gap-1.5 rounded-pill bg-accent px-2.5 py-1.5 text-caption leading-none font-500 text-foreground">
+  <span class="h-1.5 w-1.5 rounded-pill bg-[var(--success-fg)]"></span>
+  Available
+</span>
+
+<!-- Removable: the button is a real button, not a styled span. -->
+<span class="inline-flex items-center gap-1 rounded-pill bg-accent py-1.5 pl-2.5 pr-1.5 text-caption leading-none font-500 text-foreground">
+  WebGL
+  <button type="button" aria-label="Remove WebGL"
+          onclick="this.parentElement.remove()"
+          class="grid h-4 w-4 place-items-center rounded-pill text-muted-foreground hover:bg-secondary hover:text-foreground">
+    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+         stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+  </button>
+</span>

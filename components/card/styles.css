@@ -1,0 +1,25 @@
+/* Hover lift.
+ *
+ * The ask was a tilt that follows the cursor. That is a function of pointer
+ * position inside the element and CSS has no pointer coordinates, so it cannot
+ * be done here - only with a script writing --px/--py on pointermove. This is
+ * the CSS-only half: a fixed tilt with perspective, which reads as the card
+ * picking itself up rather than as it tracking you.
+ *
+ * ponytail: fixed angles. Swap to a --px/--py pair driven by pointermove if the
+ * tracking version is ever wanted; the transform below is already shaped for it.
+ */
+.card-tilt {
+  transition:
+    transform var(--motion) var(--ease),
+    box-shadow var(--motion) var(--ease);
+}
+.card-tilt:hover {
+  transform: perspective(900px) rotateX(2.5deg) rotateY(-3.5deg) translateY(-4px);
+  box-shadow: var(--shadow-2);
+}
+/* A card is often a link target. Pressing it should undo the lift, not add to
+   it, or the click has no bottom to it. */
+.card-tilt:active {
+  transform: perspective(900px) translateY(-1px);
+}

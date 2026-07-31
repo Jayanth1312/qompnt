@@ -1,0 +1,24 @@
+<!-- The forced look. Real validation happens on its own via :user-invalid -
+     type the wrong thing in the field and leave it - so this is for seeing the
+     state without having to trigger it. -->
+<label class="flex cursor-pointer items-center gap-2">
+  <input type="checkbox" class="h-4 w-4" style="accent-color: var(--primary)"
+         data-opt-target="[data-x-field]" data-opt-on="is-invalid">
+  Error state
+</label>
+
+<!-- Replaces the expanding-search variant, which is its own component now.
+     Disabled is the state every text field has and the one most often styled
+     wrong, so it earns the slot. -->
+<label class="flex cursor-pointer items-center gap-2">
+  <input type="checkbox" class="h-4 w-4" style="accent-color: var(--primary)"
+         data-opt-target="[data-x-input]" data-opt-attr="disabled" data-opt-attr-on=""
+         data-opt-on="opacity-60" data-opt-off="opacity-100">
+  Disabled
+</label>
+
+<label class="flex items-center gap-2">
+  Placeholder
+  <input type="text" placeholder="you@example.com" data-opt-target="[data-x-input]"
+         class="w-40 rounded-md border border-border bg-background px-control-x py-control-y text-body-sm leading-none text-foreground">
+</label>

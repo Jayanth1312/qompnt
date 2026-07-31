@@ -1,0 +1,47 @@
+/* ClickHouse is a dark-first system: the source doc documents dark and nothing
+   else, so those values are the base here rather than living behind a toggle.
+   The switcher forces dark and disables the theme toggle for this system.
+   Trademarks belong to their owners; this is a token set, not an endorsement. */
+:root,
+[data-theme='dark'] {
+  --background: #0a0a0a;
+  --foreground: #ffffff;
+  --card: #1a1a1a;
+  --card-foreground: #ffffff;
+  --popover: #1a1a1a;
+  --popover-foreground: #ffffff;
+
+  --primary: #faff69;
+  --primary-foreground: #0a0a0a;
+  --secondary: #2a2a2a;
+  --secondary-foreground: #ffffff;
+  --muted: #141414;
+  --muted-foreground: #888888;
+  --accent: #2a2a2a;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+
+  --border: #3a3a3a;
+  --input: #3a3a3a;
+  --ring: #faff69;
+
+  --code: #000000;
+  --code-foreground: #faff69;
+
+  --radius: 2px;
+  --knob-radius: 2px;
+  --control-px: 16px;
+  --control-py: 10px;
+  --row-px: 14px;
+  --row-py: 8px;
+  --pad-card: 24px;
+
+  --shadow-1: none;
+  --shadow-2: 0 8px 24px rgb(0 0 0 / 40%);
+
+  --type-sans: Inter, 'Helvetica Neue', sans-serif;
+  --type-display: 'Fira Mono', ui-monospace, monospace;
+
+  --knob: #faff69;
+}

@@ -1,0 +1,30 @@
+<!-- Native <dialog>. showModal() gives focus trapping, Escape to close, inert
+     background, and the top layer - all of which a div would need rebuilding. -->
+<button type="button"
+        onclick="document.getElementById('confirm').showModal()"
+        hx-get="/demo/dialog"
+        hx-target="#confirm-body"
+        class="rounded-md border border-border bg-background px-control-x py-control-y text-button font-500 text-foreground hover:bg-accent">
+  Delete component
+</button>
+
+<dialog id="confirm"
+        class="m-auto w-[min(420px,calc(100vw-2rem))] rounded-lg border border-border bg-background p-card
+               text-foreground backdrop:bg-foreground/25 backdrop:backdrop-blur-[2px]">
+  <!-- Fetched content lands here. The skeleton shows until it arrives. -->
+  <div id="confirm-body">
+    <p class="text-body-sm text-muted-foreground/70">Loading…</p>
+  </div>
+
+  <!-- A form with method=dialog closes without any JavaScript. -->
+  <form method="dialog" class="mt-6 flex justify-end gap-2">
+    <button value="cancel"
+            class="rounded-md px-control-x py-control-y text-button font-500 text-muted-foreground hover:bg-accent hover:text-foreground">
+      Cancel
+    </button>
+    <button value="confirm"
+            class="rounded-md bg-primary px-control-x py-control-y text-button font-500 text-primary-foreground hover:bg-primary/90">
+      Delete
+    </button>
+  </form>
+</dialog>

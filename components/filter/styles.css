@@ -1,0 +1,7 @@
+/* Filter shares Select's dropdown rules - the menu, the chevron flip, the
+   check on the active option - because it is the same disclosure with a
+   different trigger. They ship with the Select component:
+
+     npx shadcn@latest add <registry>/r/select.json
+
+   The only thing Filter adds is a two-tone trigger label, which is markup. */

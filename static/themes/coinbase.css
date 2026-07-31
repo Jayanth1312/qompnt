@@ -1,0 +1,64 @@
+/* Coinbase: cobalt blue, deep neutral ink, 12px radius, roomy controls.
+   Extracted from Designs/DESIGN-coinbase.md into the token contract. Trademarks
+   belong to their owners; this is a token set, not an endorsement.
+   Dark values are documented in the source doc. */
+:root {
+  --background: #ffffff;
+  --foreground: #0a0b0d;
+  --card: #f7f7f7;
+  --card-foreground: #0a0b0d;
+  --popover: #ffffff;
+  --popover-foreground: #0a0b0d;
+
+  --primary: #0052ff;
+  --primary-foreground: #ffffff;
+  --secondary: #eef0f3;
+  --secondary-foreground: #0a0b0d;
+  --muted: #f7f7f7;
+  --muted-foreground: #5b616e;
+  --accent: #e9eefc;
+  --accent-foreground: #0a0b0d;
+  --destructive: #cf202f;
+  --destructive-foreground: #ffffff;
+
+  --border: #dee1e6;
+  --input: #dee1e6;
+  --ring: #0052ff;
+
+  --radius: 12px;
+  --control-px: 20px;
+  --control-py: 12px;
+  --row-px: 16px;
+  --row-py: 10px;
+  --pad-card: 24px;
+
+  --shadow-1: 0 1px 2px rgb(10 11 13 / 10%);
+  --shadow-2: 0 10px 30px rgb(10 11 13 / 16%);
+
+  --type-sans: "Coinbase Sans", Inter, -apple-system, sans-serif;
+  --type-display: "Coinbase Display", Inter, sans-serif;
+}
+
+[data-theme='dark'] {
+  --background: #0a0b0d;
+  --foreground: #ffffff;
+  --card: #16181c;
+  --card-foreground: #ffffff;
+  --popover: #16181c;
+  --popover-foreground: #ffffff;
+
+  --primary: #0052ff;
+  --primary-foreground: #ffffff;
+  --secondary: #22262c;
+  --secondary-foreground: #ffffff;
+  --muted: #101215;
+  --muted-foreground: #a8acb3;
+  --accent: #1a2740;
+  --accent-foreground: #ffffff;
+  --destructive: #ff5c66;
+  --destructive-foreground: #ffffff;
+
+  --border: #22262c;
+  --input: #22262c;
+  --ring: #3773ff;
+}

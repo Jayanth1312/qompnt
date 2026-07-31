@@ -1,0 +1,18 @@
+{
+  "name": "Expanding Input",
+  "blurb": "A search icon that becomes the field, and collapses back when cleared.",
+  "created": "2026-07-31",
+  "tags": [
+    "Form",
+    "Navigation"
+  ],
+  "mechanism": "Both states are in the markup and `[hidden]` picks which one is showing. Nothing is created or measured, so opening is a single attribute flip - the width transition is CSS.",
+  "caveats": [
+    "Four lines of JavaScript to move focus into the field on open. Without them the icon still expands, it just does not focus, and a keyboard user has to tab into it.",
+    "The collapsed state is an icon button, so it needs an aria-label - a magnifying glass is not a name."
+  ],
+  "support": [
+    "`[hidden]` and a width transition, nothing newer."
+  ],
+  "motion": true
+}

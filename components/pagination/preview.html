@@ -1,0 +1,31 @@
+<nav aria-label="Pagination">
+  <ul data-x-pages class="pages flex items-center gap-1 text-body-sm">
+    <li data-x-edges>
+      <span data-page-prev class="page-edge text-muted-foreground">Previous</span>
+    </li>
+
+    <li>
+      <input type="radio" name="page" id="page-1" data-page-first checked aria-label="Page 1">
+      <label for="page-1" class="page">1</label>
+    </li>
+    <li>
+      <input type="radio" name="page" id="page-2" aria-label="Page 2">
+      <label for="page-2" class="page">2</label>
+    </li>
+    <li>
+      <input type="radio" name="page" id="page-3" aria-label="Page 3">
+      <label for="page-3" class="page">3</label>
+    </li>
+
+    <li data-x-gap><span class="px-1 text-muted-foreground/70" aria-hidden="true">…</span></li>
+
+    <li data-x-last>
+      <input type="radio" name="page" id="page-12" data-page-last aria-label="Page 12">
+      <label for="page-12" class="page">12</label>
+    </li>
+
+    <li data-x-edges>
+      <span data-page-next class="page-edge text-muted-foreground">Next</span>
+    </li>
+  </ul>
+</nav>

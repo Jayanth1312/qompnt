@@ -1,0 +1,18 @@
+<div>
+  <button type="button"
+          onclick="document.getElementById('confirm').showModal()"
+          hx-get="/demo/dialog"
+          hx-target="#confirm-body"
+          class="rounded-md border border-border bg-background px-control-x py-control-y text-button font-500 text-foreground hover:bg-accent">
+    <span data-x-dialog-trigger-label>Delete component</span>
+  </button>
+
+  <dialog id="confirm"
+          class="m-auto w-[min(420px,calc(100vw-2rem))] rounded-lg border border-border bg-background p-card text-left backdrop:bg-foreground/25">
+    <div id="confirm-body"><p class="text-body-sm text-muted-foreground/70">Loading…</p></div>
+    <form method="dialog" class="mt-6 flex justify-end gap-2">
+      <button data-x-dialog-cancel value="cancel" class="rounded-md px-control-x py-control-y text-button font-500 text-muted-foreground hover:bg-accent hover:text-foreground">Cancel</button>
+      <button data-x-dialog-confirm value="confirm" class="rounded-md bg-primary px-control-x py-control-y text-button font-500 text-primary-foreground hover:bg-primary/90">Delete</button>
+    </form>
+  </dialog>
+</div>

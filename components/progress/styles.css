@@ -1,0 +1,64 @@
+/* Progress. No engine exposes a single hook, so the bar and the value are styled
+   separately per vendor; height and radius still come from the contract. */
+.progress {
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border: none;
+  border-radius: var(--r-pill);
+  background: var(--secondary);
+  overflow: hidden;
+}
+.progress-thick {
+  height: 10px;
+}
+.progress::-webkit-progress-bar {
+  background: var(--secondary);
+  border-radius: var(--r-pill);
+}
+.progress::-webkit-progress-value {
+  background: var(--primary);
+  border-radius: var(--r-pill);
+}
+.progress::-moz-progress-bar {
+  background: var(--primary);
+  border-radius: var(--r-pill);
+}
+/* Indeterminate. Dropping the value attribute is the native way in;
+   .is-indeterminate is the same look for a bar that still carries a value -
+   which is what a toggle needs, since it cannot remove an attribute.
+   WebKit paints ::-webkit-progress-bar over the element background, so the
+   sweep has to be set on the pseudo-element as well as the element. */
+.progress:indeterminate,
+.progress.is-indeterminate,
+.progress:indeterminate::-webkit-progress-bar,
+.progress.is-indeterminate::-webkit-progress-bar {
+  background:
+    linear-gradient(90deg, transparent 0 15%, var(--primary) 15% 45%, transparent 45%) 0 / 250% 100% no-repeat,
+    var(--secondary);
+  animation: progress-sweep 1.2s linear infinite;
+}
+.progress.is-indeterminate::-webkit-progress-value {
+  opacity: 0;
+}
+.progress.is-indeterminate::-moz-progress-bar {
+  opacity: 0;
+}
+@keyframes progress-sweep {
+  to {
+    background-position: 100% 0;
+  }
+}
+
+/* Motion. The fill grows to the new value instead of jumping, so a bar that is
+   updated from the server reads as progress rather than as a redraw. Slow,
+   because this is the one animation here with real distance to cover.
+
+   Per-vendor rules for the same reason as the Slider's thumb: a selector list
+   with an unknown pseudo-element is dropped whole. */
+.progress::-webkit-progress-value {
+  transition: inline-size var(--motion-slow) var(--ease);
+}
+.progress::-moz-progress-bar {
+  transition: inline-size var(--motion-slow) var(--ease);
+}

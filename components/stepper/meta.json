@@ -1,0 +1,19 @@
+{
+  "name": "Stepper",
+  "blurb": "Numbered steps showing where you are in a multi-step flow.",
+  "created": "2026-08-03",
+  "tags": [
+    "Navigation",
+    "Display"
+  ],
+  "mechanism": "A radio per step, so the current step is real form state that posts with the form. The CSS reads it: `li:has(input:checked)` is the current step and `li:has(~ li input:checked)` is every step before it, which is what turns the tick on and paints the track behind you. Clicking a step selects it - no script anywhere. Vertical is the same list with one extra class.",
+  "caveats": [
+    "This is the one component here that needs `:has()`. Older engines show every step in its resting state, which is legible but not informative.",
+    "A radio group is announced as a radio group, not as a progress indicator. Each label carries a visually hidden \"completed\" or \"current\" so the list still reads correctly.",
+    "Steps a user cannot reach yet should not be selectable: drop the input on those and they become plain list items."
+  ],
+  "support": [
+    "`:has()` \u2014 Baseline since December 2023 (Chrome 105, Safari 15.4, Firefox 121)."
+  ],
+  "motion": true
+}

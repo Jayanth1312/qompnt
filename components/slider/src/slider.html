@@ -1,0 +1,27 @@
+<!-- A real <input type="range">. Arrow keys, Home/End, Page Up/Down and the
+     screen reader announcement all come free; the track and thumb are ours, via
+     the vendor pseudo-elements in tokens.css. -->
+<div class="flex w-full flex-col gap-2">
+  <label for="temp" class="text-caption font-500 text-foreground">Temperature</label>
+  <input id="temp" name="temp" type="range" class="slider" min="0" max="1" step="0.01" value="0.7"
+         style="--p: 70" oninput="this.style.setProperty('--p', (this.value - this.min) / (this.max - this.min) * 100)">
+</div>
+
+<!-- With a readout. The oninput is one expression - a whole controller would be
+     the same result with a build step attached. -->
+<div class="flex w-full flex-col gap-2">
+  <div class="flex items-baseline justify-between">
+    <label for="temp2" class="text-caption font-500 text-foreground">Temperature</label>
+    <output for="temp2" class="text-caption tabular-nums text-muted-foreground">0.7</output>
+  </div>
+  <input id="temp2" type="range" class="slider" min="0" max="1" step="0.01" value="0.7" style="--p: 70"
+         oninput="this.style.setProperty('--p', (this.value - this.min) / (this.max - this.min) * 100); this.parentElement.querySelector('output').value = (+this.value).toFixed(2)">
+</div>
+
+<!-- Ticks: a datalist snaps nothing on its own, but browsers draw the marks. -->
+<input type="range" class="slider" min="0" max="4" step="1" value="2" list="steps"
+       style="--p: 50" oninput="this.style.setProperty('--p', (this.value - this.min) / (this.max - this.min) * 100)">
+<datalist id="steps">
+  <option value="0"></option><option value="1"></option><option value="2"></option>
+  <option value="3"></option><option value="4"></option>
+</datalist>

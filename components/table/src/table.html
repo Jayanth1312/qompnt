@@ -1,0 +1,49 @@
+<!-- A real table: <thead> means every cell is announced with its column, and
+     scope="col" makes that explicit for the ones that matter. The wrapper scrolls
+     sideways on narrow screens rather than pretending the columns can stack. -->
+<div class="w-full overflow-x-auto rounded-lg border border-border">
+  <table class="tbl w-full border-collapse text-body-sm">
+    <caption class="sr-only">Skills, when they were last updated, and who wrote them</caption>
+    <thead>
+      <tr>
+        <th scope="col">Skill</th>
+        <th scope="col">Last updated</th>
+        <th scope="col">Author</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row" class="font-500 text-foreground">chapter-novelizer</th>
+        <td>7/26/26</td>
+        <td>You</td>
+      </tr>
+      <tr>
+        <th scope="row" class="font-500 text-foreground">resume-jd-tailor</th>
+        <td>7/14/26</td>
+        <td>You</td>
+      </tr>
+      <tr>
+        <th scope="row" class="font-500 text-foreground">humanizer</th>
+        <td>4/15/26</td>
+        <td>You</td>
+      </tr>
+      <tr>
+        <th scope="row" class="font-500 text-foreground">skill-creator</th>
+        <td>7/24/26</td>
+        <td>Anthropic</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Sortable column: a button inside the th, and aria-sort on the th itself.
+     The server sorts and returns the table - the browser is not holding a
+     sorted copy of your data. -->
+<th scope="col" aria-sort="ascending">
+  <button type="button" hx-get="?sort=name&dir=desc" hx-target="closest table" hx-swap="outerHTML"
+          class="inline-flex items-center gap-1 text-inherit">
+    Skill
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+  </button>
+</th>

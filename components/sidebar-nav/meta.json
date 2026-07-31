@@ -1,0 +1,17 @@
+{
+  "name": "Sidebar nav",
+  "blurb": "A vertical list of sections, with collapsible groups.",
+  "created": "2026-08-03",
+  "tags": [
+    "Navigation",
+    "Layout"
+  ],
+  "mechanism": "Links in a list, with each group in a `<details open>` so a section collapses with no script. The active item is marked with `aria-current=\"page\"`, which is also what the styling hangs off - one source of truth instead of a class that can drift.",
+  "caveats": [
+    "Wrap it in `<nav aria-label=\"Sections\">`; several unnamed navs on one page are indistinguishable.",
+    "Styling from `aria-current` means a wrong attribute is a visible bug rather than a silent one - which is the point, but it does mean the server has to set it.",
+    "A long sidebar needs a skip link ahead of it, or keyboard users tab through every item to reach the content."
+  ],
+  "support": [],
+  "motion": true
+}

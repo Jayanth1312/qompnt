@@ -1,0 +1,30 @@
+<!-- Groups are <details open>, so collapsing is the browser's job. The active
+     link is styled from aria-current, not from a class: the attribute the screen
+     reader uses and the attribute the CSS uses are the same one. -->
+<nav aria-label="Sections" class="sidebar w-full max-w-[240px] text-body-sm">
+  <details open>
+    <summary class="flex cursor-pointer list-none items-center justify-between rounded-md px-row-x py-row-y text-caption font-500 uppercase tracking-wide text-muted-foreground hover:bg-accent">
+      Getting started
+      <svg data-chevron width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m9 6 6 6-6 6"/>
+      </svg>
+    </summary>
+    <a href="/install" class="block rounded-md px-row-x py-row-y text-muted-foreground no-underline hover:bg-accent hover:text-foreground">Installation</a>
+    <a href="/tokens" aria-current="page" class="block rounded-md px-row-x py-row-y no-underline">Tokens</a>
+    <a href="/themes" class="block rounded-md px-row-x py-row-y text-muted-foreground no-underline hover:bg-accent hover:text-foreground">Themes</a>
+  </details>
+
+  <details open>
+    <summary class="mt-2 flex cursor-pointer list-none items-center justify-between rounded-md px-control-x py-control-y text-caption font-500 uppercase tracking-wide text-muted-foreground hover:bg-accent">
+      Components
+      <svg data-chevron width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m9 6 6 6-6 6"/>
+      </svg>
+    </summary>
+    <a href="/c/button" class="block rounded-md px-row-x py-row-y text-muted-foreground no-underline hover:bg-accent hover:text-foreground">Button</a>
+    <a href="/c/dialog" class="block rounded-md px-row-x py-row-y text-muted-foreground no-underline hover:bg-accent hover:text-foreground">Dialog</a>
+    <a href="/c/toast" class="block rounded-md px-row-x py-row-y text-muted-foreground no-underline hover:bg-accent hover:text-foreground">Toast</a>
+  </details>
+</nav>

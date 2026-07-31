@@ -1,0 +1,67 @@
+/* Cursor: warm greys and burnt orange, 8px radius, mid-density.
+   Extracted from Designs/DESIGN-cursor.md into the token contract. Trademarks
+   belong to their owners; this is a token set, not an endorsement.
+   The source doc barely covers dark mode - these dark values are extrapolated from its light palette, not taken from it. */
+:root {
+  --background: #fafaf7;
+  --foreground: #26251e;
+  --card: #f7f7f4;
+  --card-foreground: #26251e;
+  --popover: #ffffff;
+  --popover-foreground: #26251e;
+
+  --primary: #f54e00;
+  --primary-foreground: #ffffff;
+  --secondary: #e6e5e0;
+  --secondary-foreground: #26251e;
+  --muted: #efeee8;
+  --muted-foreground: #807d72;
+  --accent: #efeee8;
+  --accent-foreground: #26251e;
+  --destructive: #d04200;
+  --destructive-foreground: #ffffff;
+
+  --border: #cfcdc4;
+  --input: #cfcdc4;
+  --ring: #f54e00;
+
+  --radius: 8px;
+  --control-px: 18px;
+  --control-py: 10px;
+  --row-px: 14px;
+  --row-py: 8px;
+  --pad-card: 20px;
+
+  --shadow-1: 0 1px 2px rgb(38 37 30 / 10%);
+  --shadow-2: 0 10px 28px rgb(38 37 30 / 16%);
+
+  --type-sans: Inter, -apple-system, "Segoe UI", sans-serif;
+  --type-display: Inter, -apple-system, sans-serif;
+}
+
+[data-theme='dark'] {
+  --background: #191813;
+  --foreground: #f7f7f4;
+  --card: #22211b;
+  --card-foreground: #f7f7f4;
+  --popover: #22211b;
+  --popover-foreground: #f7f7f4;
+
+  --primary: #f54e00;
+  --primary-foreground: #ffffff;
+  --secondary: #2e2c25;
+  --secondary-foreground: #f7f7f4;
+  --muted: #1d1c16;
+  --muted-foreground: #a09c92;
+  --accent: #2e2c25;
+  --accent-foreground: #f7f7f4;
+  --destructive: #ff6a2a;
+  --destructive-foreground: #ffffff;
+
+  --border: #35332b;
+  --input: #35332b;
+  --ring: #f54e00;
+
+  --code: #14130f;
+  --code-foreground: #f7f7f4;
+}
