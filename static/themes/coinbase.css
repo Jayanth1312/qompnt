@@ -35,8 +35,8 @@
   --shadow-1: 0 1px 2px rgb(10 11 13 / 10%);
   --shadow-2: 0 10px 30px rgb(10 11 13 / 16%);
 
-  --type-sans: "Coinbase Sans", Inter, -apple-system, sans-serif;
-  --type-display: "Coinbase Display", Inter, sans-serif;
+  --type-sans: 'PP Neue Montreal', sans-serif;
+  --type-display: 'PP Neue Montreal', sans-serif;
 }
 
 [data-theme='dark'] {

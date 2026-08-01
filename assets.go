@@ -12,10 +12,8 @@ import (
 // COPY alongside it.
 //
 // The all: prefix is load-bearing: a plain `embed templates` walks the tree but
-// drops every file whose name starts with `_` or `.`, which silently loses
-// templates/_cards.html - the card stack the index is made of. The failure is a
-// panic at startup rather than a missing page, but only in a build, so it does
-// not show up under -dev at all.
+// drops every file whose name starts with `_` or `.`. Keep all: so future
+// underscored template partials still embed.
 //
 //go:embed all:components all:templates all:static
 var embedded embed.FS

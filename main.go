@@ -32,9 +32,7 @@ type server struct {
 
 type templates struct {
 	home   *template.Template // "layout"
-	index  *template.Template // "layout"
 	detail *template.Template // "layout"
-	cards  *template.Template // "cards"
 }
 
 // pageData is what every template receives.
@@ -46,11 +44,10 @@ type pageData struct {
 	// Button because it is a way of arranging buttons rather than a thing you go
 	// looking for on its own; it still has its own page.
 	Companion *Component
-	Query   string
 	BaseURL string
 	// V is the asset version, stamped onto every /static/ URL in the layout.
 	V string
-	// Home is the alran-style landing page at /. Gallery and detail leave it false.
+	// Home is the landing page at /. Detail leaves it false.
 	Home bool
 }
 
@@ -78,9 +75,10 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", s.handleHome)
-	mux.HandleFunc("GET /components", s.handleIndex)
+	mux.HandleFunc("GET /components", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/", http.StatusFound)
+	})
 	mux.HandleFunc("GET /c/{slug}", s.handleDetail)
-	mux.HandleFunc("GET /p/search", s.handleSearch)
 	mux.HandleFunc("GET /src/{slug}", s.handleSource)
 	mux.HandleFunc("GET /prompt/{slug}", s.handlePrompt)
 	// ServeMux wildcards must be whole segments, so ".json" cannot be a literal
@@ -195,9 +193,7 @@ func (s *server) reload() error {
 	}
 	t := templates{
 		home:   parse("templates/layout.html", "templates/home.html"),
-		index:  parse("templates/layout.html", "templates/index.html", "templates/_cards.html"),
 		detail: parse("templates/layout.html", "templates/detail.html"),
-		cards:  parse("templates/_cards.html"),
 	}
 
 	// components.css is generated, so it is held in memory and served from there
@@ -306,18 +302,6 @@ func (s *server) render(w http.ResponseWriter, r *http.Request, t *template.Temp
 func (s *server) handleHome(w http.ResponseWriter, r *http.Request) {
 	cs, t := s.snapshot()
 	s.render(w, r, t.home, "layout", pageData{Components: cs, Home: true, V: s.assetVersion()})
-}
-
-func (s *server) handleIndex(w http.ResponseWriter, r *http.Request) {
-	cs, t := s.snapshot()
-	s.render(w, r, t.index, "layout", pageData{Components: cs, V: s.assetVersion()})
-}
-
-// handleSearch returns just the card stack, swapped in by htmx.
-func (s *server) handleSearch(w http.ResponseWriter, r *http.Request) {
-	cs, t := s.snapshot()
-	q := r.URL.Query().Get("q")
-	s.render(w, r, t.cards, "cards", pageData{Components: search(cs, q), Query: q})
 }
 
 func (s *server) handleDetail(w http.ResponseWriter, r *http.Request) {

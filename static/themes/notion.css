@@ -36,8 +36,8 @@
   --shadow-1: 0 1px 2px rgb(15 15 15 / 10%);
   --shadow-2: 0 8px 24px rgb(15 15 15 / 14%);
 
-  --type-sans: Inter, -apple-system, "Segoe UI", sans-serif;
-  --type-display: Lyon, Georgia, serif;
+  --type-sans: 'PP Neue Montreal', sans-serif;
+  --type-display: 'PP Neue Montreal', sans-serif;
 }
 
 [data-theme='dark'] {

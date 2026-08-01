@@ -35,8 +35,8 @@
   --shadow-1: none;
   --shadow-2: 0 10px 28px rgb(0 0 0 / 18%);
 
-  --type-sans: Inter, "Helvetica Neue", sans-serif;
-  --type-display: "Cambo", Georgia, serif;
+  --type-sans: 'PP Neue Montreal', sans-serif;
+  --type-display: 'PP Neue Montreal', sans-serif;
 }
 
 [data-theme='dark'] {
