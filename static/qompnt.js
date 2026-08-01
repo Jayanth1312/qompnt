@@ -950,3 +950,104 @@ window.addEventListener("pageshow", (e) => {
 // so Back is a history entry htmx restores from its own snapshot rather than a
 // navigation the browser performs. Same failure, same fix.
 document.body?.addEventListener("htmx:historyRestore", restorePreferences);
+
+// Home component hover preview: 500ms delay, cursor-follow, one popover.
+// Document-level mouseover/mouseout so hx-boost swaps need no rebind, and
+// nested <span>s inside .home-comp-row links do not restart the timer.
+(() => {
+    const DELAY = 500;
+    const OFFSET = 16;
+
+    const finePointer = () =>
+        matchMedia("(hover: hover) and (pointer: fine)").matches;
+
+    let timer = 0;
+    let activeRow = null;
+    let lastX = 0;
+    let lastY = 0;
+
+    const pop = () => document.querySelector("[data-home-preview-pop]");
+
+    function hide() {
+        clearTimeout(timer);
+        timer = 0;
+        activeRow = null;
+        const el = pop();
+        if (!el) return;
+        el.removeAttribute("data-open");
+        el.hidden = true;
+        el.replaceChildren();
+        el.style.transform = "translate(-9999px, -9999px)";
+    }
+
+    function place(el, x, y) {
+        el.style.transform = "translate(0, 0)";
+        // Measure after content is in the DOM.
+        const w = el.offsetWidth;
+        const h = el.offsetHeight;
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        let left = x + OFFSET;
+        let top = y + OFFSET;
+        if (left + w > vw - 8) left = x - w - OFFSET;
+        if (top + h > vh - 8) top = y - h - OFFSET;
+        left = Math.max(8, left);
+        top = Math.max(8, top);
+        el.style.left = `${left}px`;
+        el.style.top = `${top}px`;
+    }
+
+    function show(slug, x, y) {
+        const el = pop();
+        if (!el) return;
+        const tpl = document.querySelector(
+            `template[data-home-preview="${CSS.escape(slug)}"]`,
+        );
+        if (!tpl) return;
+        el.replaceChildren(tpl.content.cloneNode(true));
+        el.hidden = false;
+        el.dataset.open = "";
+        place(el, x, y);
+    }
+
+    document.addEventListener("mouseover", (e) => {
+        if (!finePointer()) return;
+        const row = e.target.closest?.(".home-comp-row[data-slug]");
+        if (!row || !row.closest("[data-home-components]")) return;
+        // Moving between descendants of the same row — ignore.
+        if (row.contains(e.relatedTarget)) return;
+        if (activeRow === row) return;
+
+        hide();
+        activeRow = row;
+        lastX = e.clientX;
+        lastY = e.clientY;
+        const slug = row.dataset.slug;
+        timer = window.setTimeout(() => {
+            timer = 0;
+            if (activeRow !== row) return;
+            show(slug, lastX, lastY);
+        }, DELAY);
+    });
+
+    document.addEventListener("mouseout", (e) => {
+        const row = e.target.closest?.(".home-comp-row[data-slug]");
+        if (!row || row !== activeRow) return;
+        if (row.contains(e.relatedTarget)) return;
+        hide();
+    });
+
+    document.addEventListener(
+        "pointermove",
+        (e) => {
+            if (!activeRow || !activeRow.contains(e.target)) return;
+            lastX = e.clientX;
+            lastY = e.clientY;
+            const el = pop();
+            if (!el || el.hidden || !el.hasAttribute("data-open")) return;
+            place(el, lastX, lastY);
+        },
+        true,
+    );
+})();
+
