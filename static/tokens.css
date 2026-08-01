@@ -796,8 +796,12 @@ button[data-palette-item] {
   }
 }
 
-/* Home entry: quiet fade, skipped when motion is off. */
+/* Home entry: quiet fade, skipped when motion is off.
+   Gap lives here (not a Uno utility) so intro → Components spacing sticks. */
 .page-fade-in {
+  display: flex;
+  flex-direction: column;
+  gap: 3.5rem;
   animation: page-fade-in 420ms cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 @keyframes page-fade-in {
@@ -824,26 +828,28 @@ html[data-motion="off"] .home-comp-row {
   transition: none;
 }
 
-/* Home hover preview: follows cursor; never captures pointer. */
+/* Home hover preview: follows cursor; never captures pointer.
+   Must stay a direct body child (see layout.html) so fixed + clientX line up.
+   Sized to content with overflow visible so open menus and full components
+   are not clipped into a fixed frame. */
 .home-preview-pop {
   position: fixed;
   z-index: 40;
   top: 0;
   left: 0;
-  width: min(300px, calc(100vw - 2rem));
-  max-height: min(220px, 40vh);
-  overflow: hidden;
+  width: max-content;
+  max-width: min(520px, calc(100vw - 2rem));
+  overflow: visible;
   display: grid;
   place-items: center;
   padding: var(--pad-card);
   border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
   border-radius: var(--r-lg);
-  background: var(--muted);
+  background: var(--background);
   box-shadow: var(--shadow-2);
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
-  transform: translate(-9999px, -9999px); /* offscreen until positioned */
 }
 
 .home-preview-pop[data-open] {
@@ -854,14 +860,103 @@ html[data-motion="off"] .home-comp-row {
 
 .home-preview-pop > * {
   max-width: 100%;
-  max-height: 100%;
 }
 
-/* Scale oversized demos into the box without blowing layout. */
-.home-preview-pop [data-x-wrap],
-.home-preview-pop .sidebar,
-.home-preview-pop table {
+/* Wide demos need a real width: w-full inside max-content collapses to 0
+   and eats progress tracks, slider fills, stepper label spacing, etc. */
+.home-preview-pop[data-preview-slug="level-slider"],
+.home-preview-pop[data-preview-slug="slider"],
+.home-preview-pop[data-preview-slug="progress"],
+.home-preview-pop[data-preview-slug="stepper"],
+.home-preview-pop[data-preview-slug="skeleton"],
+.home-preview-pop[data-preview-slug="breadcrumb"] {
+  width: min(400px, calc(100vw - 2rem));
+}
+
+/* Pagination is wider than the other demos — size to content so Next stays inside. */
+.home-preview-pop[data-preview-slug="pagination"] {
+  width: max-content;
+  max-width: min(520px, calc(100vw - 2rem));
+  overflow: hidden;
+}
+.home-preview-pop[data-preview-slug="pagination"] .pages {
+  width: max-content;
   max-width: 100%;
+  flex-wrap: nowrap;
+}
+
+.home-preview-pop[data-preview-slug="level-slider"] .level,
+.home-preview-pop[data-preview-slug="slider"] > div,
+.home-preview-pop[data-preview-slug="progress"] > div,
+.home-preview-pop[data-preview-slug="stepper"] .steps,
+.home-preview-pop[data-preview-slug="skeleton"] > div {
+  width: 100%;
+  max-width: none;
+}
+
+.home-preview-pop[data-preview-slug="progress"] .progress {
+  flex: 1 1 auto;
+  min-width: 140px;
+  width: auto;
+}
+
+/* Badge: shrink-wrap the pill, don't stretch it into a card. */
+.home-preview-pop[data-preview-slug="badge"] {
+  width: max-content;
+  padding: 10px 12px;
+}
+.home-preview-pop[data-preview-slug="badge"] > * {
+  width: max-content;
+  max-width: none;
+}
+
+/* Room above the trigger so a forced-open tip bubble is not clipped. */
+.home-preview-pop .tip {
+  margin-block-start: 2.75rem;
+}
+
+/* Table in the hover card: longer, no outer frame. */
+.home-preview-pop[data-preview-slug="table"] [data-x-wrap] {
+  max-width: none;
+  min-width: min(420px, 70vw);
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+/* Toast sample stays put (no lifetime animation that removes the node). */
+.home-preview-pop .toast-life {
+  animation: none;
+  opacity: 1;
+  transform: none;
+  width: min(320px, 70vw);
+}
+
+/* Select / filter / combobox: dropdown sits in-flow inside the frame. */
+.home-preview-pop[data-preview-slug="select"],
+.home-preview-pop[data-preview-slug="filter"],
+.home-preview-pop[data-preview-slug="combobox"] {
+  overflow: hidden;
+}
+
+.home-preview-pop[data-preview-slug="select"] [role="listbox"],
+.home-preview-pop[data-preview-slug="filter"] [role="listbox"],
+.home-preview-pop[data-preview-slug="combobox"] [role="listbox"] {
+  position: static;
+  margin-top: 4px;
+  width: 100%;
+  min-width: 0;
+  max-height: none;
+  left: auto;
+  top: auto;
+  right: auto;
+}
+
+.home-preview-pop[data-preview-slug="dialog"] dialog {
+  display: block;
+  inset: auto;
+  max-height: none;
 }
 
 html[data-motion="off"] .home-preview-pop[data-open] {
@@ -888,6 +983,15 @@ html[data-motion="off"] .home-preview-pop[data-open] {
 .site-main {
   width: 100%;
   max-width: 640px;
+  /* Uno never emitted pt-24/pb-16 for this class combo — set here so the
+     airy top margin (like the alran reference) actually ships. */
+  padding-top: 6rem;
+  padding-bottom: 4rem;
+}
+
+/* Site chrome weight. Uno may not ship .font-400; keep it here. */
+.font-400 {
+  font-weight: 400;
 }
 
 /* Sticky page header. No border: content passing underneath is blurred out

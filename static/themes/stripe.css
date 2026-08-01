@@ -35,8 +35,8 @@
   --shadow-1: 0 2px 5px rgb(50 50 93 / 10%);
   --shadow-2: 0 15px 35px rgb(50 50 93 / 12%);
 
-  --type-sans: "Ideal Sans", Inter, -apple-system, "Segoe UI", sans-serif;
-  --type-display: "Ideal Sans", Inter, -apple-system, sans-serif;
+  --type-sans: 'PP Neue Montreal', sans-serif;
+  --type-display: 'PP Neue Montreal', sans-serif;
 }
 
 [data-theme='dark'] {

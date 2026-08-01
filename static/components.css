@@ -509,13 +509,38 @@ dialog[open]::backdrop {
 }
 
 /* ---- filter ---- */
-/* Filter shares Select's dropdown rules - the menu, the chevron flip, the
-   check on the active option - because it is the same disclosure with a
-   different trigger. They ship with the Select component:
+/* Filter is the same disclosure as Select with a two-tone trigger label.
+   Menu open animation and chevron flip live here so Filter works without
+   depending on Select's stylesheet being installed beside it. */
+summary::-webkit-details-marker {
+  display: none;
+}
+details[data-select][open] > summary [data-select-chevron] {
+  transform: rotate(180deg);
+}
+[data-select] [role='option'][aria-selected='true'] {
+  background: var(--accent);
+}
+[data-select] [role='option'] [data-check] {
+  visibility: hidden;
+}
+[data-select] [role='option'][aria-selected='true'] [data-check] {
+  visibility: visible;
+}
 
-     npx shadcn@latest add <registry>/r/select.json
-
-   The only thing Filter adds is a two-tone trigger label, which is markup. */
+[data-select-chevron] {
+  transition: transform var(--motion) var(--ease);
+}
+details[data-select][open] > [role='listbox'] {
+  animation: select-menu-in var(--motion) var(--ease);
+  transform-origin: top center;
+}
+@keyframes select-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scaleY(0.96);
+  }
+}
 
 /* ---- input ---- */
 /* Validation the platform already knows about.

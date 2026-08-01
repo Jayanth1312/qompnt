@@ -311,6 +311,7 @@ function syncDesignSystem() {
         }
     }
     enforceScheme(current);
+    syncDsSwatch();
 }
 
 // Motion. One attribute on <html>; tokens.css zeroes the duration tokens from
@@ -430,57 +431,64 @@ document.body?.addEventListener("htmx:afterSettle", () => {
     syncOptionValues();
 });
 
-// Shared by the sun/moon button and Ctrl+T. Instant light/dark — no wipe.
-// The brush (data-ds-random) cycles design systems instead; see randomDesignSystem.
+// Shared by the sun/moon button and Ctrl+T. Wipe via View Transition.
+// The color dot (data-ds-cycle) advances design systems; see cycleDesignSystem.
 function toggleTheme() {
     if (schemesFor(document.documentElement.dataset.ds).length === 1) return;
     const root = document.documentElement;
     const next = root.dataset.theme === "dark" ? "light" : "dark";
-    withoutTransitions(() => {
-        root.dataset.theme = next;
-    });
-    try {
-        localStorage.setItem("qompnt-theme", next);
-    } catch (_) {}
-}
-
-// Brush: pick a random design system (not the current one) and wipe into it.
-function randomDesignSystem() {
-    const ids = designSystemIds();
-    if (!ids.length) return;
-    const current = document.documentElement.dataset.ds || "";
-    const pool = ids.length > 1 ? ids.filter((id) => id !== current) : ids;
-    const next = pool[Math.floor(Math.random() * pool.length)];
-
-    const apply = () =>
-        new Promise((resolve) => {
-            try {
-                if (next) localStorage.setItem("qompnt-ds", next);
-                else localStorage.removeItem("qompnt-ds");
-            } catch (_) {}
-            applyDesignSystemLink(next, {
-                onReady: () =>
-                    withoutTransitions(() => {
-                        syncDesignSystem();
-                        resolve();
-                    }),
-            });
+    const apply = () => {
+        withoutTransitions(() => {
+            root.dataset.theme = next;
         });
-
-    const root = document.documentElement;
-    if (
-        document.startViewTransition &&
-        root.dataset.motion !== "off"
-    ) {
-        document.startViewTransition(() => apply());
+        try {
+            localStorage.setItem("qompnt-theme", next);
+        } catch (_) {}
+    };
+    if (document.startViewTransition && root.dataset.motion !== "off") {
+        document.startViewTransition(apply);
     } else {
         apply();
     }
 }
 
+// Color dot: advance to the next design system in palette order (wrap). Instant.
+function cycleDesignSystem() {
+    const ids = designSystemIds();
+    if (!ids.length) return;
+    const current = document.documentElement.dataset.ds || "";
+    const i = ids.indexOf(current);
+    const next = ids[(i + 1) % ids.length];
+
+    try {
+        if (next) localStorage.setItem("qompnt-ds", next);
+        else localStorage.removeItem("qompnt-ds");
+    } catch (_) {}
+    applyDesignSystemLink(next, {
+        onReady: () => withoutTransitions(() => syncDesignSystem()),
+    });
+}
+
+function syncDsSwatch() {
+    const current = document.documentElement.dataset.ds || "";
+    const row = document.querySelector(`[data-palette-ds="${current}"]`);
+    const color = row?.querySelector(".palette-swatch")?.style.background;
+    const name =
+        row?.querySelector(".flex.items-center")?.textContent.trim() ||
+        "Claude";
+    if (color) {
+        document.querySelectorAll("[data-ds-swatch]").forEach((el) => {
+            el.style.background = color;
+        });
+    }
+    document.querySelectorAll("[data-ds-label]").forEach((el) => {
+        el.textContent = name;
+    });
+}
+
 document.addEventListener("click", async (e) => {
-    if (e.target.closest("[data-ds-random]")) {
-        randomDesignSystem();
+    if (e.target.closest("[data-ds-cycle]")) {
+        cycleDesignSystem();
         return;
     }
     const themeBtn = e.target.closest("[data-theme-toggle]");
@@ -975,14 +983,13 @@ document.body?.addEventListener("htmx:historyRestore", restorePreferences);
         const el = pop();
         if (!el) return;
         el.removeAttribute("data-open");
+        el.removeAttribute("data-preview-slug");
         el.hidden = true;
         el.replaceChildren();
-        el.style.transform = "translate(-9999px, -9999px)";
     }
 
     function place(el, x, y) {
-        el.style.transform = "translate(0, 0)";
-        // Measure after content is in the DOM.
+        // clientX/Y are viewport coords; el is position:fixed on <body>.
         const w = el.offsetWidth;
         const h = el.offsetHeight;
         const vw = window.innerWidth;
@@ -991,10 +998,120 @@ document.body?.addEventListener("htmx:historyRestore", restorePreferences);
         let top = y + OFFSET;
         if (left + w > vw - 8) left = x - w - OFFSET;
         if (top + h > vh - 8) top = y - h - OFFSET;
-        left = Math.max(8, left);
-        top = Math.max(8, top);
+        left = Math.min(Math.max(8, left), Math.max(8, vw - w - 8));
+        top = Math.min(Math.max(8, top), Math.max(8, vh - h - 8));
         el.style.left = `${left}px`;
         el.style.top = `${top}px`;
+    }
+
+    // Force interactive demos into their "showing" state for the hover card.
+    function primePreview(root, slug) {
+        root.dataset.previewSlug = slug;
+
+        root.querySelectorAll("details[data-select]").forEach((d) => {
+            d.open = true;
+        });
+
+        const cb = root.querySelector("[data-combobox], [data-x-cb]");
+        if (cb) {
+            const input = cb.querySelector('[role="combobox"]');
+            const list = cb.querySelector('[role="listbox"]');
+            if (input) input.setAttribute("aria-expanded", "true");
+            if (list) {
+                list.hidden = false;
+                list.style.maxHeight = "none";
+            }
+        }
+
+        // Keep open menus in-flow inside the frame; three options is enough.
+        if (
+            slug === "select" ||
+            slug === "filter" ||
+            slug === "combobox"
+        ) {
+            root.querySelectorAll('[role="listbox"]').forEach((list) => {
+                const opts = [...list.querySelectorAll('[role="option"]')];
+                opts.slice(3).forEach((o) => o.remove());
+                list.querySelector("[data-combobox-empty]")?.remove();
+            });
+        }
+
+        const search = root.querySelector("[data-search]");
+        if (search) {
+            const openBtn = search.querySelector("[data-search-open]");
+            const field = search.querySelector("[data-search-field]");
+            if (openBtn) openBtn.hidden = true;
+            if (field) field.hidden = false;
+        }
+
+        root.querySelectorAll(".tip").forEach((t) => t.classList.add("tip-open"));
+
+        if (slug === "table") {
+            root.querySelectorAll("[data-x-wrap]").forEach((w) => {
+                w.classList.remove(
+                    "border",
+                    "border-border",
+                    "rounded-lg",
+                    "overflow-x-auto",
+                );
+            });
+        }
+
+        if (slug === "dialog") {
+            const dialog = root.querySelector("dialog");
+            if (dialog) {
+                // Drop the trigger; keep only the panel.
+                [...root.querySelectorAll("button")].forEach((b) => {
+                    if (!dialog.contains(b)) b.remove();
+                });
+                dialog.removeAttribute("id");
+                const body = [...dialog.children].find(
+                    (c) => c.tagName === "DIV",
+                );
+                if (body) {
+                    body.removeAttribute("id");
+                    body.innerHTML = `<h2 class="mb-2 text-title-md font-500 text-foreground">Delete this component?</h2>
+<p class="text-body-md text-foreground">
+  The directory and its three source files are removed. This cannot be undone.
+</p>`;
+                }
+                // Non-modal open so it paints as a panel inside the hover card.
+                dialog.setAttribute("open", "");
+                dialog.style.margin = "0";
+                dialog.style.width = "min(320px, 70vw)";
+                dialog.style.maxWidth = "100%";
+                dialog.style.position = "static";
+                const wrap = dialog.parentElement;
+                if (wrap && wrap !== root) wrap.replaceWith(dialog);
+            }
+        }
+
+        if (slug === "toast") {
+            root.replaceChildren();
+            root.insertAdjacentHTML(
+                "beforeend",
+                `<div class="toast-life tone-success flex items-start gap-2 rounded-lg border px-control-x py-control-y shadow-e2">
+  <svg data-tone-icon="success" class="mt-px shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none"
+       stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/>
+  </svg>
+  <svg data-tone-icon="error" class="mt-px shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none"
+       stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/>
+  </svg>
+  <svg data-tone-icon="info" class="mt-px shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none"
+       stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.5v.5"/>
+  </svg>
+  <p class="min-w-0 flex-1 text-body-sm leading-5">Changes saved</p>
+  <button type="button" aria-label="Dismiss"
+          class="mt-px grid shrink-0 place-items-center rounded-sm opacity-70">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+  </button>
+</div>`,
+            );
+        }
     }
 
     function show(slug, x, y) {
@@ -1004,7 +1121,12 @@ document.body?.addEventListener("htmx:historyRestore", restorePreferences);
             `template[data-home-preview="${CSS.escape(slug)}"]`,
         );
         if (!tpl) return;
+        // Stay on <body> even if hx-boost re-injected a host under main.
+        if (el.parentElement !== document.body) {
+            document.body.appendChild(el);
+        }
         el.replaceChildren(tpl.content.cloneNode(true));
+        primePreview(el, slug);
         el.hidden = false;
         el.dataset.open = "";
         place(el, x, y);
@@ -1049,5 +1171,9 @@ document.body?.addEventListener("htmx:historyRestore", restorePreferences);
         },
         true,
     );
+
+    // Pop host is on <body>; clear it when the boosted page leaves home.
+    document.body?.addEventListener("htmx:beforeSwap", hide);
+    document.body?.addEventListener("htmx:historyRestore", hide);
 })();
 

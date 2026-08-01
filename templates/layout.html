@@ -4,22 +4,19 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{if .C}}{{.C.Name}} — Qompnt{{else if .Home}}Qompnt{{else}}Qompnt — HTML components, ten design systems{{end}}</title>
-<meta name="description" content="{{if .C}}{{.C.Blurb}}{{else if .Home}}HTML components on a shared token contract. Copy the markup, or install with shadcn. Swap the whole design system with one stylesheet.{{else}}HTML components built on native elements and a token contract. Swap the whole design system with one stylesheet. Copy them, or install with shadcn.{{end}}">
+<meta name="description" content="{{if .C}}{{.C.Blurb}}{{else if .Home}}HTML components on a shared token contract. Install with the CLI or pull from a CDN. Swap the whole design system with one stylesheet.{{else}}HTML components built on native elements and a token contract. Swap the whole design system with one stylesheet. Install with the CLI or pull from a CDN.{{end}}">
 <!-- Both CDNs are hit by render-blocking stylesheets below, so the connection is
      opened while the HTML is still parsing rather than after it. Costs two DNS
      lookups; saves a full round trip each on first paint. -->
 <link rel="preconnect" href="https://fonts.cdnfonts.com" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link href="https://fonts.cdnfonts.com/css/opening-hours-sans" rel="stylesheet">
-<link href="https://fonts.cdnfonts.com/css/cambo" rel="stylesheet">
-<link href="https://fonts.cdnfonts.com/css/fira-mono" rel="stylesheet">
+<link href="https://fonts.cdnfonts.com/css/pp-neue-montreal" rel="stylesheet">
 <link rel="icon" href="/static/icon.svg?v={{.V}}" type="image/svg+xml">
 <!-- Phosphor, for this site's own chrome only. Component markup keeps inline
      SVG on purpose: an icon copied out of here must not need a second
      stylesheet to render. See README, "Icons". -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
-<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/duotone/style.css">
 <link rel="stylesheet" href="/static/tokens.css?v={{.V}}">
 <link rel="stylesheet" href="/static/qompnt.css?v={{.V}}">
 <!-- Generated from components/*/styles.css - see componentsCSS in main.go. -->
@@ -54,13 +51,20 @@ try {
 } catch (e) {}
 </script>
 </head>
-<body class="bg-background font-sans text-foreground antialiased" hx-boost="true">
-  <main class="mx-auto max-w-[688px] px-5 pb-16 pt-8">
+<body class="bg-background font-sans font-400 text-foreground antialiased" hx-boost="true">
+  <main class="site-main mx-auto px-5">
     {{template "content" .}}
   </main>
   <!-- Toast stack, so the Toast preview has somewhere to land. -->
   <div id="toasts" role="status" aria-live="polite"
        class="fixed top-6 right-6 z-50 flex w-[min(360px,calc(100vw-3rem))] flex-col gap-2"></div>
+
+  <!-- Home hover preview host. Lives on <body>, not inside .page-fade-in:
+       that animation's transform makes position:fixed track the column
+       instead of the viewport, so clientX/Y would place the card far right. -->
+  <div data-home-preview-pop hidden
+       class="home-preview-pop"
+       aria-hidden="true"></div>
 
   {{template "palette" .}}
 
@@ -79,40 +83,36 @@ try {
 {{end}}
 
 {{define "themetoggle"}}
-<!-- Instant light/dark. Fixed 8px pad + 16px icon so design systems cannot
+<!-- Light/dark with the wipe. Fixed 8px pad + 16px icon so design systems cannot
      resize the chrome via --control-* density tokens. -->
 <button type="button" data-theme-toggle data-theme-instant
         aria-label="Toggle dark mode"
-        data-tip="Toggle theme · instant"
-        class="tip tip-bottom grid shrink-0 place-items-center rounded-md p-[8px] text-muted-foreground hover:bg-accent hover:text-foreground">
+        class="grid shrink-0 place-items-center rounded-md p-[8px] text-muted-foreground hover:bg-accent hover:text-site-foreground">
   <i data-icon="moon" class="ph ph-moon text-[16px] leading-none" aria-hidden="true"></i>
   <i data-icon="sun" class="ph ph-sun text-[16px] leading-none" aria-hidden="true"></i>
 </button>
 {{end}}
 
 {{define "themepen"}}
-<!-- Random design-system swap with the top-to-bottom wipe. Same box as themetoggle. -->
-<button type="button" data-ds-random
-        aria-label="Random design system"
-        data-tip="Random design system · wipe"
-        class="tip tip-bottom grid shrink-0 place-items-center rounded-md p-[8px] text-muted-foreground hover:bg-accent hover:text-foreground active:scale-[0.96]">
-  <i class="ph ph-paint-brush text-[16px] leading-none" aria-hidden="true"></i>
+<!-- Cycle design systems in palette order. Matches chrome icon buttons. -->
+<button type="button" data-ds-cycle
+        aria-label="Next design system"
+        class="flex shrink-0 items-center gap-1.5 rounded-md p-[8px] text-muted-foreground hover:bg-accent hover:text-site-foreground active:scale-[0.96]">
+  <span data-ds-swatch class="palette-swatch shrink-0" style="background:#cc785c" aria-hidden="true"></span>
+  <span data-ds-label class="text-[13px] leading-none text-site-foreground">Claude</span>
 </button>
 {{end}}
 
 {{define "siteheader"}}
-<!-- Shared shell: small wordmark, no mark icon, sticky blur. Gallery keeps
-     search; design systems are cycled by the brush, not a dropdown. -->
+<!-- Shared shell: small wordmark, sticky blur. Design systems cycle via the
+     color dot; Cmd+K opens the palette from any page including home. -->
 <header data-sticky-header class="sticky top-0 z-30 -mx-5 mb-8 flex items-center gap-[2px] px-5 py-3">
-  <a href="/" class="mr-auto shrink-0 font-sans font-500 text-[15px] leading-none text-site-foreground no-underline">Qompnt</a>
+  <a href="/" class="mr-auto shrink-0 text-[15px] leading-none text-site-foreground no-underline">Qompnt</a>
 
   <div class="flex shrink-0 items-center gap-[2px]">
-    {{if not .Home}}
-    {{template "palettebutton" .}}
-    {{end}}
-
     {{template "themepen" .}}
     {{template "themetoggle" .}}
+    {{template "palettebutton" .}}
   </div>
 </header>
 {{end}}
@@ -122,8 +122,7 @@ try {
      is: an expanding field would have to push the title out of the way, and the
      palette already searches every component from anywhere. -->
 <button type="button" data-palette-open aria-label="Open command palette"
-        data-tip="Search · Ctrl K"
-        class="tip tip-bottom grid shrink-0 place-items-center rounded-md p-[8px] text-muted-foreground hover:bg-accent hover:text-foreground">
+        class="grid shrink-0 place-items-center rounded-md p-[8px] text-muted-foreground hover:bg-accent hover:text-site-foreground">
   <i class="ph ph-magnifying-glass text-[16px] leading-none" aria-hidden="true"></i>
 </button>
 {{end}}
@@ -254,7 +253,7 @@ try {
      markup, same classes, different radius, density, colour and type. -->
 <details data-select data-ds-switch class="relative">
   <summary class="flex cursor-pointer list-none items-center gap-1.5 rounded-md px-control-x py-control-y text-body-sm leading-none text-muted-foreground hover:bg-accent">
-    <span data-select-label class="font-500 text-foreground">Claude</span>
+    <span data-select-label class="font-400 text-foreground">Claude</span>
     <i data-select-chevron class="ph ph-caret-down shrink-0 text-[14px]" aria-hidden="true"></i>
   </summary>
 

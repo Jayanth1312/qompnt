@@ -318,19 +318,3 @@ func find(cs []Component, slug string) (Component, bool) {
 	}
 	return Component{}, false
 }
-
-// search filters by name, blurb, and tags, case-insensitively.
-func search(cs []Component, q string) []Component {
-	q = strings.ToLower(strings.TrimSpace(q))
-	if q == "" {
-		return cs
-	}
-	var out []Component
-	for _, c := range cs {
-		hay := strings.ToLower(c.Name + " " + c.Blurb + " " + strings.Join(c.Tags, " "))
-		if strings.Contains(hay, q) {
-			out = append(out, c)
-		}
-	}
-	return out
-}
