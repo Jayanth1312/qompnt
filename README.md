@@ -1,7 +1,8 @@
 # qompnt
 
-Ten HTML components in Claude's design language. Copy the markup, or install it
-with `shadcn`.
+Thirty HTML components on a shared token contract. Ten design systems share the
+same markup — swap one stylesheet and the whole look changes. Copy the markup,
+install with `shadcn`, or pull from a CDN.
 
 Go serves the site, htmx handles the interactive previews, UnoCSS generates the
 stylesheet at build time. No JavaScript framework, nothing to build in a
@@ -21,13 +22,13 @@ without `-dev` reads them once at startup.
 ## Add a component
 
 Create a directory under `components/`. There is no registration step — the
-server picks it up, the index lists it, and the registry serves it.
+server picks it up, the home page lists it, and the registry serves it.
 
 ```
 components/tooltip/
   meta.json      name, blurb, created (YYYY-MM-DD), tags, motion
   preview.html   what renders in the card and the detail hero
-  notes.md       prose, blank-line separated paragraphs
+  notes.md       prose, blank-line separated paragraphs (gitignored)
   src/
     tooltip.html the copyable markup - one file per code tab, max 6
 ```
@@ -64,18 +65,28 @@ uses — the token names are identical either way.
 ## Layout
 
 ```
-main.go        routes, startup scan
-component.go   Component, loaded from disk
-registry.go    shadcn registry JSON, plus the token maps
-markdown.go    the "Copy markdown" blob
-demo.go        endpoints backing the interactive previews
-uno.config.ts  DESIGN.MD tokens as an UnoCSS theme
-templates/     layout, index, detail, card fragment
-static/        tokens.css (hand-written), qompnt.css (generated), htmx.js, qompnt.js
-DESIGN.MD      the source design spec
+main.go           routes, startup scan
+component.go      Component, loaded from disk
+registry.go       shadcn registry JSON, plus the token maps
+markdown.go       the "Copy markdown" blob
+demo.go           endpoints backing the interactive previews
+uno.config.ts     design tokens as an UnoCSS theme
+templates/        layout.html (shell), home.html (index), detail.html
+static/           tokens.css, themes/*.css (design systems), qompnt.css
+                  (generated), components.css (generated), htmx.js, qompnt.js
 ```
 
 ## Notes on the stack
+
+**Design systems.** Claude is the default (`tokens.css` alone). Nine more live in
+`static/themes/` — Apple, ClickHouse, Cohere, Coinbase, Cursor, Linear, Notion,
+Stripe, Vercel — each a single stylesheet of token overrides. The palette
+switcher and the pen button in the header cycle through them; choice persists in
+`localStorage` as `qompnt-ds`.
+
+**Home previews.** The component list on `/` stashes each `preview.html` in a
+`<template>` and shows a cursor-following popover after a short hover delay.
+`static/qompnt.js` owns the timing and positioning; fine-pointer devices only.
 
 **Themes.** UnoCSS colours point at CSS variables and `tokens.css` swaps the
 variables, so one set of classes covers light and dark. Nothing is duplicated per
@@ -95,7 +106,7 @@ default when nothing is stored; an explicit `data-motion="on"` overrides it,
 because a visitor turning motion on for this site outranks their OS setting.
 The **Animation** switch in the Customize panel writes `qompnt-motion` to
 localStorage; `layout.html` applies it before first paint. It appears only where
-`meta.json` sets `"motion": true` — twelve of the twenty-six. A switch that
+`meta.json` sets `"motion": true` — sixteen of the thirty. A switch that
 visibly does nothing reads as a broken one, so Badge, Table, Pagination and the
 rest do not get it, and neither do the loaders: a Spinner's animation is the
 component, not decoration on it.
