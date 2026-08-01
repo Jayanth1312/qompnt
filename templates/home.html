@@ -1,28 +1,46 @@
 {{define "content"}}
 {{template "siteheader" .}}
 
-<div class="page-fade-in flex flex-col gap-10 text-[15px] leading-[1.7] text-foreground">
-  <section class="flex flex-col gap-5 text-foreground/90">
+<div class="page-fade-in flex flex-col gap-10 text-[15px] leading-[1.7] text-site-foreground">
+  <section class="flex flex-col gap-5">
     <p>
-      HTML components on a shared token contract — copy the markup, or install
-      with shadcn. One stylesheet swaps the whole design system.
+      HTML components on a shared token contract — copy the markup, install
+      with our CLI, or pull from a CDN. One stylesheet swaps the whole design system.
     </p>
     <p>
       Native elements first. Previews run on the server when they need to.
       Ten design systems share the same classes.
     </p>
     <p>
-      Open the
-      <a href="/components"
-         class="home-vault inline-flex items-center gap-1.5 rounded-md bg-secondary px-2 py-0.5 text-foreground no-underline hover:bg-accent">
-        <i class="ph-duotone ph-folder-open text-[15px] text-primary" aria-hidden="true"></i>
-        Components
-      </a>
-      gallery to browse, customize, and copy.
+      Browse below to customize and copy. Open any component for the full page.
     </p>
   </section>
 
-  <section class="flex flex-col gap-3" aria-label="FAQ">
+  <section class="flex flex-col gap-3" aria-label="Components">
+    <h2 class="flex items-center gap-2 text-body-md text-site-foreground-muted">
+      Components
+    </h2>
+    <div data-home-components class="divide-y divide-border border-y border-border">
+      {{range .Components}}
+      <a href="/c/{{.Slug}}"
+         data-slug="{{.Slug}}"
+         class="home-comp-row flex items-baseline justify-between gap-4 py-3.5 text-body-md text-site-foreground no-underline transition-[color,opacity] duration-200">
+        <span>{{.Name}}</span>
+        <span class="tabular-nums text-caption text-site-foreground-muted">{{.Created.Format "Jan 2"}}</span>
+      </a>
+      {{end}}
+    </div>
+
+    {{range .Components}}
+    <template data-home-preview="{{.Slug}}">{{.Preview}}</template>
+    {{end}}
+
+    <div data-home-preview-pop hidden
+         class="home-preview-pop"
+         aria-hidden="true"></div>
+  </section>
+
+  <section hidden class="flex flex-col gap-3" aria-label="FAQ">
     <h2 class="text-caption font-500 uppercase tracking-wide text-muted-foreground">FAQ</h2>
     <div data-accordion class="w-full divide-y divide-border border-y border-border">
       <details name="home-faq" class="group">
@@ -81,12 +99,5 @@
       </details>
     </div>
   </section>
-
-  <footer class="flex items-center justify-between gap-4 border-t border-border pt-6 text-caption text-muted-foreground">
-    <span>Aug 2026</span>
-    <a href="https://github.com/Jayanth1312/qompnt"
-       class="text-muted-foreground no-underline hover:text-foreground"
-       rel="noopener noreferrer" target="_blank">GitHub</a>
-  </footer>
 </div>
 {{end}}

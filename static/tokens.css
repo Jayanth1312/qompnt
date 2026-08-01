@@ -33,6 +33,9 @@
   --muted-foreground: #6c6a64;
   --accent: #efe9de;
   --accent-foreground: #141413;
+  /* Site chrome ink: darkest accent tone, richer than neutral foreground. */
+  --site-foreground: color-mix(in srgb, var(--primary) 42%, var(--foreground));
+  --site-foreground-muted: color-mix(in srgb, var(--site-foreground) 68%, var(--background));
   --destructive: #c64545;
   --destructive-foreground: #ffffff;
 
@@ -98,9 +101,9 @@
   --motion-slow: 260ms;
   --ease: cubic-bezier(0.2, 0, 0, 1);
 
-  --type-sans: 'Opening Hours Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --type-display: Cambo, Garamond, 'Times New Roman', serif;
-  --type-mono: 'Fira Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --type-sans: 'PP Neue Montreal', sans-serif;
+  --type-display: 'PP Neue Montreal', sans-serif;
+  --type-mono: 'PP Neue Montreal', sans-serif;
 }
 
 [data-theme='dark'] {
@@ -120,6 +123,8 @@
   --muted-foreground: #a09d96;
   --accent: #252320;
   --accent-foreground: #faf9f5;
+  --site-foreground: color-mix(in srgb, var(--primary) 28%, var(--foreground));
+  --site-foreground-muted: color-mix(in srgb, var(--site-foreground) 68%, var(--background));
   --destructive: #c64545;
   --destructive-foreground: #ffffff;
 
@@ -165,6 +170,7 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-site-foreground: var(--site-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
@@ -800,6 +806,88 @@ button[data-palette-item] {
 }
 html[data-motion="off"] .page-fade-in {
   animation: none;
+}
+
+/* Home component list: hover one row, fade the rest. */
+[data-home-components]:hover .home-comp-row {
+  color: var(--muted-foreground);
+  opacity: 0.45;
+}
+[data-home-components]:hover .home-comp-row:hover {
+  color: var(--site-foreground);
+  opacity: 1;
+}
+[data-home-components]:hover .home-comp-row:hover .tabular-nums {
+  color: var(--site-foreground-muted);
+}
+html[data-motion="off"] .home-comp-row {
+  transition: none;
+}
+
+/* Home hover preview: follows cursor; never captures pointer. */
+.home-preview-pop {
+  position: fixed;
+  z-index: 40;
+  top: 0;
+  left: 0;
+  width: min(300px, calc(100vw - 2rem));
+  max-height: min(220px, 40vh);
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  padding: var(--pad-card);
+  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  border-radius: var(--r-lg);
+  background: var(--muted);
+  box-shadow: var(--shadow-2);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-9999px, -9999px); /* offscreen until positioned */
+}
+
+.home-preview-pop[data-open] {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity var(--motion) var(--ease);
+}
+
+.home-preview-pop > * {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* Scale oversized demos into the box without blowing layout. */
+.home-preview-pop [data-x-wrap],
+.home-preview-pop .sidebar,
+.home-preview-pop table {
+  max-width: 100%;
+}
+
+html[data-motion="off"] .home-preview-pop[data-open] {
+  transition: none;
+}
+
+/* Subtle list / section rules — keep --border full-weight for cards.
+   tokens.css loads before Uno utilities; compound selectors beat
+   .border-border / .divide-border so lightness actually applies. */
+[data-home-components].divide-border > :not(:last-child),
+[data-home-components].border-y,
+.section-rule.border-b {
+  border-color: color-mix(in srgb, var(--border) 45%, transparent);
+}
+
+.text-site-foreground {
+  color: var(--site-foreground);
+}
+
+.text-site-foreground-muted {
+  color: var(--site-foreground-muted);
+}
+
+.site-main {
+  width: 100%;
+  max-width: 640px;
 }
 
 /* Sticky page header. No border: content passing underneath is blurred out

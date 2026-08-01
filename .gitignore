@@ -27,6 +27,10 @@ render.yaml
 # styles.css, options.html, extras.html and src/* - never these.
 components/*/notes.md
 
+# Superpowers plugin plans and specs — local agent working material, not project
+# docs. README.md is what this repo publishes.
+docs/
+
 /component_test.go
 
 # static/qompnt.css and static/components.css are generated but intentionally
