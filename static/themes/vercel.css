@@ -41,11 +41,9 @@
 }
 
 [data-theme='dark'] {
-  /* Vercel keeps a dark knob in dark mode - asked for explicitly, and it suits a
-     system built on pure black and white. Every other theme takes the default
-     light --knob. The track's hairline in tokens.css is what keeps the off
-     state legible here, since this palette's --secondary is nearly the panel. */
-  --knob: #1f1f1f;
+  /* --knob stays the contract default (light). A dark handle vanished into the
+     filled track on Slider and Level Slider - the same failure ClickHouse had
+     when its knob matched --primary. Switches do not read --knob. */
 
   --background: #000000;
   --foreground: #fafafa;

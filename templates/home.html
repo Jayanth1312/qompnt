@@ -1,0 +1,92 @@
+{{define "content"}}
+{{template "siteheader" .}}
+
+<div class="page-fade-in flex flex-col gap-10 text-[15px] leading-[1.7] text-foreground">
+  <section class="flex flex-col gap-5 text-foreground/90">
+    <p>
+      HTML components on a shared token contract — copy the markup, or install
+      with shadcn. One stylesheet swaps the whole design system.
+    </p>
+    <p>
+      Native elements first. Previews run on the server when they need to.
+      Ten design systems share the same classes.
+    </p>
+    <p>
+      Open the
+      <a href="/components"
+         class="home-vault inline-flex items-center gap-1.5 rounded-md bg-secondary px-2 py-0.5 text-foreground no-underline hover:bg-accent">
+        <i class="ph-duotone ph-folder-open text-[15px] text-primary" aria-hidden="true"></i>
+        Components
+      </a>
+      gallery to browse, customize, and copy.
+    </p>
+  </section>
+
+  <section class="flex flex-col gap-3" aria-label="FAQ">
+    <h2 class="text-caption font-500 uppercase tracking-wide text-muted-foreground">FAQ</h2>
+    <div data-accordion class="w-full divide-y divide-border border-y border-border">
+      <details name="home-faq" class="group">
+        <summary
+          class="flex cursor-pointer list-none items-center justify-between gap-3 py-3.5 text-body-md font-500 text-foreground">
+          What is Qompnt?
+          <i class="ph ph-caret-right shrink-0 text-[14px] text-muted-foreground transition-transform group-open:rotate-90" aria-hidden="true"></i>
+        </summary>
+        <p class="pb-4 pr-6 text-body-sm text-muted-foreground">
+          A small library of HTML components styled with a token contract.
+          Use them as copy-paste markup or install via the shadcn registry.
+          The site itself is the living catalog.
+        </p>
+      </details>
+
+      <details name="home-faq" class="group">
+        <summary
+          class="flex cursor-pointer list-none items-center justify-between gap-3 py-3.5 text-body-md font-500 text-foreground">
+          How do I use a component?
+          <i class="ph ph-caret-right shrink-0 text-[14px] text-muted-foreground transition-transform group-open:rotate-90" aria-hidden="true"></i>
+        </summary>
+        <p class="pb-4 pr-6 text-body-sm text-muted-foreground">
+          Open any component page, copy the HTML from the Code section, and
+          link <code class="rounded-sm bg-secondary px-1 text-caption">tokens.css</code>
+          plus <code class="rounded-sm bg-secondary px-1 text-caption">qompnt.css</code>.
+          Or run
+          <code class="rounded-sm bg-secondary px-1 text-caption">npx shadcn@latest add https://&lt;host&gt;/r/&lt;slug&gt;.json</code>.
+        </p>
+      </details>
+
+      <details name="home-faq" class="group">
+        <summary
+          class="flex cursor-pointer list-none items-center justify-between gap-3 py-3.5 text-body-md font-500 text-foreground">
+          Do components have animations?
+          <i class="ph ph-caret-right shrink-0 text-[14px] text-muted-foreground transition-transform group-open:rotate-90" aria-hidden="true"></i>
+        </summary>
+        <p class="pb-4 pr-6 text-body-sm text-muted-foreground">
+          Some do — accordion, dialog, toast, and others — and those pages
+          expose an Animation switch so you can turn motion off. The site
+          also respects <code class="rounded-sm bg-secondary px-1 text-caption">prefers-reduced-motion</code>.
+        </p>
+      </details>
+
+      <details name="home-faq" class="group">
+        <summary
+          class="flex cursor-pointer list-none items-center justify-between gap-3 py-3.5 text-body-md font-500 text-foreground">
+          How do design systems and themes work?
+          <i class="ph ph-caret-right shrink-0 text-[14px] text-muted-foreground transition-transform group-open:rotate-90" aria-hidden="true"></i>
+        </summary>
+        <p class="pb-4 pr-6 text-body-sm text-muted-foreground">
+          Light and dark ride on <code class="rounded-sm bg-secondary px-1 text-caption">data-theme</code>.
+          Each design system is one stylesheet of tokens over the same
+          contract — switch Claude, Notion, Linear, and the rest from the
+          Components gallery without changing markup.
+        </p>
+      </details>
+    </div>
+  </section>
+
+  <footer class="flex items-center justify-between gap-4 border-t border-border pt-6 text-caption text-muted-foreground">
+    <span>Aug 2026</span>
+    <a href="https://github.com/Jayanth1312/qompnt"
+       class="text-muted-foreground no-underline hover:text-foreground"
+       rel="noopener noreferrer" target="_blank">GitHub</a>
+  </footer>
+</div>
+{{end}}

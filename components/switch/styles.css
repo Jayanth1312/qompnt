@@ -47,13 +47,11 @@
   width: var(--knob-size);
   height: var(--knob-size);
   border-radius: var(--r-pill);
-  /* Not --knob. That token is the Slider's handle and a design system is free to
-     make it the brand colour - ClickHouse does, with the same yellow as
-     --primary - which on a switch means an off knob that reads as on and an on
-     knob the same colour as the track it sits on. A control with state names a
-     colour per state instead: off, a neutral that can never be the accent; on,
-     --primary-foreground, which is by definition what stays legible on
-     --primary, so this holds for themes not written yet. */
+  /* Not --knob. That token is the Slider's handle - a light grab surface on the
+     track. A switch has state, so each state names a colour instead: off, a
+     neutral that can never be the accent; on, --primary-foreground, which is by
+     definition what stays legible on --primary, so this holds for themes not
+     written yet. */
   background: color-mix(in oklab, var(--foreground) 55%, var(--background));
   color: var(--background);
   transition:

@@ -5,18 +5,20 @@
      component page is going back to the list, not dismissing a dialog, and the
      header slot it occupied is worth more as the theme toggle. Not sticky - it
      belongs to the top of the page, and it frees the header row entirely. -->
-<a href="/" class="mb-4 inline-flex items-center gap-1.5 rounded-pill border border-border bg-secondary px-3 py-1.5 text-body-sm leading-none text-muted-foreground no-underline hover:bg-accent hover:text-foreground">
+<a href="/components" class="mb-4 inline-flex items-center gap-1.5 rounded-pill border border-border bg-secondary px-3 py-1.5 text-body-sm leading-none text-muted-foreground no-underline hover:bg-accent hover:text-foreground">
   <i class="ph ph-arrow-left text-[14px]" aria-hidden="true"></i>
   Back
 </a>
 
-<header data-sticky-header class="sticky top-0 z-30 -mx-5 mb-3 flex items-center gap-1 px-5 py-3">
+<header data-sticky-header class="sticky top-0 z-30 -mx-5 mb-3 flex items-center gap-[2px] px-5 py-3">
   <!-- truncate, not wrap: a long component name must not push the controls onto
        a second row on a phone. -->
   <h1 class="mr-auto truncate font-display text-title-md text-foreground sm:text-title-lg">{{.Name}}</h1>
-  {{template "dsswitch" .}}
-  {{template "palettebutton" .}}
-  {{template "themetoggle" .}}
+  <div class="flex shrink-0 items-center gap-[2px]">
+    {{template "palettebutton" .}}
+    {{template "themepen" .}}
+    {{template "themetoggle" .}}
+  </div>
 </header>
 
 <p class="mb-10 text-body-md text-muted-foreground">{{.BlurbHTML}}</p>

@@ -317,6 +317,10 @@
 html {
   background: var(--background);
   color-scheme: light;
+  /* clip, not hidden: hidden on one axis forces the other to auto in the
+     CSS overflow pairing rules, which makes <body> a scroll container and
+     breaks position:sticky for the page header. clip does not. */
+  overflow-x: clip;
 }
 [data-theme='dark'] {
   color-scheme: dark;
@@ -325,6 +329,7 @@ html {
 body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overflow-x: clip;
 }
 
 /* Focus: one ring, flush against the control. The border takes the ring colour
@@ -419,6 +424,19 @@ dialog[data-palette][open] {
 [data-palette-item]:hover {
   background: var(--accent);
 }
+button[data-palette-item] {
+  border: none;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.palette-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 9999px;
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.12);
+}
 .palette-kbd {
   display: inline-flex;
   align-items: center;
@@ -485,11 +503,11 @@ dialog[data-palette][open] {
   box-shadow: inset 0 0 0 1px var(--border);
   transition: background-color var(--motion) var(--ease);
 }
-/* And the knob has to separate from the track it sits on. Vercel asks for a
-   dark knob, which on its dark track left the whole switch one flat grey. A
-   relative tint solves it for every theme at once: the track darkens or
-   lightens away from the knob by a fixed amount rather than by a colour someone
-   has to pick per theme. */
+/* And the knob has to separate from the track it sits on. A relative tint
+   solves it for every theme at once: the track darkens or lightens away from
+   the knob by a fixed amount rather than by a colour someone has to pick per
+   theme. Vercel's --secondary sits within a shade of the panel, so without
+   this the off track disappeared. */
 .options-grid input[type='checkbox']:not(:checked) {
   background: color-mix(in oklab, var(--foreground) 14%, transparent);
 }
@@ -501,17 +519,12 @@ dialog[data-palette][open] {
   width: 14px;
   height: 14px;
   border-radius: var(--r-pill);
-  /* Not --knob. --knob is the Slider's handle, and a design system is free to
-     make that its brand colour - ClickHouse does, with the same yellow as
-     --primary. On a switch that is two separate failures: off, a brand-coloured
-     knob reads as on; on, the knob is the track's own colour and the control
-     collapses into a solid pill. Vercel fails the same way in light mode, where
-     --knob #1f1f1f sits on --primary #171717.
-
-     A switch has state, so each state names a colour that cannot collide with
-     its own track. Off: a neutral mixed from --foreground, never the accent.
-     On: --primary-foreground, which is by definition what stays legible on
-     --primary - so this holds for any theme, including ones not written yet. */
+  /* Not --knob. --knob is the Slider's handle and stays a light grab surface so
+     it reads on a filled track. A switch has state, so each state names a
+     colour that cannot collide with its own track. Off: a neutral mixed from
+     --foreground, never the accent. On: --primary-foreground, which is by
+     definition what stays legible on --primary - so this holds for any theme,
+     including ones not written yet. */
   background: color-mix(in oklab, var(--foreground) 55%, var(--background));
   transition:
     transform var(--motion) var(--ease),
@@ -739,7 +752,7 @@ dialog[data-palette][open] {
    in Firefox against Chrome's longer default - so the same swap ran visibly
    quicker in one than the other. Naming it here makes the two agree. */
 ::view-transition-group(root) {
-  animation-duration: 450ms;
+  animation-duration: 700ms;
   animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 ::view-transition-old(root),
@@ -761,12 +774,32 @@ dialog[data-palette][open] {
      duration of the swap, which is exactly when this animation has to run.
      Reduced motion is handled in the click handler, which skips the
      transition entirely. */
-  animation: theme-reveal 450ms cubic-bezier(0.4, 0, 0.2, 1);
+  animation: theme-reveal 700ms cubic-bezier(0.4, 0, 0.2, 1);
+  filter: blur(2px);
 }
 
 @keyframes theme-reveal {
-  from { clip-path: inset(0 0 100% 0); }
-  to { clip-path: inset(0 0 0 0); }
+  from {
+    clip-path: inset(0 0 100% 0);
+    filter: blur(8px);
+  }
+  50% { filter: blur(4px); }
+  to {
+    clip-path: inset(0 0 0 0);
+    filter: blur(0px);
+  }
+}
+
+/* Home entry: quiet fade, skipped when motion is off. */
+.page-fade-in {
+  animation: page-fade-in 420ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+@keyframes page-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+html[data-motion="off"] .page-fade-in {
+  animation: none;
 }
 
 /* Sticky page header. No border: content passing underneath is blurred out
@@ -778,15 +811,22 @@ dialog[data-palette][open] {
 
    Safari still needs the prefix, and this is the one place the site uses
    backdrop-filter - a browser without it just gets the tinted background,
-   which is legible on its own. */
+   which is legible on its own.
+
+   On touch devices the bar is opaque and untransformed. backdrop-filter plus
+   translateZ(0) / will-change was promoting a compositor layer so the blur
+   would not drop mid-scroll - but that same promotion stopped sticky from
+   sticking until a viewport change (pinch-zoom) forced a reflow. Opaque paint
+   needs no layer hint, so sticky works on the first scroll. */
 [data-sticky-header] {
-  background: color-mix(in srgb, var(--background) 72%, transparent);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  /* Same bar at every width. The blur is held on its own composited layer:
-     without this, mobile drops the layer while scrolling down and repaints it on
-     the way up, so the header appeared to come and go. */
-  will-change: backdrop-filter;
-  transform: translateZ(0);
+  background: var(--background);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  [data-sticky-header] {
+    background: color-mix(in srgb, var(--background) 72%, transparent);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
 }
 

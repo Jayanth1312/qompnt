@@ -47,10 +47,15 @@
   opacity: 0;
   pointer-events: none;
 }
-.tip:hover::after,
-.tip:hover::before,
-.tip:focus-visible::after,
-.tip:focus-visible::before,
+/* Touch has no hover; :focus-visible after a tap was showing these on phones. */
+@media (hover: hover) and (pointer: fine) {
+  .tip:hover::after,
+  .tip:hover::before,
+  .tip:focus-visible::after,
+  .tip:focus-visible::before {
+    opacity: 1;
+  }
+}
 .tip-open::after,
 .tip-open::before {
   opacity: 1;
@@ -82,18 +87,23 @@
     opacity var(--motion) var(--ease),
     translate var(--motion) var(--ease);
 }
-.tip:hover::after,
-.tip:hover::before,
-.tip:focus-visible::after,
-.tip:focus-visible::before,
+@media (hover: hover) and (pointer: fine) {
+  .tip:hover::after,
+  .tip:hover::before,
+  .tip:focus-visible::after,
+  .tip:focus-visible::before {
+    translate: 0 0;
+    transition-delay: 300ms;
+  }
+  .tip:not(:hover)::after,
+  .tip:not(:hover)::before {
+    transition-delay: 0s;
+  }
+}
 .tip-open::after,
 .tip-open::before {
   translate: 0 0;
   transition-delay: 300ms;
-}
-.tip:not(:hover)::after,
-.tip:not(:hover)::before {
-  transition-delay: 0s;
 }
 /* Below the anchor, so it rises from the other side. */
 .tip-bottom::after,

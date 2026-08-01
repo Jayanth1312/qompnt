@@ -31,6 +31,7 @@ type server struct {
 }
 
 type templates struct {
+	home   *template.Template // "layout"
 	index  *template.Template // "layout"
 	detail *template.Template // "layout"
 	cards  *template.Template // "cards"
@@ -49,6 +50,8 @@ type pageData struct {
 	BaseURL string
 	// V is the asset version, stamped onto every /static/ URL in the layout.
 	V string
+	// Home is the alran-style landing page at /. Gallery and detail leave it false.
+	Home bool
 }
 
 func main() {
@@ -74,7 +77,8 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /{$}", s.handleIndex)
+	mux.HandleFunc("GET /{$}", s.handleHome)
+	mux.HandleFunc("GET /components", s.handleIndex)
 	mux.HandleFunc("GET /c/{slug}", s.handleDetail)
 	mux.HandleFunc("GET /p/search", s.handleSearch)
 	mux.HandleFunc("GET /src/{slug}", s.handleSource)
@@ -190,6 +194,7 @@ func (s *server) reload() error {
 		return template.Must(template.ParseFS(assets, files...))
 	}
 	t := templates{
+		home:   parse("templates/layout.html", "templates/home.html"),
 		index:  parse("templates/layout.html", "templates/index.html", "templates/_cards.html"),
 		detail: parse("templates/layout.html", "templates/detail.html"),
 		cards:  parse("templates/_cards.html"),
@@ -296,6 +301,11 @@ func (s *server) render(w http.ResponseWriter, r *http.Request, t *template.Temp
 		return
 	}
 	buf.WriteTo(w)
+}
+
+func (s *server) handleHome(w http.ResponseWriter, r *http.Request) {
+	cs, t := s.snapshot()
+	s.render(w, r, t.home, "layout", pageData{Components: cs, Home: true, V: s.assetVersion()})
 }
 
 func (s *server) handleIndex(w http.ResponseWriter, r *http.Request) {

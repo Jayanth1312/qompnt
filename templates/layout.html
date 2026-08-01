@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{if .C}}{{.C.Name}} — Qompnt{{else}}Qompnt — HTML components, ten design systems{{end}}</title>
-<meta name="description" content="{{if .C}}{{.C.Blurb}}{{else}}HTML components built on native elements and a token contract. Swap the whole design system with one stylesheet. Copy them, or install with shadcn.{{end}}">
+<title>{{if .C}}{{.C.Name}} — Qompnt{{else if .Home}}Qompnt{{else}}Qompnt — HTML components, ten design systems{{end}}</title>
+<meta name="description" content="{{if .C}}{{.C.Blurb}}{{else if .Home}}HTML components on a shared token contract. Copy the markup, or install with shadcn. Swap the whole design system with one stylesheet.{{else}}HTML components built on native elements and a token contract. Swap the whole design system with one stylesheet. Copy them, or install with shadcn.{{end}}">
 <!-- Both CDNs are hit by render-blocking stylesheets below, so the connection is
      opened while the HTML is still parsing rather than after it. Costs two DNS
      lookups; saves a full round trip each on first paint. -->
@@ -19,6 +19,7 @@
      stylesheet to render. See README, "Icons". -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/duotone/style.css">
 <link rel="stylesheet" href="/static/tokens.css?v={{.V}}">
 <link rel="stylesheet" href="/static/qompnt.css?v={{.V}}">
 <!-- Generated from components/*/styles.css - see componentsCSS in main.go. -->
@@ -78,25 +79,52 @@ try {
 {{end}}
 
 {{define "themetoggle"}}
-<!-- Both icons ship; tokens.css shows the one for the current theme. Swapping in
-     CSS rather than JS means the right icon is there on the first paint. -->
-<button type="button" data-theme-toggle
+<!-- Instant light/dark. Fixed 8px pad + 16px icon so design systems cannot
+     resize the chrome via --control-* density tokens. -->
+<button type="button" data-theme-toggle data-theme-instant
         aria-label="Toggle dark mode"
-        data-tip="Toggle theme · Ctrl T"
-        class="tip tip-bottom grid p-2 shrink-0 place-items-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground">
-  <i data-icon="moon" class="ph ph-moon text-[15px]" aria-hidden="true"></i>
-  <i data-icon="sun" class="ph ph-sun text-[15px]" aria-hidden="true"></i>
+        data-tip="Toggle theme · instant"
+        class="tip tip-bottom grid shrink-0 place-items-center rounded-md p-[8px] text-muted-foreground hover:bg-accent hover:text-foreground">
+  <i data-icon="moon" class="ph ph-moon text-[16px] leading-none" aria-hidden="true"></i>
+  <i data-icon="sun" class="ph ph-sun text-[16px] leading-none" aria-hidden="true"></i>
 </button>
+{{end}}
+
+{{define "themepen"}}
+<!-- Random design-system swap with the top-to-bottom wipe. Same box as themetoggle. -->
+<button type="button" data-ds-random
+        aria-label="Random design system"
+        data-tip="Random design system · wipe"
+        class="tip tip-bottom grid shrink-0 place-items-center rounded-md p-[8px] text-muted-foreground hover:bg-accent hover:text-foreground active:scale-[0.96]">
+  <i class="ph ph-paint-brush text-[16px] leading-none" aria-hidden="true"></i>
+</button>
+{{end}}
+
+{{define "siteheader"}}
+<!-- Shared shell: small wordmark, no mark icon, sticky blur. Gallery keeps
+     search; design systems are cycled by the brush, not a dropdown. -->
+<header data-sticky-header class="sticky top-0 z-30 -mx-5 mb-8 flex items-center gap-[2px] px-5 py-3">
+  <a href="/" class="mr-auto shrink-0 font-sans font-500 text-[15px] leading-none text-foreground no-underline">Qompnt</a>
+
+  <div class="flex shrink-0 items-center gap-[2px]">
+    {{if not .Home}}
+    {{template "palettebutton" .}}
+    {{end}}
+
+    {{template "themepen" .}}
+    {{template "themetoggle" .}}
+  </div>
+</header>
 {{end}}
 
 {{define "palettebutton"}}
 <!-- Opens the command palette. On the detail page this is the only search there
      is: an expanding field would have to push the title out of the way, and the
      palette already searches every component from anywhere. -->
-<button type="button" data-palette-open aria-label="Search components"
+<button type="button" data-palette-open aria-label="Open command palette"
         data-tip="Search · Ctrl K"
-        class="tip tip-bottom grid p-2 shrink-0 place-items-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground">
-  <i class="ph ph-magnifying-glass text-[15px]" aria-hidden="true"></i>
+        class="tip tip-bottom grid shrink-0 place-items-center rounded-md p-[8px] text-muted-foreground hover:bg-accent hover:text-foreground">
+  <i class="ph ph-magnifying-glass text-[16px] leading-none" aria-hidden="true"></i>
 </button>
 {{end}}
 
@@ -112,27 +140,108 @@ try {
         class="m-0 w-[min(560px,calc(100vw-2rem))] rounded-xl border border-border bg-popover p-0 text-foreground shadow-e2 backdrop:bg-black/40">
   <div class="flex items-center gap-2 border-b border-border px-4">
     <i class="ph ph-magnifying-glass shrink-0 text-[15px] text-muted-foreground" aria-hidden="true"></i>
-    <input data-palette-input type="text" placeholder="Search components…" aria-label="Search components"
+    <input data-palette-input type="text" placeholder="Search…" aria-label="Search"
            autocomplete="off" spellcheck="false"
            class="w-full bg-transparent py-3.5 text-body-md text-foreground outline-none placeholder:text-muted-foreground">
   </div>
 
-  <div data-palette-list role="listbox" aria-label="Components" class="max-h-[min(380px,60vh)] overflow-y-auto p-2">
-    <p data-palette-heading class="px-2 py-1.5 text-caption text-muted-foreground">Components</p>
+  <div data-palette-list role="listbox" aria-label="Command palette" class="max-h-[min(380px,60vh)] overflow-y-auto p-2">
+    <p data-palette-heading data-palette-group="actions" class="px-2 py-1.5 text-caption text-muted-foreground">Actions</p>
+    <button type="button" role="option" aria-selected="false"
+            data-palette-item data-palette-group="actions" data-palette-action="toggle-theme"
+            data-name="Toggle theme dark light mode"
+            class="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
+      <i class="ph ph-sun-dim shrink-0 text-[15px] text-muted-foreground" aria-hidden="true"></i>
+      Toggle theme
+    </button>
+
+    <p data-palette-heading data-palette-group="themes" class="px-2 py-1.5 text-caption text-muted-foreground">Themes</p>
+    <button type="button" role="option" aria-selected="true"
+            data-palette-item data-palette-group="themes" data-palette-ds="" data-ds-schemes="light dark"
+            data-name="Claude design system theme"
+            class="flex w-full items-center justify-between gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
+      <span class="flex items-center gap-2.5"><span class="palette-swatch shrink-0" style="background:#cc785c" aria-hidden="true"></span>Claude</span>
+      <i data-check class="ph ph-check shrink-0 text-[13px] text-ring" aria-hidden="true"></i>
+    </button>
+    <button type="button" role="option" aria-selected="false"
+            data-palette-item data-palette-group="themes" data-palette-ds="apple" data-ds-schemes="light dark"
+            data-name="Apple design system theme"
+            class="flex w-full items-center justify-between gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
+      <span class="flex items-center gap-2.5"><span class="palette-swatch shrink-0" style="background:#0071e3" aria-hidden="true"></span>Apple</span>
+      <i data-check hidden class="ph ph-check shrink-0 text-[13px] text-ring" aria-hidden="true"></i>
+    </button>
+    <button type="button" role="option" aria-selected="false"
+            data-palette-item data-palette-group="themes" data-palette-ds="clickhouse" data-ds-schemes="dark"
+            data-name="ClickHouse design system theme"
+            class="flex w-full items-center justify-between gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
+      <span class="flex items-center gap-2.5"><span class="palette-swatch shrink-0" style="background:#faff69" aria-hidden="true"></span>ClickHouse</span>
+      <i data-check hidden class="ph ph-check shrink-0 text-[13px] text-ring" aria-hidden="true"></i>
+    </button>
+    <button type="button" role="option" aria-selected="false"
+            data-palette-item data-palette-group="themes" data-palette-ds="cohere" data-ds-schemes="light dark"
+            data-name="Cohere design system theme"
+            class="flex w-full items-center justify-between gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
+      <span class="flex items-center gap-2.5"><span class="palette-swatch shrink-0" style="background:#003c33" aria-hidden="true"></span>Cohere</span>
+      <i data-check hidden class="ph ph-check shrink-0 text-[13px] text-ring" aria-hidden="true"></i>
+    </button>
+    <button type="button" role="option" aria-selected="false"
+            data-palette-item data-palette-group="themes" data-palette-ds="coinbase" data-ds-schemes="light dark"
+            data-name="Coinbase design system theme"
+            class="flex w-full items-center justify-between gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
+      <span class="flex items-center gap-2.5"><span class="palette-swatch shrink-0" style="background:#0052ff" aria-hidden="true"></span>Coinbase</span>
+      <i data-check hidden class="ph ph-check shrink-0 text-[13px] text-ring" aria-hidden="true"></i>
+    </button>
+    <button type="button" role="option" aria-selected="false"
+            data-palette-item data-palette-group="themes" data-palette-ds="cursor" data-ds-schemes="light dark"
+            data-name="Cursor design system theme"
+            class="flex w-full items-center justify-between gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
+      <span class="flex items-center gap-2.5"><span class="palette-swatch shrink-0" style="background:#f54e00" aria-hidden="true"></span>Cursor</span>
+      <i data-check hidden class="ph ph-check shrink-0 text-[13px] text-ring" aria-hidden="true"></i>
+    </button>
+    <button type="button" role="option" aria-selected="false"
+            data-palette-item data-palette-group="themes" data-palette-ds="linear" data-ds-schemes="dark"
+            data-name="Linear design system theme"
+            class="flex w-full items-center justify-between gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
+      <span class="flex items-center gap-2.5"><span class="palette-swatch shrink-0" style="background:#828fff" aria-hidden="true"></span>Linear</span>
+      <i data-check hidden class="ph ph-check shrink-0 text-[13px] text-ring" aria-hidden="true"></i>
+    </button>
+    <button type="button" role="option" aria-selected="false"
+            data-palette-item data-palette-group="themes" data-palette-ds="notion" data-ds-schemes="light dark"
+            data-name="Notion design system theme"
+            class="flex w-full items-center justify-between gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
+      <span class="flex items-center gap-2.5"><span class="palette-swatch shrink-0" style="background:#0075de" aria-hidden="true"></span>Notion</span>
+      <i data-check hidden class="ph ph-check shrink-0 text-[13px] text-ring" aria-hidden="true"></i>
+    </button>
+    <button type="button" role="option" aria-selected="false"
+            data-palette-item data-palette-group="themes" data-palette-ds="stripe" data-ds-schemes="light dark"
+            data-name="Stripe design system theme"
+            class="flex w-full items-center justify-between gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
+      <span class="flex items-center gap-2.5"><span class="palette-swatch shrink-0" style="background:#533afd" aria-hidden="true"></span>Stripe</span>
+      <i data-check hidden class="ph ph-check shrink-0 text-[13px] text-ring" aria-hidden="true"></i>
+    </button>
+    <button type="button" role="option" aria-selected="false"
+            data-palette-item data-palette-group="themes" data-palette-ds="vercel" data-ds-schemes="light dark"
+            data-name="Vercel design system theme"
+            class="flex w-full items-center justify-between gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
+      <span class="flex items-center gap-2.5"><span class="palette-swatch shrink-0" style="background:#171717" aria-hidden="true"></span>Vercel</span>
+      <i data-check hidden class="ph ph-check shrink-0 text-[13px] text-ring" aria-hidden="true"></i>
+    </button>
+
+    <p data-palette-heading data-palette-group="components" class="px-2 py-1.5 text-caption text-muted-foreground">Components</p>
     {{range .Components}}
-    <a href="/c/{{.Slug}}" role="option" aria-selected="false" data-palette-item data-name="{{.Name}}"
+    <a href="/c/{{.Slug}}" role="option" aria-selected="false" data-palette-item data-palette-group="components" data-name="{{.Name}}"
        class="flex items-center gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground no-underline">
       <i class="ph ph-circle-dashed shrink-0 text-[15px] text-muted-foreground" aria-hidden="true"></i>
       {{.Name}}
     </a>
     {{end}}
-    <p data-palette-empty hidden class="px-2 py-6 text-center text-body-sm text-muted-foreground">No components match.</p>
+    <p data-palette-empty hidden class="px-2 py-6 text-center text-body-sm text-muted-foreground">Nothing matches.</p>
   </div>
 
   <div class="flex items-center gap-4 border-t border-border px-4 py-2.5 text-caption text-muted-foreground">
     <!-- Icons rather than ↑↓: the display font has no arrow glyphs, so those
          two characters rendered as an empty box. -->
-    <span class="flex items-center gap-1.5"><kbd class="palette-kbd"><i class="ph ph-arrow-elbow-down-left" aria-hidden="true"></i></kbd> Go to page</span>
+    <span class="flex items-center gap-1.5"><kbd class="palette-kbd"><i class="ph ph-arrow-elbow-down-left" aria-hidden="true"></i></kbd> Select</span>
     <span class="flex items-center gap-1.5"><kbd class="palette-kbd"><i class="ph ph-arrow-up" aria-hidden="true"></i><i class="ph ph-arrow-down" aria-hidden="true"></i></kbd> Navigate</span>
     <span class="flex items-center gap-1.5"><kbd class="palette-kbd"><span data-kbd-mod>Ctrl</span> T</kbd> Theme</span>
   </div>

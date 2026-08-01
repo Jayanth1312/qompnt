@@ -43,5 +43,7 @@
   --type-sans: Inter, 'Helvetica Neue', sans-serif;
   --type-display: 'Fira Mono', ui-monospace, monospace;
 
-  --knob: #faff69;
+  /* Light handle, not --primary: a yellow knob on a yellow fill disappears.
+     Same rule as every other system - --knob is a physical grab surface. */
+  --knob: #ffffff;
 }

@@ -204,8 +204,17 @@ document.addEventListener("keydown", (e) => {
 // palette, and one is dark-first. Those declare what they have, and the toggle
 // is disabled rather than pretending to switch something that does not exist.
 function schemesFor(name) {
-    const opt = document.querySelector(`[data-ds-option="${name || ""}"]`);
+    const key = name || "";
+    const opt =
+        document.querySelector(`[data-ds-option="${key}"]`) ||
+        document.querySelector(`[data-palette-ds="${key}"]`);
     return (opt?.dataset.dsSchemes || "light dark").split(" ");
+}
+
+function designSystemIds() {
+    return [...document.querySelectorAll("[data-palette-ds]")].map(
+        (el) => el.dataset.paletteDs,
+    );
 }
 
 // Rewriting the tokens should land in one repaint. Without this, every element
@@ -237,12 +246,18 @@ const assetV =
 function applyDesignSystem(name) {
     // removeAttribute rather than href='' inside: an empty href points at the
     // current page, which the browser dutifully downloads and parses as CSS.
-    withoutTransitions(() => applyDesignSystemLink(name));
+    //
+    // The sheet swap is async (see applyDesignSystemLink): transitions stay
+    // suppressed until the new file has actually applied, and the scheme is
+    // enforced then too - otherwise a dark-only system would briefly paint
+    // under the previous scheme while the request is in flight.
+    applyDesignSystemLink(name, {
+        onReady: () => withoutTransitions(() => syncDesignSystem()),
+    });
     try {
         if (name) localStorage.setItem("qompnt-ds", name);
         else localStorage.removeItem("qompnt-ds");
     } catch (_) {}
-    enforceScheme(name);
 }
 
 // Move to a scheme this system actually has, and disable the toggle when there
@@ -258,7 +273,7 @@ function enforceScheme(name) {
 
     root.dataset.theme = schemes.includes(wanted) ? wanted : schemes[0];
 
-    document.querySelectorAll("[data-theme-toggle]").forEach((btn) => {
+    document.querySelectorAll("[data-theme-toggle][data-theme-instant]").forEach((btn) => {
         const single = schemes.length === 1;
         btn.disabled = single;
         btn.setAttribute("aria-disabled", String(single));
@@ -268,20 +283,33 @@ function enforceScheme(name) {
             single ? `This system is ${schemes[0]}-only` : "Toggle dark mode",
         );
     });
+    document
+        .querySelectorAll("[data-palette-action='toggle-theme']")
+        .forEach((btn) => {
+            btn.hidden = schemes.length === 1;
+        });
 }
 
 // The page renders with the default selected; reflect the stored choice.
 function syncDesignSystem() {
-    const box = document.querySelector("[data-ds-switch]");
-    if (!box) return;
     const current = document.documentElement.dataset.ds || "";
-    const opt = box.querySelector(`[data-ds-option="${current}"]`);
-    if (!opt) return;
-    box.querySelectorAll('[role="option"]').forEach((o) =>
-        o.setAttribute("aria-selected", String(o === opt)),
-    );
-    box.querySelector("[data-select-label]").textContent =
-        opt.textContent.trim();
+    document.querySelectorAll("[data-palette-ds]").forEach((btn) => {
+        const selected = btn.dataset.paletteDs === current;
+        btn.setAttribute("aria-selected", String(selected));
+        const check = btn.querySelector("[data-check]");
+        if (check) check.hidden = !selected;
+    });
+    const box = document.querySelector("[data-ds-switch]");
+    if (box) {
+        const opt = box.querySelector(`[data-ds-option="${current}"]`);
+        if (opt) {
+            box.querySelectorAll('[role="option"]').forEach((o) =>
+                o.setAttribute("aria-selected", String(o === opt)),
+            );
+            box.querySelector("[data-select-label]").textContent =
+                opt.textContent.trim();
+        }
+    }
     enforceScheme(current);
 }
 
@@ -402,40 +430,61 @@ document.body?.addEventListener("htmx:afterSettle", () => {
     syncOptionValues();
 });
 
-// Shared by the header button and Ctrl+T. A design system with only one scheme
-// has nothing to toggle to, so this is a no-op there rather than a swap to a
-// theme whose tokens the loaded stylesheet never defines.
+// Shared by the sun/moon button and Ctrl+T. Instant light/dark — no wipe.
+// The brush (data-ds-random) cycles design systems instead; see randomDesignSystem.
 function toggleTheme() {
     if (schemesFor(document.documentElement.dataset.ds).length === 1) return;
-    const next =
-        document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-    const swap = () =>
-        withoutTransitions(() => {
-            document.documentElement.dataset.theme = next;
-        });
-    // The new theme is wiped down over the old one from the top of the viewport,
-    // so the swap reads as a deliberate change rather than as a flash.
-    //
-    // Gated on data-motion, not on the media query: the attribute is already the
-    // OS preference with the site's Animation switch layered over it. The
-    // ::view-transition pseudo-elements also sit outside the blanket "zero every
-    // duration" rule in tokens.css - they are not descendants of <html> - so with
-    // motion off this is the only thing that can stop the wipe.
-    if (
-        document.startViewTransition &&
-        document.documentElement.dataset.motion !== "off"
-    ) {
-        document.startViewTransition(swap);
-    } else {
-        swap();
-    }
+    const root = document.documentElement;
+    const next = root.dataset.theme === "dark" ? "light" : "dark";
+    withoutTransitions(() => {
+        root.dataset.theme = next;
+    });
     try {
         localStorage.setItem("qompnt-theme", next);
     } catch (_) {}
 }
 
+// Brush: pick a random design system (not the current one) and wipe into it.
+function randomDesignSystem() {
+    const ids = designSystemIds();
+    if (!ids.length) return;
+    const current = document.documentElement.dataset.ds || "";
+    const pool = ids.length > 1 ? ids.filter((id) => id !== current) : ids;
+    const next = pool[Math.floor(Math.random() * pool.length)];
+
+    const apply = () =>
+        new Promise((resolve) => {
+            try {
+                if (next) localStorage.setItem("qompnt-ds", next);
+                else localStorage.removeItem("qompnt-ds");
+            } catch (_) {}
+            applyDesignSystemLink(next, {
+                onReady: () =>
+                    withoutTransitions(() => {
+                        syncDesignSystem();
+                        resolve();
+                    }),
+            });
+        });
+
+    const root = document.documentElement;
+    if (
+        document.startViewTransition &&
+        root.dataset.motion !== "off"
+    ) {
+        document.startViewTransition(() => apply());
+    } else {
+        apply();
+    }
+}
+
 document.addEventListener("click", async (e) => {
-    if (e.target.closest("[data-theme-toggle]")) {
+    if (e.target.closest("[data-ds-random]")) {
+        randomDesignSystem();
+        return;
+    }
+    const themeBtn = e.target.closest("[data-theme-toggle]");
+    if (themeBtn) {
         toggleTheme();
         return;
     }
@@ -443,17 +492,9 @@ document.addEventListener("click", async (e) => {
     // Search: the icon button becomes the field, the clear button undoes it.
     const openSearch = e.target.closest("[data-search-open]");
     if (openSearch) {
-        // No room for a field on a phone, so the same button opens the palette. The
-        // width is checked at click time rather than at load: a rotated phone or a
-        // resized window would otherwise keep whichever answer was right at boot.
-        //
-        // Only the one in the page header. Expanding Input is a component with this
-        // exact hook, and its demo has to keep expanding at every width - it is what
-        // the page is there to show.
-        if (
-            openSearch.closest("[data-sticky-header]") &&
-            matchMedia("(max-width: 639px)").matches
-        ) {
+        // Header search opens the palette only. Expanding Input is a component with
+        // this exact hook, and its demo has to keep expanding at every width.
+        if (openSearch.closest("[data-sticky-header]")) {
             openPalette();
             return;
         }
@@ -584,11 +625,11 @@ document.addEventListener("click", async (e) => {
 
 // ---- Command palette -------------------------------------------------------
 //
-// The whole component list is already in the page (see "palette" in
-// layout.html), so this filters rows rather than querying anything. Selection is
-// tracked as an index into the visible rows instead of by focusing them: the
-// input has to keep focus for typing to work, and arrow keys have to move the
-// highlight without moving the caret out of the field.
+// Components, theme actions and design systems are all in the page (see
+// "palette" in layout.html), so this filters rows rather than querying
+// anything. Selection is tracked as an index into the visible rows instead of
+// by focusing them: the input has to keep focus for typing to work, and arrow
+// keys have to move the highlight without moving the caret out of the field.
 //
 // ponytail: substring match on the name. Fuzzy matching goes in when a name is
 // long enough that people mistype it - thirty short names is not that.
@@ -626,7 +667,15 @@ function paletteFilter(q) {
         if (!r.hidden) shown++;
     });
     el.querySelector("[data-palette-empty]").hidden = shown > 0;
-    el.querySelector("[data-palette-heading]").hidden = shown === 0;
+    el.querySelectorAll("[data-palette-heading]").forEach((h) => {
+        const group = h.dataset.paletteGroup;
+        const hasVisible = group
+            ? [...el.querySelectorAll(
+                  `[data-palette-item][data-palette-group="${group}"]`,
+              )].some((r) => !r.hidden)
+            : false;
+        h.hidden = !hasVisible || shown === 0;
+    });
     paletteSelect(0);
 }
 
@@ -679,9 +728,21 @@ document.addEventListener("keydown", (e) => {
 // target is the dialog element itself landed outside the content.
 document.addEventListener("click", (e) => {
     if (e.target.matches("[data-palette]")) e.target.close();
+    const item = e.target.closest("[data-palette-item]");
+    if (!item) return;
+    if (item.dataset.paletteAction === "toggle-theme") {
+        toggleTheme();
+        palette.el.close();
+        return;
+    }
+    if (item.hasAttribute("data-palette-ds")) {
+        applyDesignSystem(item.dataset.paletteDs);
+        palette.el.close();
+        return;
+    }
     // htmx boosts navigation, so following a row swaps the page under an open
     // dialog and leaves it there.
-    if (e.target.closest("[data-palette-item]")) palette.el.close();
+    palette.el.close();
 });
 
 document.addEventListener("click", (e) => {
@@ -815,23 +876,70 @@ function restorePreferences() {
     if (motion) root.dataset.motion = motion;
 
     // Without transitions: this is a restore, not a change the visitor made, and
-    // a page fading between themes as it comes back reads as a bug.
-    withoutTransitions(() => {
-        if ((ds || "") !== (root.dataset.ds || "")) applyDesignSystemLink(ds || "");
+    // a page fading between themes as it comes back reads as a bug. Wait for the
+    // sheet when it has to load, so we do not sync under the wrong tokens.
+    applyDesignSystemLink(ds || "", {
+        onReady: () =>
+            withoutTransitions(() => {
+                syncDesignSystem();
+                syncMotion();
+                localiseShortcuts();
+            }),
     });
-
-    syncDesignSystem();
-    syncMotion();
-    localiseShortcuts();
 }
 
 // The stylesheet half of applyDesignSystem, without the persisting - the value
 // being restored came out of storage in the first place.
-function applyDesignSystemLink(name) {
+//
+// Swapping link.href in place drops the old sheet the moment the attribute
+// changes, so until the new file arrives the page falls back through the
+// default tokens (Claude). On a phone that gap is visible. Load the next
+// sheet beside the current one and only retire the old one once it is ready.
+let dsSwapGen = 0;
+function applyDesignSystemLink(name, { onReady } = {}) {
     const link = document.getElementById("ds");
-    if (link && name) link.href = `/static/themes/${name}.css?v=${assetV}`;
-    else if (link) link.removeAttribute("href");
     document.documentElement.dataset.ds = name || "";
+    if (!link) {
+        onReady?.();
+        return;
+    }
+
+    const gen = ++dsSwapGen;
+
+    if (!name) {
+        link.removeAttribute("href");
+        document.querySelectorAll('link[data-ds-pending]').forEach((el) => el.remove());
+        onReady?.();
+        return;
+    }
+
+    const href = `/static/themes/${name}.css?v=${assetV}`;
+    if (link.getAttribute("href") === href) {
+        onReady?.();
+        return;
+    }
+
+    document.querySelectorAll('link[data-ds-pending]').forEach((el) => el.remove());
+
+    const next = document.createElement("link");
+    next.rel = "stylesheet";
+    next.dataset.dsPending = "";
+    const finish = () => {
+        if (gen !== dsSwapGen) {
+            next.remove();
+            return;
+        }
+        link.remove();
+        delete next.dataset.dsPending;
+        next.id = "ds";
+        onReady?.();
+    };
+    // Handlers before href: a cached sheet can fire load synchronously on
+    // assign in some engines, and a handler attached after would miss it.
+    next.onload = finish;
+    next.onerror = finish;
+    next.href = href;
+    link.after(next);
 }
 
 window.addEventListener("pageshow", (e) => {

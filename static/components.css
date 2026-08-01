@@ -1373,13 +1373,11 @@ details[data-select][open] > [role='listbox'] {
   width: var(--knob-size);
   height: var(--knob-size);
   border-radius: var(--r-pill);
-  /* Not --knob. That token is the Slider's handle and a design system is free to
-     make it the brand colour - ClickHouse does, with the same yellow as
-     --primary - which on a switch means an off knob that reads as on and an on
-     knob the same colour as the track it sits on. A control with state names a
-     colour per state instead: off, a neutral that can never be the accent; on,
-     --primary-foreground, which is by definition what stays legible on
-     --primary, so this holds for themes not written yet. */
+  /* Not --knob. That token is the Slider's handle - a light grab surface on the
+     track. A switch has state, so each state names a colour instead: off, a
+     neutral that can never be the accent; on, --primary-foreground, which is by
+     definition what stays legible on --primary, so this holds for themes not
+     written yet. */
   background: color-mix(in oklab, var(--foreground) 55%, var(--background));
   color: var(--background);
   transition:
@@ -1673,10 +1671,15 @@ input:checked + .toggle [data-toggle-off] {
   opacity: 0;
   pointer-events: none;
 }
-.tip:hover::after,
-.tip:hover::before,
-.tip:focus-visible::after,
-.tip:focus-visible::before,
+/* Touch has no hover; :focus-visible after a tap was showing these on phones. */
+@media (hover: hover) and (pointer: fine) {
+  .tip:hover::after,
+  .tip:hover::before,
+  .tip:focus-visible::after,
+  .tip:focus-visible::before {
+    opacity: 1;
+  }
+}
 .tip-open::after,
 .tip-open::before {
   opacity: 1;
@@ -1708,18 +1711,23 @@ input:checked + .toggle [data-toggle-off] {
     opacity var(--motion) var(--ease),
     translate var(--motion) var(--ease);
 }
-.tip:hover::after,
-.tip:hover::before,
-.tip:focus-visible::after,
-.tip:focus-visible::before,
+@media (hover: hover) and (pointer: fine) {
+  .tip:hover::after,
+  .tip:hover::before,
+  .tip:focus-visible::after,
+  .tip:focus-visible::before {
+    translate: 0 0;
+    transition-delay: 300ms;
+  }
+  .tip:not(:hover)::after,
+  .tip:not(:hover)::before {
+    transition-delay: 0s;
+  }
+}
 .tip-open::after,
 .tip-open::before {
   translate: 0 0;
   transition-delay: 300ms;
-}
-.tip:not(:hover)::after,
-.tip:not(:hover)::before {
-  transition-delay: 0s;
 }
 /* Below the anchor, so it rises from the other side. */
 .tip-bottom::after,
