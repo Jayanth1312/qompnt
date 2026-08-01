@@ -959,11 +959,11 @@ window.addEventListener("pageshow", (e) => {
 // navigation the browser performs. Same failure, same fix.
 document.body?.addEventListener("htmx:historyRestore", restorePreferences);
 
-// Home component hover preview: 500ms delay, cursor-follow, one popover.
+// Home component hover preview: 300ms delay, cursor-follow, one popover.
 // Document-level mouseover/mouseout so hx-boost swaps need no rebind, and
 // nested <span>s inside .home-comp-row links do not restart the timer.
 (() => {
-    const DELAY = 500;
+    const DELAY = 300;
     const OFFSET = 16;
 
     const finePointer = () =>
