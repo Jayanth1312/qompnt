@@ -55,7 +55,7 @@ try {
 </script>
 </head>
 <body class="bg-background font-sans text-foreground antialiased" hx-boost="true">
-  <main class="mx-auto max-w-[688px] px-5 py-16">
+  <main class="mx-auto max-w-[688px] px-5 pb-16 pt-8">
     {{template "content" .}}
   </main>
   <!-- Toast stack, so the Toast preview has somewhere to land. -->
@@ -104,7 +104,7 @@ try {
 <!-- Shared shell: small wordmark, no mark icon, sticky blur. Gallery keeps
      search; design systems are cycled by the brush, not a dropdown. -->
 <header data-sticky-header class="sticky top-0 z-30 -mx-5 mb-8 flex items-center gap-[2px] px-5 py-3">
-  <a href="/" class="mr-auto shrink-0 font-sans font-500 text-[15px] leading-none text-foreground no-underline">Qompnt</a>
+  <a href="/" class="mr-auto shrink-0 font-sans font-500 text-[15px] leading-none text-site-foreground no-underline">Qompnt</a>
 
   <div class="flex shrink-0 items-center gap-[2px]">
     {{if not .Home}}
