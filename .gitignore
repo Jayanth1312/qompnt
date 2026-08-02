@@ -34,6 +34,7 @@ components/*/notes.md
 # docs. README.md is what this repo publishes.
 docs/
 .agents
+.web-kits
 
 /component_test.go
 /dist/

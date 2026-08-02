@@ -1,5 +1,6 @@
-// UI sounds — adapted from a vanilla Web Audio sound.ts (clock ticks, clicks, etc.).
-// Kept separate from @web-kits/audio (vendored under static/vendor/).
+// UI sounds. Chrome controls use Minimal-patch sine cues (select, expand, pop,
+// toggle-on) ported from .web-kits/minimal.ts. Older noise-based sounds remain
+// for anything that still calls them.
 
 let audioContext = null;
 
@@ -13,7 +14,84 @@ function getAudioContext() {
     return audioContext;
 }
 
+// Minimal patch: sine + ADSR with sustain 0. `freq` is Hz or { start, end }.
+// Gains are scaled up from the patch's whisper-quiet defaults.
+function playMinimalSine(
+    freq,
+    { attack = 0, decay = 0.015, release = 0.005, gain = 0.1, delay = 0 } = {},
+) {
+    const run = () => {
+        const ctx = getAudioContext();
+        const t = ctx.currentTime + delay;
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        osc.type = "sine";
+        const dur = Math.max(attack + decay + release, 0.02);
+        if (typeof freq === "object") {
+            const start = Math.max(freq.start, 1);
+            const end = Math.max(freq.end, 1);
+            osc.frequency.setValueAtTime(start, t);
+            osc.frequency.exponentialRampToValueAtTime(end, t + dur);
+        } else {
+            osc.frequency.value = freq;
+        }
+        const peak = Math.min(gain * 4.5, 0.45);
+        g.gain.setValueAtTime(0.0001, t);
+        if (attack > 0) g.gain.linearRampToValueAtTime(peak, t + attack);
+        else g.gain.setValueAtTime(peak, t);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        osc.connect(g);
+        g.connect(ctx.destination);
+        osc.start(t);
+        osc.stop(t + dur + 0.02);
+    };
+
+    const ctx = getAudioContext();
+    if (ctx.state === "suspended") {
+        ctx.resume().then(run).catch(() => {});
+    } else {
+        run();
+    }
+}
+
 const sounds = {
+    // ---- Minimal patch (chrome) --------------------------------------------
+    select() {
+        try {
+            playMinimalSine(1100, { decay: 0.02, release: 0.006, gain: 0.08 });
+        } catch (_) {}
+    },
+
+    expand() {
+        try {
+            playMinimalSine(
+                { start: 800, end: 1000 },
+                { decay: 0.04, release: 0.012, gain: 0.06 },
+            );
+        } catch (_) {}
+    },
+
+    pop() {
+        try {
+            playMinimalSine(
+                { start: 400, end: 200 },
+                { decay: 0.04, release: 0.012, gain: 0.1 },
+            );
+        } catch (_) {}
+    },
+
+    "toggle-on"() {
+        try {
+            playMinimalSine(880, { decay: 0.02, release: 0.006, gain: 0.08 });
+            playMinimalSine(1320, {
+                decay: 0.02,
+                release: 0.006,
+                gain: 0.07,
+                delay: 0.03,
+            });
+        } catch (_) {}
+    },
+
     click() {
         try {
             const ctx = getAudioContext();
@@ -43,28 +121,6 @@ const sounds = {
             filter.connect(gain);
             gain.connect(ctx.destination);
             noise.start(t);
-        } catch (_) {}
-    },
-
-    pop() {
-        try {
-            const ctx = getAudioContext();
-            const t = ctx.currentTime;
-
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-
-            osc.type = "sine";
-            osc.frequency.setValueAtTime(400, t);
-            osc.frequency.exponentialRampToValueAtTime(150, t + 0.04);
-
-            gain.gain.setValueAtTime(0.35, t);
-            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
-
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.start(t);
-            osc.stop(t + 0.05);
         } catch (_) {}
     },
 

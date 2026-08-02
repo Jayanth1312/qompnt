@@ -268,7 +268,8 @@ const assetV =
 
 // ---- UI sounds --------------------------------------------------------------
 // Definitions live in static/sounds.js (window.qompntSounds). Silent when
-// motion is off. @web-kits/audio stays vendored under static/vendor/ for later.
+// motion is off. Chrome uses Minimal-patch names: select, expand, pop,
+// toggle-on.
 function playUi(name) {
     if (document.documentElement.dataset.motion === "off") return;
     try {
@@ -471,7 +472,7 @@ function toggleTheme() {
     if (schemesFor(document.documentElement.dataset.ds).length === 1) return;
     const root = document.documentElement;
     const next = root.dataset.theme === "dark" ? "light" : "dark";
-    playUi("toggle");
+    playUi("toggle-on");
     const apply = () => {
         withoutTransitions(() => {
             root.dataset.theme = next;
@@ -495,6 +496,7 @@ function cycleDesignSystem() {
     const i = ids.indexOf(current);
     const next = ids[(i + 1) % ids.length];
 
+    playUi("select");
     try {
         if (next) localStorage.setItem("qompnt-ds", next);
         else localStorage.removeItem("qompnt-ds");
@@ -603,7 +605,6 @@ document.addEventListener("click", async (e) => {
             await copyText(cmd);
             copyCmd.dataset.copied = "";
             copyCmd.setAttribute("aria-label", "Copied");
-            playUi("click");
         } catch (_) {
             copyCmd.setAttribute("aria-label", "Copy failed");
         }
@@ -623,7 +624,6 @@ document.addEventListener("click", async (e) => {
             const res = await fetch(copySrc.dataset.copySrc);
             await copyText(await res.text());
             copySrc.setAttribute("aria-label", "Copied");
-            playUi("click");
         } catch (_) {
             copySrc.setAttribute("aria-label", "Copy failed");
         }
@@ -646,7 +646,6 @@ document.addEventListener("click", async (e) => {
         try {
             await copyText(code.textContent);
             pane.setAttribute("aria-label", "Copied");
-            playUi("click");
         } catch (_) {
             pane.setAttribute("aria-label", "Copy failed");
         }
@@ -665,7 +664,6 @@ document.addEventListener("click", async (e) => {
         try {
             await copyText(code.textContent);
             copy.setAttribute("aria-label", "Copied");
-            playUi("click");
         } catch (_) {
             copy.setAttribute("aria-label", "Copy failed");
         }
@@ -910,7 +908,6 @@ document.addEventListener("click", async (e) => {
             await copyText(text);
             btn.dataset.copied = "";
             btn.setAttribute("aria-label", "Copied");
-            playUi("click");
             const icon = btn.querySelector("[data-docs-copy-icon]");
             if (icon) {
                 icon.classList.remove("ph-copy");
@@ -1040,6 +1037,7 @@ function paletteFilter(q) {
 function openPalette() {
     const el = palette.el;
     if (!el || el.open) return;
+    playUi("expand");
     palette.view = "root";
     el.showModal();
     const input = el.querySelector("[data-palette-input]");
@@ -1416,7 +1414,7 @@ document.body?.addEventListener("htmx:historyRestore", restorePreferences);
         if (!list) return;
         const cur = list.dataset.sort || "asc";
         sortHome(cur === "asc" ? "desc" : "asc");
-        playUi("tick");
+        playUi("pop");
     });
 
     document.body?.addEventListener("htmx:beforeSwap", () => {
