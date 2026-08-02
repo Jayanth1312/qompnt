@@ -1,10 +1,13 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"io/fs"
 	"net/http"
 	"path"
+	"sort"
 	"strings"
 )
 
@@ -247,4 +250,122 @@ func writeJSON(w http.ResponseWriter, v any) {
 	if err := enc.Encode(v); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+}
+
+// CLI installer manifest. Thin qomp binary pulls this, then fetches item JSON
+// and static assets by URL. Hashes let update skip unchanged files.
+type cliManifest struct {
+	Version  string            `json:"version"`
+	Registry string            `json:"registry"`
+	Minimal  []string          `json:"minimal"`
+	Themes   []cliTheme        `json:"themes"`
+	Components []cliComponent  `json:"components"`
+	Assets   cliAssets         `json:"assets"`
+}
+
+type cliTheme struct {
+	ID    string `json:"id"`
+	Title string `json:"title"`
+	URL   string `json:"url,omitempty"` // empty for claude (tokens only)
+	Hash  string `json:"hash,omitempty"`
+}
+
+type cliComponent struct {
+	Slug        string   `json:"slug"`
+	Title       string   `json:"title"`
+	Description string   `json:"description,omitempty"`
+	Tags        []string `json:"tags,omitempty"`
+	URL         string   `json:"url"`
+	Hash        string   `json:"hash"`
+}
+
+type cliAssets struct {
+	Tokens string `json:"tokens"`
+	Utils  string `json:"utils"`
+}
+
+// minimalCLIComponents is the "Minimal installation" preset for qomp init.
+var minimalCLIComponents = []string{
+	"button", "input", "checkbox", "card", "alert", "badge",
+}
+
+func (s *server) handleCLIManifest(w http.ResponseWriter, r *http.Request) {
+	cs, _ := s.snapshot()
+	base := baseURL(r)
+
+	themes, err := listCLIThemes(base)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	comps := make([]cliComponent, 0, len(cs))
+	for _, c := range cs {
+		comps = append(comps, cliComponent{
+			Slug:        c.Slug,
+			Title:       c.Name,
+			Description: c.Blurb,
+			Tags:        c.Tags,
+			URL:         base + "/r/" + c.Slug + ".json",
+			Hash:        componentHash(c),
+		})
+	}
+
+	m := cliManifest{
+		Version:  s.assetVersion(),
+		Registry: base,
+		Minimal:  append([]string(nil), minimalCLIComponents...),
+		Themes:   themes,
+		Components: comps,
+		Assets: cliAssets{
+			Tokens: base + "/static/tokens.css",
+			Utils:  base + "/static/qompnt.css",
+		},
+	}
+	writeJSON(w, m)
+}
+
+func listCLIThemes(base string) ([]cliTheme, error) {
+	out := []cliTheme{{
+		ID:    "claude",
+		Title: "Claude",
+	}}
+	entries, err := fs.ReadDir(assets, "static/themes")
+	if err != nil {
+		return out, err
+	}
+	var ids []string
+	for _, e := range entries {
+		if e.IsDir() || !strings.HasSuffix(e.Name(), ".css") {
+			continue
+		}
+		ids = append(ids, strings.TrimSuffix(e.Name(), ".css"))
+	}
+	sort.Strings(ids)
+	for _, id := range ids {
+		body, err := fs.ReadFile(assets, path.Join("static/themes", id+".css"))
+		if err != nil {
+			return out, err
+		}
+		sum := sha256.Sum256(body)
+		out = append(out, cliTheme{
+			ID:    id,
+			Title: strings.ToUpper(id[:1]) + id[1:],
+			URL:   base + "/static/themes/" + id + ".css",
+			Hash:  hex.EncodeToString(sum[:]),
+		})
+	}
+	return out, nil
+}
+
+func componentHash(c Component) string {
+	h := sha256.New()
+	for _, f := range c.Files {
+		h.Write([]byte(f.Name))
+		h.Write([]byte{0})
+		h.Write([]byte(f.Body))
+		h.Write([]byte{0})
+	}
+	h.Write([]byte(c.Styles))
+	return hex.EncodeToString(h.Sum(nil))
 }

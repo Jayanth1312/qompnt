@@ -13,6 +13,7 @@ consumer's project.
 ```
 make dev      # generate CSS, then serve on :8080 with live reload
 make          # generate CSS and build the ./qompnt binary
+make qomp     # build the ./qomp installer CLI
 make test     # go test ./...
 ```
 
@@ -37,6 +38,30 @@ Then `make css`, because the stylesheet only contains classes that appear in the
 markup. Forgetting this is the one way to get an unstyled component.
 
 ## Consuming a component
+
+**qomp CLI.** Thin Go installer — pulls from the registry, caches under
+`~/.cache/qomp`, writes `qomp.json` and files under `components/qompnt/`.
+
+```
+make qomp
+# or: go install qompnt/cmd/qomp@latest   (from this module once published)
+
+qomp --registry http://localhost:8080          # interactive init
+qomp init --registry https://<host> \
+  --theme apple --accent '#0071e3' --components minimal
+qomp add accordion
+qomp update
+```
+
+`--components` accepts `all`, `minimal`, `none`, or a comma-separated slug list.
+Link the stylesheets from `components/qompnt/styles/` (`tokens.css`,
+`qompnt.css`, optional `theme.css` / `accent.css`, plus any per-component CSS).
+
+Package managers (Homebrew, Scoop, winget) come after GitHub Releases are
+stable. Until then download a release asset from
+https://github.com/Jayanth1312/qompnt/releases or build with `make qomp`.
+
+Default registry: `https://qompnt.vercel.app` (`--registry` / `QOMP_REGISTRY` to override).
 
 **Copy-paste.** Take the markup from the Code section and link the two
 stylesheets:
@@ -67,8 +92,8 @@ uses — the token names are identical either way.
 ```
 main.go           routes, startup scan
 component.go      Component, loaded from disk
-registry.go       shadcn registry JSON, plus the token maps
-markdown.go       the "Copy markdown" blob
+registry.go       shadcn registry JSON, CLI manifest, token maps
+cmd/qomp/         installer CLI (init / add / update)
 demo.go           endpoints backing the interactive previews
 uno.config.ts     design tokens as an UnoCSS theme
 templates/        layout.html (shell), home.html (index), detail.html

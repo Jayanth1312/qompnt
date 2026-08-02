@@ -47,8 +47,27 @@
         </summary>
         <p class="pb-4 pr-6 text-body-sm text-muted-foreground">
           A small library of HTML components styled with a token contract.
-          Use them as copy-paste markup or install via the shadcn registry.
+          Install with the <code class="rounded-sm bg-secondary px-1 text-caption">qomp</code> CLI,
+          copy-paste markup, or pull from the shadcn registry.
           The site itself is the living catalog.
+        </p>
+      </details>
+
+      <details name="home-faq" class="group">
+        <summary
+          class="flex cursor-pointer list-none items-center justify-between gap-3 py-3.5 text-body-md font-400 text-foreground">
+          How do I install the CLI?
+          <i class="ph ph-caret-right shrink-0 text-[14px] text-muted-foreground transition-transform group-open:rotate-90" aria-hidden="true"></i>
+        </summary>
+        <p class="pb-4 pr-6 text-body-sm text-muted-foreground">
+          Download <code class="rounded-sm bg-secondary px-1 text-caption">qomp</code> from
+          <a class="underline underline-offset-2" href="https://github.com/Jayanth1312/qompnt/releases">GitHub Releases</a>
+          (latest: <code class="rounded-sm bg-secondary px-1 text-caption">v1.0.0</code>),
+          put it on your <code class="rounded-sm bg-secondary px-1 text-caption">PATH</code>, then in any project run
+          <code class="rounded-sm bg-secondary px-1 text-caption">qomp init</code>.
+          It pulls themes and components from this site into
+          <code class="rounded-sm bg-secondary px-1 text-caption">components/qompnt/</code>.
+          Homebrew, Scoop, and winget come next once the release pipeline is stable.
         </p>
       </details>
 
@@ -59,11 +78,13 @@
           <i class="ph ph-caret-right shrink-0 text-[14px] text-muted-foreground transition-transform group-open:rotate-90" aria-hidden="true"></i>
         </summary>
         <p class="pb-4 pr-6 text-body-sm text-muted-foreground">
-          Open any component page, copy the HTML from the Code section, and
-          link <code class="rounded-sm bg-secondary px-1 text-caption">tokens.css</code>
+          Prefer
+          <code class="rounded-sm bg-secondary px-1 text-caption">qomp add &lt;slug&gt;</code>
+          after init. Or open any component page, copy the HTML, and link
+          <code class="rounded-sm bg-secondary px-1 text-caption">tokens.css</code>
           plus <code class="rounded-sm bg-secondary px-1 text-caption">qompnt.css</code>.
           Or run
-          <code class="rounded-sm bg-secondary px-1 text-caption">npx shadcn@latest add https://&lt;host&gt;/r/&lt;slug&gt;.json</code>.
+          <code class="rounded-sm bg-secondary px-1 text-caption">npx shadcn@latest add https://qompnt.vercel.app/r/&lt;slug&gt;.json</code>.
         </p>
       </details>
 

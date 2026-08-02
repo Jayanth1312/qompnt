@@ -83,6 +83,7 @@ func main() {
 	mux.HandleFunc("GET /prompt/{slug}", s.handlePrompt)
 	// ServeMux wildcards must be whole segments, so ".json" cannot be a literal
 	// suffix in the pattern - one handler takes the filename and splits it.
+	mux.HandleFunc("GET /r/cli/manifest.json", s.handleCLIManifest)
 	mux.HandleFunc("GET /r/{file}", s.handleRegistry)
 	// More specific than the pattern below it, so ServeMux routes the generated
 	// stylesheet here and the rest to the files.
