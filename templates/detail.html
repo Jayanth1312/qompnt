@@ -13,7 +13,7 @@
 <header data-sticky-header class="sticky top-0 z-30 -mx-5 mb-3 flex items-center gap-[2px] px-5 py-3">
   <!-- truncate, not wrap: a long component name must not push the controls onto
        a second row on a phone. -->
-  <h1 class="mr-auto truncate text-title-md text-site-foreground sm:text-title-lg">{{.Name}}</h1>
+  <h2 class="mr-auto truncate leading-none text-site-foreground" style="font-weight: 500;">{{.Name}}</h2>
   <div class="flex shrink-0 items-center gap-[2px]">
     {{template "themepen" .}}
     {{template "themetoggle" .}}
