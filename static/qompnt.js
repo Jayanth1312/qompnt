@@ -554,22 +554,23 @@ document.addEventListener("click", async (e) => {
     const copyCmd = e.target.closest("[data-copy-cmd]");
     if (copyCmd) {
         const cmd = copyCmd.dataset.copyCmd;
-        const label = copyCmd.dataset.copyLabel || copyCmd.textContent.trim();
-        copyCmd.dataset.copyLabel = label;
+        const label =
+            copyCmd.querySelector("[data-install-label]")?.textContent.trim() ||
+            copyCmd.textContent.trim();
         try {
             await copyText(cmd);
             copyCmd.dataset.copied = "";
-            copyCmd.textContent = "🎉 Copied!";
             copyCmd.setAttribute("aria-label", "Copied");
         } catch (_) {
-            copyCmd.textContent = "failed";
             copyCmd.setAttribute("aria-label", "Copy failed");
         }
         setTimeout(() => {
-            copyCmd.textContent = label;
             copyCmd.removeAttribute("data-copied");
-            copyCmd.setAttribute("aria-label", `Copy ${label} install command`);
-        }, 1600);
+            copyCmd.setAttribute(
+                "aria-label",
+                `Copy ${label} install command`,
+            );
+        }, 1200);
         return;
     }
 
@@ -676,6 +677,216 @@ document.addEventListener("click", async (e) => {
     });
 });
 
+// ---- Docs deep links --------------------------------------------------------
+//
+// /docs and /docs/{section} share one page. Nav links pushState and scroll so
+// the pretty path stays in the bar without a reload. Full loads (and htmx
+// swaps from elsewhere) read the path and jump to the matching section id.
+(function () {
+    const HEADER_OFFSET = 64;
+
+    function docsSectionFromPath(pathname) {
+        const m = pathname.match(/^\/docs\/([^/]+)\/?$/);
+        return m ? m[1] : "";
+    }
+
+    function scrollToDocsSection(id, { instant } = {}) {
+        if (!id) return;
+        const el = document.getElementById(id);
+        if (!el) return;
+        const top =
+            el.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET;
+        window.scrollTo({
+            top: Math.max(0, top),
+            behavior: instant ? "auto" : "smooth",
+        });
+    }
+
+    function applyDocsPath({ instant } = {}) {
+        if (!document.querySelector("[data-docs]")) return;
+        scrollToDocsSection(docsSectionFromPath(location.pathname), {
+            instant,
+        });
+    }
+
+    document.addEventListener("click", (e) => {
+        const link = e.target.closest("[data-docs-nav] a[href^='/docs/']");
+        if (!link) return;
+        const url = new URL(link.href, location.origin);
+        if (url.origin !== location.origin) return;
+        const id = docsSectionFromPath(url.pathname);
+        if (!id) return;
+        e.preventDefault();
+        history.pushState(null, "", url.pathname);
+        scrollToDocsSection(id);
+        const details = link.closest("details");
+        if (details) details.open = false;
+    });
+
+    window.addEventListener("popstate", () => applyDocsPath());
+
+    // Script is at the bottom of <body>, so the nav is already in the DOM.
+    applyDocsPath({ instant: true });
+    document.body?.addEventListener("htmx:afterSettle", () =>
+        applyDocsPath({ instant: true }),
+    );
+})();
+
+// ---- Docs code blocks: copy + token highlight --------------------------------
+//
+// Colours come from CSS variables (.tok-* → --primary / --muted-foreground /
+// --code-foreground). No hex in JS. Keep the tokenizer small: shell, html, js.
+(function () {
+    function esc(s) {
+        return s
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+    }
+
+    function wrap(cls, text) {
+        return `<span class="${cls}">${esc(text)}</span>`;
+    }
+
+    function highlightShell(src) {
+        return src
+            .split(/(\n)/)
+            .map((part) => {
+                if (part === "\n") return part;
+                if (/^\s*#/.test(part)) return wrap("tok-comment", part);
+                return part.replace(
+                    /^(\s*)([a-zA-Z][\w-]*)/,
+                    (_, sp, cmd) => sp + wrap("tok-keyword", cmd),
+                );
+            })
+            .join("");
+    }
+
+    function highlightHtml(src) {
+        let out = "";
+        const re =
+            /(<!--[\s\S]*?-->)|(<\/?[a-zA-Z!][\w:-]*)|("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')|([=/?>])/g;
+        let last = 0;
+        let m;
+        while ((m = re.exec(src))) {
+            out += esc(src.slice(last, m.index));
+            if (m[1]) out += wrap("tok-comment", m[1]);
+            else if (m[2]) out += wrap("tok-tag", m[2]);
+            else if (m[3]) out += wrap("tok-string", m[3]);
+            else if (m[4]) out += wrap("tok-punct", m[4]);
+            last = re.lastIndex;
+        }
+        out += esc(src.slice(last));
+        return out.replace(
+            /(<\/span>)([^<]*?)(?=<span class="tok-(?:punct|tag)"|<\/span>$|$)/g,
+            (all, close, mid) => {
+                if (!/\s[a-zA-Z_]/.test(mid)) return all;
+                return (
+                    close +
+                    mid.replace(
+                        /(\s)([a-zA-Z_:][\w:.-]*)(?=\s*=)/g,
+                        (_, sp, name) => sp + wrap("tok-attr", name),
+                    )
+                );
+            },
+        );
+    }
+
+    function highlightJs(src) {
+        const kw =
+            /\b(import|from|export|default|function|return|const|let|var|class|async|await|new|typeof|if|else)\b/g;
+        let out = "";
+        const re =
+            /(\/\/[^\n]*|\/\*[\s\S]*?\*\/)|("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`(?:\\.|[^`\\])*`)|([{}()[\];,])/g;
+        let last = 0;
+        let m;
+        while ((m = re.exec(src))) {
+            out += esc(src.slice(last, m.index)).replace(
+                kw,
+                (w) => `<span class="tok-keyword">${w}</span>`,
+            );
+            if (m[1]) out += wrap("tok-comment", m[1]);
+            else if (m[2]) out += wrap("tok-string", m[2]);
+            else if (m[3]) out += wrap("tok-punct", m[3]);
+            last = re.lastIndex;
+        }
+        out += esc(src.slice(last)).replace(
+            kw,
+            (w) => `<span class="tok-keyword">${w}</span>`,
+        );
+        return out;
+    }
+
+    function highlight(lang, src) {
+        if (lang === "shell") return highlightShell(src);
+        if (lang === "html") return highlightHtml(src);
+        if (lang === "js") return highlightJs(src);
+        return esc(src);
+    }
+
+    function ensureDocsCodeBar(block) {
+        if (block.querySelector("[data-docs-code-bar]")) return;
+        const code = block.querySelector("code[data-lang]");
+        const btn = block.querySelector("[data-docs-copy]");
+        if (!code || !btn) return;
+        const bar = document.createElement("div");
+        bar.className = "docs-code-bar";
+        bar.dataset.docsCodeBar = "";
+        const lang = document.createElement("span");
+        lang.className = "docs-code-lang";
+        lang.textContent = code.dataset.lang || "code";
+        bar.append(lang, btn);
+        block.insertBefore(bar, block.firstChild);
+    }
+
+    function paintDocsCode() {
+        document.querySelectorAll("[data-docs-code]").forEach(ensureDocsCodeBar);
+        document
+            .querySelectorAll("[data-docs-code] code[data-lang]")
+            .forEach((el) => {
+                if (el.dataset.highlighted) return;
+                const lang = el.dataset.lang;
+                const raw = el.textContent;
+                el.dataset.raw = raw;
+                el.innerHTML = highlight(lang, raw);
+                el.dataset.highlighted = "1";
+            });
+    }
+
+    document.addEventListener("click", async (e) => {
+        const btn = e.target.closest("[data-docs-copy]");
+        if (!btn) return;
+        const block = btn.closest("[data-docs-code]");
+        const code = block?.querySelector("code");
+        if (!code) return;
+        const text = code.dataset.raw || code.textContent;
+        try {
+            await copyText(text);
+            btn.dataset.copied = "";
+            btn.setAttribute("aria-label", "Copied");
+            const icon = btn.querySelector("[data-docs-copy-icon]");
+            if (icon) {
+                icon.classList.remove("ph-copy");
+                icon.classList.add("ph-check");
+            }
+        } catch {
+            btn.setAttribute("aria-label", "Copy failed");
+        }
+        setTimeout(() => {
+            btn.removeAttribute("data-copied");
+            btn.setAttribute("aria-label", "Copy code");
+            const icon = btn.querySelector("[data-docs-copy-icon]");
+            if (icon) {
+                icon.classList.remove("ph-check");
+                icon.classList.add("ph-copy");
+            }
+        }, 1600);
+    });
+
+    paintDocsCode();
+    document.body?.addEventListener("htmx:afterSettle", paintDocsCode);
+})();
+
 // ---- Command palette -------------------------------------------------------
 //
 // Components, theme actions and design systems are all in the page (see
@@ -684,6 +895,9 @@ document.addEventListener("click", async (e) => {
 // by focusing them: the input has to keep focus for typing to work, and arrow
 // keys have to move the highlight without moving the caret out of the field.
 //
+// Themes drill in like VS Code: root shows "Themes >", then a nested list.
+// Escape in a nested view goes back rather than closing.
+//
 // ponytail: substring match on the name. Fuzzy matching goes in when a name is
 // long enough that people mistype it - thirty short names is not that.
 const palette = {
@@ -691,6 +905,7 @@ const palette = {
         return document.querySelector("[data-palette]");
     },
     index: 0,
+    view: "root",
 };
 
 function paletteRows() {
@@ -710,31 +925,75 @@ function paletteSelect(i) {
     rows[palette.index].scrollIntoView({ block: "nearest" });
 }
 
+function paletteSetView(view) {
+    palette.view = view;
+    const input = palette.el?.querySelector("[data-palette-input]");
+    if (input) input.value = "";
+    paletteFilter("");
+    input?.focus();
+}
+
 function paletteFilter(q) {
     const needle = q.trim().toLowerCase();
     const el = palette.el;
+    const view = palette.view || "root";
     let shown = 0;
     el.querySelectorAll("[data-palette-item]").forEach((r) => {
-        r.hidden =
-            needle !== "" && !r.dataset.name.toLowerCase().includes(needle);
+        const scope = r.dataset.paletteScope || "root";
+        const match =
+            needle === "" || r.dataset.name.toLowerCase().includes(needle);
+        const isBack = r.hasAttribute("data-palette-back");
+        const isTheme = r.hasAttribute("data-palette-ds");
+        let visible;
+        if (view === "themes") {
+            visible = scope === "themes" && (isBack || match);
+        } else if (needle !== "" && isTheme && match) {
+            // Root search: surface matching design systems without drilling in.
+            visible = true;
+        } else {
+            visible = scope === view && match;
+        }
+        r.hidden = !visible;
         if (!r.hidden) shown++;
     });
     el.querySelector("[data-palette-empty]").hidden = shown > 0;
     el.querySelectorAll("[data-palette-heading]").forEach((h) => {
         const group = h.dataset.paletteGroup;
+        const scope = h.dataset.paletteScope || "root";
         const hasVisible = group
             ? [...el.querySelectorAll(
                   `[data-palette-item][data-palette-group="${group}"]`,
               )].some((r) => !r.hidden)
             : false;
+        // Themes heading can appear under root when a DS name is typed.
+        const rootThemeHits =
+            view === "root" &&
+            needle !== "" &&
+            group === "themes" &&
+            hasVisible;
+        if (scope !== view && !rootThemeHits) {
+            h.hidden = true;
+            return;
+        }
         h.hidden = !hasVisible || shown === 0;
     });
-    paletteSelect(0);
+    // In Themes, land on the first theme — not the back row.
+    const rows = [...el.querySelectorAll("[data-palette-item]")].filter(
+        (r) => !r.hidden,
+    );
+    let start = 0;
+    if (view === "themes" || (view === "root" && needle !== "")) {
+        const i = rows.findIndex((r) => !r.hasAttribute("data-palette-back"));
+        if (i >= 0 && view === "themes") start = i;
+    }
+    palette.index = 0;
+    paletteSelect(start);
 }
 
 function openPalette() {
     const el = palette.el;
     if (!el || el.open) return;
+    palette.view = "root";
     el.showModal();
     const input = el.querySelector("[data-palette-input]");
     input.value = "";
@@ -773,9 +1032,29 @@ document.addEventListener("keydown", (e) => {
     } else if (e.key === "Enter") {
         e.preventDefault();
         paletteRows()[palette.index]?.click();
+    } else if (
+        e.key === "Backspace" &&
+        palette.view !== "root" &&
+        e.target.matches("[data-palette-input]") &&
+        !e.target.value
+    ) {
+        e.preventDefault();
+        paletteSetView("root");
     }
-    // Escape is <dialog>'s own, and it already does the right thing.
 });
+
+// Escape in a nested view goes back; otherwise the dialog closes as usual.
+document.addEventListener(
+    "cancel",
+    (e) => {
+        if (!e.target.matches("[data-palette]")) return;
+        if (palette.view !== "root") {
+            e.preventDefault();
+            paletteSetView("root");
+        }
+    },
+    true,
+);
 
 // Clicking the backdrop closes. The dialog fills its own box, so a click whose
 // target is the dialog element itself landed outside the content.
@@ -783,6 +1062,14 @@ document.addEventListener("click", (e) => {
     if (e.target.matches("[data-palette]")) e.target.close();
     const item = e.target.closest("[data-palette-item]");
     if (!item) return;
+    if (item.hasAttribute("data-palette-back")) {
+        paletteSetView("root");
+        return;
+    }
+    if (item.dataset.paletteDrill) {
+        paletteSetView(item.dataset.paletteDrill);
+        return;
+    }
     if (item.dataset.paletteAction === "toggle-theme") {
         toggleTheme();
         palette.el.close();
@@ -1033,6 +1320,41 @@ document.body?.addEventListener("htmx:historyRestore", restorePreferences);
         el.replaceChildren();
     }
 
+    function enterRow(row, x, y) {
+        if (!finePointer()) return;
+        if (!row?.closest?.("[data-home-components]")) return;
+        if (activeRow === row) return;
+
+        hide();
+        activeRow = row;
+        lastX = x;
+        lastY = y;
+        const slug = row.dataset.slug;
+        timer = window.setTimeout(() => {
+            timer = 0;
+            if (activeRow !== row) return;
+            show(slug, lastX, lastY);
+        }, DELAY);
+    }
+
+    function syncRowUnderCursor() {
+        if (!finePointer()) return;
+        const hit = document.elementFromPoint(lastX, lastY);
+        const row = hit?.closest?.(".home-comp-row[data-slug]");
+        if (!row) return;
+        enterRow(row, lastX, lastY);
+    }
+
+    function dismissOnScroll(e) {
+        if (e?.clientX != null) lastX = e.clientX;
+        if (e?.clientY != null) lastY = e.clientY;
+        hide();
+        // Layout settles after scroll; re-hover whatever is now under the pointer.
+        requestAnimationFrame(() => {
+            requestAnimationFrame(syncRowUnderCursor);
+        });
+    }
+
     function place(el, x, y) {
         // clientX/Y are viewport coords; el is position:fixed on <body>.
         const w = el.offsetWidth;
@@ -1183,18 +1505,7 @@ document.body?.addEventListener("htmx:historyRestore", restorePreferences);
         if (!row || !row.closest("[data-home-components]")) return;
         // Moving between descendants of the same row — ignore.
         if (row.contains(e.relatedTarget)) return;
-        if (activeRow === row) return;
-
-        hide();
-        activeRow = row;
-        lastX = e.clientX;
-        lastY = e.clientY;
-        const slug = row.dataset.slug;
-        timer = window.setTimeout(() => {
-            timer = 0;
-            if (activeRow !== row) return;
-            show(slug, lastX, lastY);
-        }, DELAY);
+        enterRow(row, e.clientX, e.clientY);
     });
 
     document.addEventListener("mouseout", (e) => {
@@ -1207,15 +1518,23 @@ document.body?.addEventListener("htmx:historyRestore", restorePreferences);
     document.addEventListener(
         "pointermove",
         (e) => {
-            if (!activeRow || !activeRow.contains(e.target)) return;
             lastX = e.clientX;
             lastY = e.clientY;
+            if (!activeRow || !activeRow.contains(e.target)) return;
             const el = pop();
             if (!el || el.hidden || !el.hasAttribute("data-open")) return;
             place(el, lastX, lastY);
         },
         true,
     );
+
+    // Scroll moves rows under a stationary cursor without mouseout — dismiss,
+    // then re-enter hover on whatever row ended up under the pointer.
+    document.addEventListener("scroll", dismissOnScroll, true);
+    document.addEventListener("wheel", dismissOnScroll, {
+        capture: true,
+        passive: true,
+    });
 
     // Pop host is on <body>; clear it when the boosted page leaves home.
     document.body?.addEventListener("htmx:beforeSwap", hide);

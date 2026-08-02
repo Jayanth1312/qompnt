@@ -1,0 +1,336 @@
+{{define "content"}}
+<a href="/" class="mb-4 inline-flex items-center gap-1.5 rounded-pill border border-border bg-secondary px-3 py-1.5 text-body-sm leading-none text-muted-foreground no-underline hover:bg-accent hover:text-site-foreground">
+  <i class="ph ph-arrow-left text-[14px]" aria-hidden="true"></i>
+  Back
+</a>
+
+<header data-sticky-header class="sticky top-0 z-30 -mx-5 mb-8 flex items-center gap-[2px] px-5 py-3">
+  <h1 class="mr-auto truncate text-title-md text-site-foreground sm:text-title-lg">Docs</h1>
+  <div class="flex shrink-0 items-center gap-[2px]">
+    {{template "themepen" .}}
+    {{template "themetoggle" .}}
+    {{template "palettebutton" .}}
+  </div>
+</header>
+
+{{/*
+<nav data-docs-nav hx-boost="false"
+     class="docs-nav flex w-full items-stretch"
+     aria-label="Docs sections">
+  <a href="/docs/installation" class="docs-nav-btn">Installation</a>
+  <a href="/docs/cdn" class="docs-nav-btn">CDN</a>
+  <a href="/docs/cli" class="docs-nav-btn">CLI</a>
+  <a href="/docs/themes" class="docs-nav-btn">Themes</a>
+  <a href="/docs/shadcn" class="docs-nav-btn">shadcn</a>
+  <details class="docs-nav-details relative">
+    <summary class="docs-nav-btn docs-nav-summary">
+      Frameworks
+      <i class="ph ph-caret-down text-[12px]" aria-hidden="true"></i>
+    </summary>
+    <div class="docs-nav-menu absolute top-[calc(100%+4px)] z-40 rounded-md border border-border bg-popover p-1 shadow-e2">
+      <a href="/docs/html_usage" class="docs-nav-menu-item">Plain HTML</a>
+      <a href="/docs/react_usage" class="docs-nav-menu-item">React or Next.js or Vite</a>
+      <a href="/docs/svelte_usage" class="docs-nav-menu-item">Svelte</a>
+      <a href="/docs/astro_usage" class="docs-nav-menu-item">Astro</a>
+      <a href="/docs/angular_usage" class="docs-nav-menu-item">Angular</a>
+      <a href="/docs/vue_usage" class="docs-nav-menu-item">Vue</a>
+    </div>
+  </details>
+</nav>
+*/}}
+
+<div data-docs class="page-fade-in text-[15px] leading-[1.7] text-site-foreground">
+
+<section id="installation" class="mb-10 scroll-mt-16">
+  <div class="section-rule mb-4 flex items-center justify-between gap-4 border-b border-border pb-1.5">
+    <h2 class="text-title-sm text-site-foreground">Installation</h2>
+  </div>
+  <p class="mb-4">
+    Grab the qomp CLI for your platform with
+    <span class="inline-flex flex-wrap items-baseline gap-y-3">
+      <button type="button" class="install-pill"
+              data-copy-cmd="irm https://qompnt.vercel.app/install/windows.ps1 | iex"
+              aria-label="Copy Windows install command">
+        <span data-install-label>PowerShell</span>
+        <i data-install-copy class="ph ph-copy" aria-hidden="true"></i>
+        <i data-install-check class="ph ph-check" aria-hidden="true"></i>
+      </button>
+      <span>,</span>
+      <button type="button" class="install-pill"
+              data-copy-cmd="scoop install https://qompnt.vercel.app/install/scoop.json"
+              aria-label="Copy scoop install command">
+        <span data-install-label>Scoop</span>
+        <i data-install-copy class="ph ph-copy" aria-hidden="true"></i>
+        <i data-install-check class="ph ph-check" aria-hidden="true"></i>
+      </button>
+      <span>,</span>
+      <button type="button" class="install-pill"
+              data-copy-cmd="brew install --formula https://qompnt.vercel.app/install/qomp.rb"
+              aria-label="Copy brew install command">
+        <span data-install-label>Brew</span>
+        <i data-install-copy class="ph ph-copy" aria-hidden="true"></i>
+        <i data-install-check class="ph ph-check" aria-hidden="true"></i>
+      </button>
+    </span>
+    — click to copy
+  </p>
+  <p class="mb-4 text-muted-foreground">
+    Or download a binary from
+    <a class="text-primary underline" href="https://github.com/Jayanth1312/qompnt/releases">GitHub</a>
+    and put qomp on your PATH.
+  </p>
+  <p class="mb-2">In any project:</p>
+  <div data-docs-code class="docs-code mb-4">
+    <button type="button" data-docs-copy aria-label="Copy code" class="docs-code-copy">
+      <i data-docs-copy-icon class="ph ph-copy text-[14px]" aria-hidden="true"></i>
+    </button>
+    <pre><code data-lang="shell">qomp init</code></pre>
+  </div>
+  <p class="mb-2 text-muted-foreground">
+    Files land under components/qompnt/ with a qomp.json config.
+  </p>
+  <div data-docs-code class="docs-code">
+    <button type="button" data-docs-copy aria-label="Copy code" class="docs-code-copy">
+      <i data-docs-copy-icon class="ph ph-copy text-[14px]" aria-hidden="true"></i>
+    </button>
+    <pre><code data-lang="shell">qomp add accordion
+qomp update
+qomp upgrade</code></pre>
+  </div>
+</section>
+
+<section id="cdn" class="mb-10 scroll-mt-16">
+  <div class="section-rule mb-4 flex items-center justify-between gap-4 border-b border-border pb-1.5">
+    <h2 class="text-title-sm text-site-foreground">CDN</h2>
+  </div>
+  <p class="mb-4">
+    Skip the CLI: copy markup from the site and link the stylesheets.
+  </p>
+  <div data-docs-code class="docs-code">
+    <button type="button" data-docs-copy aria-label="Copy code" class="docs-code-copy">
+      <i data-docs-copy-icon class="ph ph-copy text-[14px]" aria-hidden="true"></i>
+    </button>
+    <pre><code data-lang="html">&lt;link rel="stylesheet" href="https://qompnt.vercel.app/static/tokens.css"&gt;
+&lt;link rel="stylesheet" href="https://qompnt.vercel.app/static/qompnt.css"&gt;
+&lt;!-- optional theme, e.g. apple --&gt;
+&lt;link rel="stylesheet" href="https://qompnt.vercel.app/static/themes/apple.css"&gt;</code></pre>
+  </div>
+</section>
+
+<section id="cli" class="mb-10 scroll-mt-16">
+  <div class="section-rule mb-4 flex items-center justify-between gap-4 border-b border-border pb-1.5">
+    <h2 class="text-title-sm text-site-foreground">CLI</h2>
+  </div>
+  <p class="mb-4">
+    qomp init walks you through a design system and which components to install.
+    Non-interactive:
+  </p>
+  <div data-docs-code class="docs-code mb-4">
+    <button type="button" data-docs-copy aria-label="Copy code" class="docs-code-copy">
+      <i data-docs-copy-icon class="ph ph-copy text-[14px]" aria-hidden="true"></i>
+    </button>
+    <pre><code data-lang="shell">qomp init --theme apple --components minimal
+# --components: all | minimal | none | button,card,...</code></pre>
+  </div>
+</section>
+
+<section id="themes" class="mb-10 scroll-mt-16">
+  <div class="section-rule mb-4 flex items-center justify-between gap-4 border-b border-border pb-1.5">
+    <h2 class="text-title-sm text-site-foreground">Themes</h2>
+  </div>
+  <p class="mb-4">
+    Light and dark ride on the data-theme attribute on the html element.
+    Each design system is one stylesheet of tokens over the same contract —
+    Claude (default), Apple, Linear, Notion, and the rest.
+  </p>
+  <p class="mb-2">After qomp init, link from components/qompnt/styles/:</p>
+  <div data-docs-code class="docs-code">
+    <button type="button" data-docs-copy aria-label="Copy code" class="docs-code-copy">
+      <i data-docs-copy-icon class="ph ph-copy text-[14px]" aria-hidden="true"></i>
+    </button>
+    <pre><code data-lang="html">&lt;link rel="stylesheet" href="/components/qompnt/styles/tokens.css"&gt;
+&lt;link rel="stylesheet" href="/components/qompnt/styles/qompnt.css"&gt;
+&lt;link rel="stylesheet" href="/components/qompnt/styles/themes/apple.css"&gt;</code></pre>
+  </div>
+</section>
+
+<section id="shadcn" class="mb-10 scroll-mt-16">
+  <div class="section-rule mb-4 flex items-center justify-between gap-4 border-b border-border pb-1.5">
+    <h2 class="text-title-sm text-site-foreground">shadcn</h2>
+  </div>
+  <p class="mb-4">
+    Needs components.json and tsconfig.json in your project.
+    Files land in components/qompnt/, same layout as qomp init:
+  </p>
+  <p class="mb-4 flex flex-wrap items-baseline gap-x-2 gap-y-2.5">
+    <button type="button" class="install-pill"
+            data-copy-cmd="npx shadcn@latest add https://qompnt.vercel.app/r/button.json"
+            aria-label="Copy shadcn install command">
+      <span data-install-label>shadcn</span>
+      <i data-install-copy class="ph ph-copy" aria-hidden="true"></i>
+      <i data-install-check class="ph ph-check" aria-hidden="true"></i>
+    </button>
+    <span class="text-muted-foreground">— click to copy.</span>
+  </p>
+  <div data-docs-code class="docs-code mb-4">
+    <button type="button" data-docs-copy aria-label="Copy code" class="docs-code-copy">
+      <i data-docs-copy-icon class="ph ph-copy text-[14px]" aria-hidden="true"></i>
+    </button>
+    <pre><code data-lang="shell">npx shadcn@latest add https://qompnt.vercel.app/r/&lt;slug&gt;.json</code></pre>
+  </div>
+  <p class="mb-4">
+    After adding a registry item, import tokens.css and qompnt.css from components/qompnt/styles/,
+    then use the installed HTML as JSX (or import snippets from those files).
+  </p>
+  <div data-docs-code class="docs-code">
+    <button type="button" data-docs-copy aria-label="Copy code" class="docs-code-copy">
+      <i data-docs-copy-icon class="ph ph-copy text-[14px]" aria-hidden="true"></i>
+    </button>
+    <pre><code data-lang="js">import "@/components/qompnt/styles/tokens.css";
+import "@/components/qompnt/styles/qompnt.css";</code></pre>
+  </div>
+</section>
+
+<section id="html_usage" class="mb-10 scroll-mt-16">
+  <div class="section-rule mb-4 flex items-center justify-between gap-4 border-b border-border pb-1.5">
+    <h2 class="text-title-sm text-site-foreground">Plain HTML</h2>
+  </div>
+  <p class="mb-4">
+    Link the stylesheets (CDN or local after init), paste the component markup into your page.
+    No build step required.
+  </p>
+  <div data-docs-code class="docs-code">
+    <button type="button" data-docs-copy aria-label="Copy code" class="docs-code-copy">
+      <i data-docs-copy-icon class="ph ph-copy text-[14px]" aria-hidden="true"></i>
+    </button>
+    <pre><code data-lang="html">&lt;!doctype html&gt;
+&lt;html lang="en" data-theme="light"&gt;
+&lt;head&gt;
+  &lt;link rel="stylesheet" href="https://qompnt.vercel.app/static/tokens.css"&gt;
+  &lt;link rel="stylesheet" href="https://qompnt.vercel.app/static/qompnt.css"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;!-- paste button / accordion / … markup here --&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+  </div>
+</section>
+
+<section id="react_usage" class="mb-10 scroll-mt-16">
+  <div class="section-rule mb-4 flex items-center justify-between gap-4 border-b border-border pb-1.5">
+    <h2 class="text-title-sm text-site-foreground">React or Next.js or Vite</h2>
+  </div>
+  <p class="mb-4">
+    Import the CSS once in your entry file — main.tsx for React or Vite, app/layout.tsx (App Router) or _app for Next.js —
+    then paste markup as JSX. Keep class names and attributes; self-close void tags.
+    Static HTML works in Next.js Server Components; use a client component only where you need interactivity.
+  </p>
+  <div data-docs-code class="docs-code mb-4">
+    <button type="button" data-docs-copy aria-label="Copy code" class="docs-code-copy">
+      <i data-docs-copy-icon class="ph ph-copy text-[14px]" aria-hidden="true"></i>
+    </button>
+    <pre><code data-lang="js">import "./components/qompnt/styles/tokens.css";
+import "./components/qompnt/styles/qompnt.css";
+// import "./components/qompnt/styles/themes/apple.css";</code></pre>
+  </div>
+  <div data-docs-code class="docs-code">
+    <button type="button" data-docs-copy aria-label="Copy code" class="docs-code-copy">
+      <i data-docs-copy-icon class="ph ph-copy text-[14px]" aria-hidden="true"></i>
+    </button>
+    <pre><code data-lang="js">export function Example() {
+  return (
+    &lt;button type="button" className="btn"&gt;Save&lt;/button&gt;
+  );
+}</code></pre>
+  </div>
+</section>
+
+<section id="svelte_usage" class="mb-10 scroll-mt-16">
+  <div class="section-rule mb-4 flex items-center justify-between gap-4 border-b border-border pb-1.5">
+    <h2 class="text-title-sm text-site-foreground">Svelte</h2>
+  </div>
+  <p class="mb-4">
+    Import CSS in +layout.svelte or main.js, paste markup into a .svelte file.
+  </p>
+  <div data-docs-code class="docs-code">
+    <button type="button" data-docs-copy aria-label="Copy code" class="docs-code-copy">
+      <i data-docs-copy-icon class="ph ph-copy text-[14px]" aria-hidden="true"></i>
+    </button>
+    <pre><code data-lang="html">&lt;script&gt;
+  import "../components/qompnt/styles/tokens.css";
+  import "../components/qompnt/styles/qompnt.css";
+&lt;/script&gt;
+
+&lt;button type="button" class="btn"&gt;Save&lt;/button&gt;</code></pre>
+  </div>
+</section>
+
+<section id="astro_usage" class="mb-10 scroll-mt-16">
+  <div class="section-rule mb-4 flex items-center justify-between gap-4 border-b border-border pb-1.5">
+    <h2 class="text-title-sm text-site-foreground">Astro</h2>
+  </div>
+  <p class="mb-4">
+    Import CSS in the layout frontmatter or global stylesheet. Paste HTML into .astro templates as-is.
+  </p>
+  <div data-docs-code class="docs-code">
+    <button type="button" data-docs-copy aria-label="Copy code" class="docs-code-copy">
+      <i data-docs-copy-icon class="ph ph-copy text-[14px]" aria-hidden="true"></i>
+    </button>
+    <pre><code data-lang="html">---
+import "../components/qompnt/styles/tokens.css";
+import "../components/qompnt/styles/qompnt.css";
+---
+&lt;button type="button" class="btn"&gt;Save&lt;/button&gt;</code></pre>
+  </div>
+</section>
+
+<section id="angular_usage" class="mb-10 scroll-mt-16">
+  <div class="section-rule mb-4 flex items-center justify-between gap-4 border-b border-border pb-1.5">
+    <h2 class="text-title-sm text-site-foreground">Angular</h2>
+  </div>
+  <p class="mb-4">
+    Add the stylesheets to angular.json styles, or import them in styles.css.
+    Paste markup into the component template.
+  </p>
+  <div data-docs-code class="docs-code mb-4">
+    <button type="button" data-docs-copy aria-label="Copy code" class="docs-code-copy">
+      <i data-docs-copy-icon class="ph ph-copy text-[14px]" aria-hidden="true"></i>
+    </button>
+    <pre><code data-lang="js">// angular.json → projects.*.architect.build.options.styles
+"src/components/qompnt/styles/tokens.css",
+"src/components/qompnt/styles/qompnt.css"</code></pre>
+  </div>
+  <div data-docs-code class="docs-code">
+    <button type="button" data-docs-copy aria-label="Copy code" class="docs-code-copy">
+      <i data-docs-copy-icon class="ph ph-copy text-[14px]" aria-hidden="true"></i>
+    </button>
+    <pre><code data-lang="html">&lt;button type="button" class="btn"&gt;Save&lt;/button&gt;</code></pre>
+  </div>
+</section>
+
+<section id="vue_usage" class="mb-10 scroll-mt-16">
+  <div class="section-rule mb-4 flex items-center justify-between gap-4 border-b border-border pb-1.5">
+    <h2 class="text-title-sm text-site-foreground">Vue</h2>
+  </div>
+  <p class="mb-4">
+    Import CSS in main.js, paste markup into an SFC template (use class, not className).
+  </p>
+  <div data-docs-code class="docs-code mb-4">
+    <button type="button" data-docs-copy aria-label="Copy code" class="docs-code-copy">
+      <i data-docs-copy-icon class="ph ph-copy text-[14px]" aria-hidden="true"></i>
+    </button>
+    <pre><code data-lang="js">import "./components/qompnt/styles/tokens.css";
+import "./components/qompnt/styles/qompnt.css";</code></pre>
+  </div>
+  <div data-docs-code class="docs-code">
+    <button type="button" data-docs-copy aria-label="Copy code" class="docs-code-copy">
+      <i data-docs-copy-icon class="ph ph-copy text-[14px]" aria-hidden="true"></i>
+    </button>
+    <pre><code data-lang="html">&lt;template&gt;
+  &lt;button type="button" class="btn"&gt;Save&lt;/button&gt;
+&lt;/template&gt;</code></pre>
+  </div>
+</section>
+
+</div>
+{{end}}

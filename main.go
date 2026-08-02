@@ -33,6 +33,7 @@ type server struct {
 type templates struct {
 	home   *template.Template // "layout"
 	detail *template.Template // "layout"
+	docs   *template.Template // "layout"
 }
 
 // pageData is what every template receives.
@@ -44,11 +45,36 @@ type pageData struct {
 	// Button because it is a way of arranging buttons rather than a thing you go
 	// looking for on its own; it still has its own page.
 	Companion *Component
-	BaseURL string
+	BaseURL   string
 	// V is the asset version, stamped onto every /static/ URL in the layout.
 	V string
 	// Home is the landing page at /. Detail leaves it false.
 	Home bool
+	// Docs is the /docs page (and /docs/{section} deep links).
+	Docs bool
+}
+
+// docsSections are allowlisted /docs/{section} path segments. Same page for
+// every slug; the client scrolls to the matching element id.
+var docsSections = map[string]struct{}{
+	"installation":  {},
+	"cdn":           {},
+	"cli":           {},
+	"themes":        {},
+	"shadcn":        {},
+	"html_usage":    {},
+	"react_usage":   {},
+	"svelte_usage":  {},
+	"astro_usage":   {},
+	"angular_usage": {},
+	"vue_usage":     {},
+}
+
+// docsSectionAliases redirect old /docs/{section} paths to a merged section.
+var docsSectionAliases = map[string]string{
+	"nextjs_usage":       "react_usage",
+	"vite_usage":         "react_usage",
+	"shadcn_react_usage": "shadcn",
 }
 
 func main() {
@@ -78,6 +104,8 @@ func main() {
 	mux.HandleFunc("GET /components", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusFound)
 	})
+	mux.HandleFunc("GET /docs", s.handleDocs)
+	mux.HandleFunc("GET /docs/{section}", s.handleDocs)
 	mux.HandleFunc("GET /c/{slug}", s.handleDetail)
 	mux.HandleFunc("GET /src/{slug}", s.handleSource)
 	mux.HandleFunc("GET /prompt/{slug}", s.handlePrompt)
@@ -196,6 +224,7 @@ func (s *server) reload() error {
 	t := templates{
 		home:   parse("templates/layout.html", "templates/home.html"),
 		detail: parse("templates/layout.html", "templates/detail.html"),
+		docs:   parse("templates/layout.html", "templates/docs.html"),
 	}
 
 	// components.css is generated, so it is held in memory and served from there
@@ -304,6 +333,21 @@ func (s *server) render(w http.ResponseWriter, r *http.Request, t *template.Temp
 func (s *server) handleHome(w http.ResponseWriter, r *http.Request) {
 	cs, t := s.snapshot()
 	s.render(w, r, t.home, "layout", pageData{Components: cs, Home: true, V: s.assetVersion()})
+}
+
+func (s *server) handleDocs(w http.ResponseWriter, r *http.Request) {
+	if section := r.PathValue("section"); section != "" {
+		if dest, ok := docsSectionAliases[section]; ok {
+			http.Redirect(w, r, "/docs/"+dest, http.StatusFound)
+			return
+		}
+		if _, ok := docsSections[section]; !ok {
+			http.NotFound(w, r)
+			return
+		}
+	}
+	cs, t := s.snapshot()
+	s.render(w, r, t.docs, "layout", pageData{Components: cs, Docs: true, V: s.assetVersion()})
 }
 
 func (s *server) handleDetail(w http.ResponseWriter, r *http.Request) {

@@ -9,30 +9,47 @@
     </p>
     <p class="flex flex-wrap items-baseline gap-x-2 gap-y-2.5">
       <span>Grab the CLI with</span>
-      <span class="inline-flex flex-wrap items-baseline gap-x-5 gap-y-3">
+      <span class="inline-flex flex-wrap items-baseline gap-x-1 gap-y-3">
         <button type="button" class="install-pill"
                 data-copy-cmd="irm https://qompnt.vercel.app/install/windows.ps1 | iex"
-                aria-label="Copy Windows install command">winget</button>
+                aria-label="Copy Windows install command">
+          <span data-install-label>PowerShell</span>
+          <i data-install-copy class="ph ph-copy" aria-hidden="true"></i>
+          <i data-install-check class="ph ph-check" aria-hidden="true"></i>
+        </button>
+        <span aria-hidden="true">,</span>
         <button type="button" class="install-pill"
                 data-copy-cmd="scoop install https://qompnt.vercel.app/install/scoop.json"
-                aria-label="Copy scoop install command">scoop</button>
+                aria-label="Copy scoop install command">
+          <span data-install-label>Scoop</span>
+          <i data-install-copy class="ph ph-copy" aria-hidden="true"></i>
+          <i data-install-check class="ph ph-check" aria-hidden="true"></i>
+        </button>
+        <span aria-hidden="true">,</span>
         <button type="button" class="install-pill"
                 data-copy-cmd="brew install --formula https://qompnt.vercel.app/install/qomp.rb"
-                aria-label="Copy brew install command">brew</button>
+                aria-label="Copy brew install command">
+          <span data-install-label>Brew</span>
+          <i data-install-copy class="ph ph-copy" aria-hidden="true"></i>
+          <i data-install-check class="ph ph-check" aria-hidden="true"></i>
+        </button>
       </span>
       <span>— click one to copy the install command.</span>
     </p>
-    <p>
-      Want the source, issues, or release builds? Visit
-      <a class="install-pill install-pill--link" href="https://github.com/Jayanth1312/qompnt">GitHub</a>
-      to learn more about the project.
-    </p>
-    <p class="flex flex-wrap items-baseline gap-x-2 gap-y-2.5">
+    <!-- <p class="flex flex-wrap items-baseline gap-x-2 gap-y-2.5">
       <span>Or install with shadcn:</span>
       <button type="button" class="install-pill"
               data-copy-cmd="npx shadcn@latest add https://qompnt.vercel.app/r/button.json"
-              aria-label="Copy shadcn install command">shadcn</button>
+              aria-label="Copy shadcn install command">
+        <span data-install-label>shadcn</span>
+        <i data-install-copy class="ph ph-copy" aria-hidden="true"></i>
+        <i data-install-check class="ph ph-check" aria-hidden="true"></i>
+      </button>
       <span>— needs <code class="rounded-sm bg-secondary px-1 text-caption">components.json</code> in your project.</span>
+    </p> -->
+    <p>
+      To know how to use components in your project, check the
+      <a class="text-primary underline" href="/docs">Docs</a>.
     </p>
     <p>
       Native elements first. Browse below, open a component, customize it, copy
@@ -60,88 +77,12 @@
     {{end}}
   </section>
 
-  <section hidden class="flex flex-col gap-3" aria-label="FAQ">
-    <h2 class="text-caption font-400 uppercase tracking-wide text-muted-foreground">FAQ</h2>
-    <div data-accordion class="w-full divide-y divide-border border-y border-border">
-      <details name="home-faq" class="group">
-        <summary
-          class="flex cursor-pointer list-none items-center justify-between gap-3 py-3.5 text-body-md font-400 text-foreground">
-          What is Qompnt?
-          <i class="ph ph-caret-right shrink-0 text-[14px] text-muted-foreground transition-transform group-open:rotate-90" aria-hidden="true"></i>
-        </summary>
-        <p class="pb-4 pr-6 text-body-sm text-muted-foreground">
-          A small library of HTML components styled with a token contract.
-          Install with the <code class="rounded-sm bg-secondary px-1 text-caption">qomp</code> CLI,
-          copy-paste markup, or pull from the shadcn registry.
-          The site itself is the living catalog.
-        </p>
-      </details>
-
-      <details name="home-faq" class="group">
-        <summary
-          class="flex cursor-pointer list-none items-center justify-between gap-3 py-3.5 text-body-md font-400 text-foreground">
-          How do I install the CLI?
-          <i class="ph ph-caret-right shrink-0 text-[14px] text-muted-foreground transition-transform group-open:rotate-90" aria-hidden="true"></i>
-        </summary>
-        <p class="pb-4 pr-6 text-body-sm text-muted-foreground">
-          Download <code class="rounded-sm bg-secondary px-1 text-caption">qomp</code> from
-          <a class="underline underline-offset-2" href="https://github.com/Jayanth1312/qompnt/releases">GitHub Releases</a>,
-          or copy an install command from the home page
-          (<code class="rounded-sm bg-secondary px-1 text-caption">scoop</code> /
-          <code class="rounded-sm bg-secondary px-1 text-caption">brew</code> /
-          Windows script).
-          Each one pulls the binary from the latest GitHub release.
-          Then in any project run
-          <code class="rounded-sm bg-secondary px-1 text-caption">qomp init</code>.
-          It pulls themes and components from this site into
-          <code class="rounded-sm bg-secondary px-1 text-caption">components/qompnt/</code>.
-        </p>
-      </details>
-
-      <details name="home-faq" class="group">
-        <summary
-          class="flex cursor-pointer list-none items-center justify-between gap-3 py-3.5 text-body-md font-400 text-foreground">
-          How do I use a component?
-          <i class="ph ph-caret-right shrink-0 text-[14px] text-muted-foreground transition-transform group-open:rotate-90" aria-hidden="true"></i>
-        </summary>
-        <p class="pb-4 pr-6 text-body-sm text-muted-foreground">
-          Prefer
-          <code class="rounded-sm bg-secondary px-1 text-caption">qomp add &lt;slug&gt;</code>
-          after init. Or open any component page, copy the HTML, and link
-          <code class="rounded-sm bg-secondary px-1 text-caption">tokens.css</code>
-          plus <code class="rounded-sm bg-secondary px-1 text-caption">qompnt.css</code>.
-          Or run
-          <code class="rounded-sm bg-secondary px-1 text-caption">npx shadcn@latest add https://qompnt.vercel.app/r/&lt;slug&gt;.json</code>.
-        </p>
-      </details>
-
-      <details name="home-faq" class="group">
-        <summary
-          class="flex cursor-pointer list-none items-center justify-between gap-3 py-3.5 text-body-md font-400 text-foreground">
-          Do components have animations?
-          <i class="ph ph-caret-right shrink-0 text-[14px] text-muted-foreground transition-transform group-open:rotate-90" aria-hidden="true"></i>
-        </summary>
-        <p class="pb-4 pr-6 text-body-sm text-muted-foreground">
-          Some do — accordion, dialog, toast, and others — and those pages
-          expose an Animation switch so you can turn motion off. The site
-          also respects <code class="rounded-sm bg-secondary px-1 text-caption">prefers-reduced-motion</code>.
-        </p>
-      </details>
-
-      <details name="home-faq" class="group">
-        <summary
-          class="flex cursor-pointer list-none items-center justify-between gap-3 py-3.5 text-body-md font-400 text-foreground">
-          How do design systems and themes work?
-          <i class="ph ph-caret-right shrink-0 text-[14px] text-muted-foreground transition-transform group-open:rotate-90" aria-hidden="true"></i>
-        </summary>
-        <p class="pb-4 pr-6 text-body-sm text-muted-foreground">
-          Light and dark ride on <code class="rounded-sm bg-secondary px-1 text-caption">data-theme</code>.
-          Each design system is one stylesheet of tokens over the same
-          contract — switch Claude, Notion, Linear, and the rest from the
-          Components gallery without changing markup.
-        </p>
-      </details>
-    </div>
-  </section>
+  <footer class="home-footer text-site-foreground-muted">
+    <p>
+      Want the source, issues, or release builds? Visit
+      <a class="text-primary underline" href="https://github.com/Jayanth1312/qompnt">GitHub</a>
+      to learn more about the project.
+    </p>
+  </footer>
 </div>
 {{end}}

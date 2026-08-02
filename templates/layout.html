@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{if .C}}{{.C.Name}} — Qompnt{{else if .Home}}Qompnt{{else}}Qompnt — HTML components, ten design systems{{end}}</title>
-<meta name="description" content="{{if .C}}{{.C.Blurb}}{{else if .Home}}HTML components on a shared token contract. Install with the CLI or pull from a CDN. Swap the whole design system with one stylesheet.{{else}}HTML components built on native elements and a token contract. Swap the whole design system with one stylesheet. Install with the CLI or pull from a CDN.{{end}}">
+<title>{{if .C}}{{.C.Name}} — Qompnt{{else if .Docs}}Docs — Qompnt{{else if .Home}}Qompnt{{else}}Qompnt — HTML components, ten design systems{{end}}</title>
+<meta name="description" content="{{if .C}}{{.C.Blurb}}{{else if .Docs}}Install qompnt and use the components in HTML, React, Vue, Next.js, Astro, and more.{{else if .Home}}HTML components on a shared token contract. Install with the CLI or pull from a CDN. Swap the whole design system with one stylesheet.{{else}}HTML components built on native elements and a token contract. Swap the whole design system with one stylesheet. Install with the CLI or pull from a CDN.{{end}}">
 <!-- Both CDNs are hit by render-blocking stylesheets below, so the connection is
      opened while the HTML is still parsing rather than after it. Costs two DNS
      lookups; saves a full round trip each on first paint. -->
@@ -87,7 +87,7 @@ try {
      resize the chrome via --control-* density tokens. -->
 <button type="button" data-theme-toggle data-theme-instant
         aria-label="Toggle dark mode"
-        class="grid shrink-0 place-items-center rounded-md p-[8px] text-muted-foreground hover:bg-accent hover:text-site-foreground">
+        class="grid shrink-0 cursor-pointer place-items-center rounded-md p-[8px] text-muted-foreground hover:bg-accent hover:text-site-foreground">
   <i data-icon="moon" class="ph ph-moon text-[16px] leading-none" aria-hidden="true"></i>
   <i data-icon="sun" class="ph ph-sun text-[16px] leading-none" aria-hidden="true"></i>
 </button>
@@ -97,7 +97,7 @@ try {
 <!-- Cycle design systems in palette order. Matches chrome icon buttons. -->
 <button type="button" data-ds-cycle
         aria-label="Next design system"
-        class="flex shrink-0 items-center gap-1.5 rounded-md p-[8px] text-muted-foreground hover:bg-accent hover:text-site-foreground active:scale-[0.96]">
+        class="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-md p-[8px] text-muted-foreground hover:bg-accent hover:text-site-foreground active:scale-[0.96]">
   <span data-ds-swatch class="palette-swatch shrink-0" style="background:#cc785c" aria-hidden="true"></span>
   <span data-ds-label class="text-[13px] leading-none text-site-foreground">Claude</span>
 </button>
@@ -122,7 +122,7 @@ try {
      is: an expanding field would have to push the title out of the way, and the
      palette already searches every component from anywhere. -->
 <button type="button" data-palette-open aria-label="Open command palette"
-        class="grid shrink-0 place-items-center rounded-md p-[8px] text-muted-foreground hover:bg-accent hover:text-site-foreground">
+        class="grid shrink-0 cursor-pointer place-items-center rounded-md p-[8px] text-muted-foreground hover:bg-accent hover:text-site-foreground">
   <i class="ph ph-magnifying-glass text-[16px] leading-none" aria-hidden="true"></i>
 </button>
 {{end}}
@@ -145,91 +145,117 @@ try {
   </div>
 
   <div data-palette-list role="listbox" aria-label="Command palette" class="max-h-[min(380px,60vh)] overflow-y-auto p-2">
-    <p data-palette-heading data-palette-group="actions" class="px-2 py-1.5 text-caption text-muted-foreground">Actions</p>
+    <p data-palette-heading data-palette-group="actions" data-palette-scope="root" class="px-2 py-1.5 text-caption text-muted-foreground">Actions</p>
     <button type="button" role="option" aria-selected="false"
-            data-palette-item data-palette-group="actions" data-palette-action="toggle-theme"
+            data-palette-item data-palette-group="actions" data-palette-scope="root" data-palette-action="toggle-theme"
             data-name="Toggle theme dark light mode"
-            class="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
+            class="flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
       <i class="ph ph-sun-dim shrink-0 text-[15px] text-muted-foreground" aria-hidden="true"></i>
       Toggle theme
     </button>
 
-    <p data-palette-heading data-palette-group="themes" class="px-2 py-1.5 text-caption text-muted-foreground">Themes</p>
+    <a href="/docs" role="option" aria-selected="false"
+       data-palette-item data-palette-group="nav" data-palette-scope="root"
+       data-name="Docs documentation"
+       class="flex cursor-pointer items-center gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground no-underline">
+      <i class="ph ph-book-open-text shrink-0 text-[15px] text-muted-foreground" aria-hidden="true"></i>
+      Docs
+    </a>
+    <button type="button" role="option" aria-selected="false"
+            data-palette-item data-palette-group="nav" data-palette-scope="root" data-palette-drill="themes"
+            data-name="Themes design systems"
+            class="flex w-full cursor-pointer items-center justify-between gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
+      <span class="flex items-center gap-2.5">
+        <i class="ph ph-palette shrink-0 text-[15px] text-muted-foreground" aria-hidden="true"></i>
+        Themes
+      </span>
+      <i class="ph ph-caret-right shrink-0 text-[13px] text-muted-foreground" aria-hidden="true"></i>
+    </button>
+
+    <p data-palette-heading data-palette-group="themes" data-palette-scope="root" class="px-2 py-1.5 text-caption text-muted-foreground">Themes</p>
+    <button type="button" role="option" aria-selected="false"
+            data-palette-item data-palette-group="themes" data-palette-scope="themes" data-palette-back
+            data-name="Back"
+            class="flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-muted-foreground">
+      <i class="ph ph-arrow-left shrink-0 text-[15px]" aria-hidden="true"></i>
+      Themes
+    </button>
     <button type="button" role="option" aria-selected="true"
-            data-palette-item data-palette-group="themes" data-palette-ds="" data-ds-schemes="light dark"
+            data-palette-item data-palette-group="themes" data-palette-scope="themes" data-palette-ds="" data-ds-schemes="light dark"
             data-name="Claude design system theme"
-            class="flex w-full items-center justify-between gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
+            class="flex w-full cursor-pointer items-center justify-between gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
       <span class="flex items-center gap-2.5"><span class="palette-swatch shrink-0" style="background:#cc785c" aria-hidden="true"></span>Claude</span>
       <i data-check class="ph ph-check shrink-0 text-[13px] text-ring" aria-hidden="true"></i>
     </button>
     <button type="button" role="option" aria-selected="false"
-            data-palette-item data-palette-group="themes" data-palette-ds="apple" data-ds-schemes="light dark"
+            data-palette-item data-palette-group="themes" data-palette-scope="themes" data-palette-ds="apple" data-ds-schemes="light dark"
             data-name="Apple design system theme"
-            class="flex w-full items-center justify-between gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
+            class="flex w-full cursor-pointer items-center justify-between gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
       <span class="flex items-center gap-2.5"><span class="palette-swatch shrink-0" style="background:#0071e3" aria-hidden="true"></span>Apple</span>
       <i data-check hidden class="ph ph-check shrink-0 text-[13px] text-ring" aria-hidden="true"></i>
     </button>
     <button type="button" role="option" aria-selected="false"
-            data-palette-item data-palette-group="themes" data-palette-ds="clickhouse" data-ds-schemes="dark"
+            data-palette-item data-palette-group="themes" data-palette-scope="themes" data-palette-ds="clickhouse" data-ds-schemes="dark"
             data-name="ClickHouse design system theme"
-            class="flex w-full items-center justify-between gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
+            class="flex w-full cursor-pointer items-center justify-between gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
       <span class="flex items-center gap-2.5"><span class="palette-swatch shrink-0" style="background:#faff69" aria-hidden="true"></span>ClickHouse</span>
       <i data-check hidden class="ph ph-check shrink-0 text-[13px] text-ring" aria-hidden="true"></i>
     </button>
     <button type="button" role="option" aria-selected="false"
-            data-palette-item data-palette-group="themes" data-palette-ds="cohere" data-ds-schemes="light dark"
+            data-palette-item data-palette-group="themes" data-palette-scope="themes" data-palette-ds="cohere" data-ds-schemes="light dark"
             data-name="Cohere design system theme"
-            class="flex w-full items-center justify-between gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
+            class="flex w-full cursor-pointer items-center justify-between gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
       <span class="flex items-center gap-2.5"><span class="palette-swatch shrink-0" style="background:#003c33" aria-hidden="true"></span>Cohere</span>
       <i data-check hidden class="ph ph-check shrink-0 text-[13px] text-ring" aria-hidden="true"></i>
     </button>
     <button type="button" role="option" aria-selected="false"
-            data-palette-item data-palette-group="themes" data-palette-ds="coinbase" data-ds-schemes="light dark"
+            data-palette-item data-palette-group="themes" data-palette-scope="themes" data-palette-ds="coinbase" data-ds-schemes="light dark"
             data-name="Coinbase design system theme"
-            class="flex w-full items-center justify-between gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
+            class="flex w-full cursor-pointer items-center justify-between gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
       <span class="flex items-center gap-2.5"><span class="palette-swatch shrink-0" style="background:#0052ff" aria-hidden="true"></span>Coinbase</span>
       <i data-check hidden class="ph ph-check shrink-0 text-[13px] text-ring" aria-hidden="true"></i>
     </button>
     <button type="button" role="option" aria-selected="false"
-            data-palette-item data-palette-group="themes" data-palette-ds="cursor" data-ds-schemes="light dark"
+            data-palette-item data-palette-group="themes" data-palette-scope="themes" data-palette-ds="cursor" data-ds-schemes="light dark"
             data-name="Cursor design system theme"
-            class="flex w-full items-center justify-between gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
+            class="flex w-full cursor-pointer items-center justify-between gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
       <span class="flex items-center gap-2.5"><span class="palette-swatch shrink-0" style="background:#f54e00" aria-hidden="true"></span>Cursor</span>
       <i data-check hidden class="ph ph-check shrink-0 text-[13px] text-ring" aria-hidden="true"></i>
     </button>
     <button type="button" role="option" aria-selected="false"
-            data-palette-item data-palette-group="themes" data-palette-ds="linear" data-ds-schemes="dark"
+            data-palette-item data-palette-group="themes" data-palette-scope="themes" data-palette-ds="linear" data-ds-schemes="dark"
             data-name="Linear design system theme"
-            class="flex w-full items-center justify-between gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
+            class="flex w-full cursor-pointer items-center justify-between gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
       <span class="flex items-center gap-2.5"><span class="palette-swatch shrink-0" style="background:#828fff" aria-hidden="true"></span>Linear</span>
       <i data-check hidden class="ph ph-check shrink-0 text-[13px] text-ring" aria-hidden="true"></i>
     </button>
     <button type="button" role="option" aria-selected="false"
-            data-palette-item data-palette-group="themes" data-palette-ds="notion" data-ds-schemes="light dark"
+            data-palette-item data-palette-group="themes" data-palette-scope="themes" data-palette-ds="notion" data-ds-schemes="light dark"
             data-name="Notion design system theme"
-            class="flex w-full items-center justify-between gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
+            class="flex w-full cursor-pointer items-center justify-between gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
       <span class="flex items-center gap-2.5"><span class="palette-swatch shrink-0" style="background:#0075de" aria-hidden="true"></span>Notion</span>
       <i data-check hidden class="ph ph-check shrink-0 text-[13px] text-ring" aria-hidden="true"></i>
     </button>
     <button type="button" role="option" aria-selected="false"
-            data-palette-item data-palette-group="themes" data-palette-ds="stripe" data-ds-schemes="light dark"
+            data-palette-item data-palette-group="themes" data-palette-scope="themes" data-palette-ds="stripe" data-ds-schemes="light dark"
             data-name="Stripe design system theme"
-            class="flex w-full items-center justify-between gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
+            class="flex w-full cursor-pointer items-center justify-between gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
       <span class="flex items-center gap-2.5"><span class="palette-swatch shrink-0" style="background:#533afd" aria-hidden="true"></span>Stripe</span>
       <i data-check hidden class="ph ph-check shrink-0 text-[13px] text-ring" aria-hidden="true"></i>
     </button>
     <button type="button" role="option" aria-selected="false"
-            data-palette-item data-palette-group="themes" data-palette-ds="vercel" data-ds-schemes="light dark"
+            data-palette-item data-palette-group="themes" data-palette-scope="themes" data-palette-ds="vercel" data-ds-schemes="light dark"
             data-name="Vercel design system theme"
-            class="flex w-full items-center justify-between gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
+            class="flex w-full cursor-pointer items-center justify-between gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground">
       <span class="flex items-center gap-2.5"><span class="palette-swatch shrink-0" style="background:#171717" aria-hidden="true"></span>Vercel</span>
       <i data-check hidden class="ph ph-check shrink-0 text-[13px] text-ring" aria-hidden="true"></i>
     </button>
 
-    <p data-palette-heading data-palette-group="components" class="px-2 py-1.5 text-caption text-muted-foreground">Components</p>
+    <p data-palette-heading data-palette-group="components" data-palette-scope="root" class="px-2 py-1.5 text-caption text-muted-foreground">Components</p>
     {{range .Components}}
-    <a href="/c/{{.Slug}}" role="option" aria-selected="false" data-palette-item data-palette-group="components" data-name="{{.Name}}"
-       class="flex items-center gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground no-underline">
+    <a href="/c/{{.Slug}}" role="option" aria-selected="false"
+       data-palette-item data-palette-group="components" data-palette-scope="root" data-name="{{.Name}}"
+       class="flex cursor-pointer items-center gap-2.5 rounded-md px-2 py-2 text-body-sm leading-none text-foreground no-underline">
       <i class="ph ph-circle-dashed shrink-0 text-[15px] text-muted-foreground" aria-hidden="true"></i>
       {{.Name}}
     </a>
