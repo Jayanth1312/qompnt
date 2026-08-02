@@ -1,4 +1,4 @@
-.PHONY: all css build test dev kill clean
+.PHONY: all css build qomp test dev kill clean
 
 PORT ?= 8080
 
@@ -15,6 +15,10 @@ css:
 build: css
 	go build -o qompnt .
 
+# Thin installer CLI — pulls themes/components from the live registry.
+qomp:
+	go build -o qomp ./cmd/qomp
+
 test:
 	go test ./...
 
@@ -30,4 +34,4 @@ kill:
 	@sleep 0.3
 
 clean:
-	rm -f qompnt static/qompnt.css static/components.css
+	rm -f qompnt qomp static/qompnt.css static/components.css

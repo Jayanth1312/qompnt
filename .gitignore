@@ -1,5 +1,6 @@
 node_modules/
-qompnt
+/qompnt
+/qomp
 
 # One-off Playwright probes and audit passes, hardcoded to a dev server on a
 # fixed port. They answered a question once and are kept locally for the next
