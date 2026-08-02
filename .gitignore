@@ -33,7 +33,7 @@ components/*/notes.md
 docs/
 
 /component_test.go
-
+/dist/
 # static/qompnt.css and static/components.css are generated but intentionally
 # committed - they are what consumers download, and nothing here should need Node
 # or Go to serve the site.

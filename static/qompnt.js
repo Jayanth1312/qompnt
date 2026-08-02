@@ -9,6 +9,29 @@ window.__qompntSearch = true;
 // DOM, so it always shows what is on screen.
 const words = (s) => (s || "").split(/\s+/).filter(Boolean);
 
+// Clipboard with a textarea fallback for non-secure contexts (and older
+// browsers) where navigator.clipboard.writeText throws.
+async function copyText(text) {
+    if (navigator.clipboard?.writeText) {
+        try {
+            await navigator.clipboard.writeText(text);
+            return;
+        } catch (_) {
+            /* fall through */
+        }
+    }
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.cssText = "position:fixed;left:-9999px;top:0";
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, text.length);
+    const ok = document.execCommand("copy");
+    ta.remove();
+    if (!ok) throw new Error("copy failed");
+}
+
 // Print the preview as source: drop the demo-only data-x-* hooks and anything
 // currently hidden, then break tags onto their own lines.
 function previewSource(preview) {
@@ -528,11 +551,33 @@ document.addEventListener("click", async (e) => {
         return;
     }
 
+    const copyCmd = e.target.closest("[data-copy-cmd]");
+    if (copyCmd) {
+        const cmd = copyCmd.dataset.copyCmd;
+        const label = copyCmd.dataset.copyLabel || copyCmd.textContent.trim();
+        copyCmd.dataset.copyLabel = label;
+        try {
+            await copyText(cmd);
+            copyCmd.dataset.copied = "";
+            copyCmd.textContent = "🎉 Copied!";
+            copyCmd.setAttribute("aria-label", "Copied");
+        } catch (_) {
+            copyCmd.textContent = "failed";
+            copyCmd.setAttribute("aria-label", "Copy failed");
+        }
+        setTimeout(() => {
+            copyCmd.textContent = label;
+            copyCmd.removeAttribute("data-copied");
+            copyCmd.setAttribute("aria-label", `Copy ${label} install command`);
+        }, 1600);
+        return;
+    }
+
     const copySrc = e.target.closest("[data-copy-src]");
     if (copySrc) {
         try {
             const res = await fetch(copySrc.dataset.copySrc);
-            await navigator.clipboard.writeText(await res.text());
+            await copyText(await res.text());
             copySrc.setAttribute("aria-label", "Copied");
         } catch (_) {
             copySrc.setAttribute("aria-label", "Copy failed");
@@ -554,7 +599,7 @@ document.addEventListener("click", async (e) => {
             .querySelectorAll(".panes > .panels > pre")
             [idx]?.querySelector("code");
         try {
-            await navigator.clipboard.writeText(code.textContent);
+            await copyText(code.textContent);
             pane.setAttribute("aria-label", "Copied");
         } catch (_) {
             pane.setAttribute("aria-label", "Copy failed");
@@ -572,7 +617,7 @@ document.addEventListener("click", async (e) => {
             shown || document.querySelector("[data-code]")
         )?.querySelector("code");
         try {
-            await navigator.clipboard.writeText(code.textContent);
+            await copyText(code.textContent);
             copy.setAttribute("aria-label", "Copied");
         } catch (_) {
             copy.setAttribute("aria-label", "Copy failed");

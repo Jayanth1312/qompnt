@@ -111,6 +111,7 @@
 .leading-5{--un-leading:calc(var(--spacing) * 5);line-height:calc(var(--spacing) * 5);}
 .leading-none{--un-leading:var(--leading-none);line-height:var(--leading-none);}
 .tracking-wide{--un-tracking:var(--tracking-wide);letter-spacing:var(--tracking-wide);}
+.font-400{--un-font-weight:400;font-weight:400;}
 .font-500{--un-font-weight:500;font-weight:500;}
 .font-display{font-family:var(--font-display);}
 .font-mono{font-family:var(--font-mono);}
@@ -160,7 +161,6 @@
 .px-control-x{padding-inline:var(--spacing-control-x);}
 .px-row-x{padding-inline:var(--spacing-row-x);}
 .py-1\.5{padding-block:calc(var(--spacing) * 1.5);}
-.py-16{padding-block:calc(var(--spacing) * 16);}
 .py-2{padding-block:calc(var(--spacing) * 2);}
 .py-2\.5{padding-block:calc(var(--spacing) * 2.5);}
 .py-3{padding-block:calc(var(--spacing) * 3);}
@@ -227,6 +227,7 @@
 .hover\:opacity-90:hover{opacity:90%;}
 .underline{text-decoration-line:underline;}
 .hover\:underline:hover{text-decoration-line:underline;}
+.underline-offset-2{text-underline-offset:2px;}
 .underline-offset-4{text-underline-offset:4px;}
 .decoration-dotted{text-decoration-style:dotted;}
 .no-underline{text-decoration:none;}
@@ -239,7 +240,6 @@
 .gap-\[2px\]{gap:2px;}
 .gap-1{gap:calc(var(--spacing) * 1);}
 .gap-1\.5{gap:calc(var(--spacing) * 1.5);}
-.gap-10{gap:calc(var(--spacing) * 10);}
 .gap-2{gap:calc(var(--spacing) * 2);}
 .gap-2\.5{gap:calc(var(--spacing) * 2.5);}
 .gap-3{gap:calc(var(--spacing) * 3);}
@@ -312,6 +312,7 @@
 .-translate-y-1\/2{--un-translate-y:-50%;translate:var(--un-translate-x) var(--un-translate-y);}
 .group[open] .group-open\:rotate-90{rotate:90deg;}
 .active\:scale-\[0\.96\]:active{--un-scale-x:0.96;--un-scale-y:0.96;scale:var(--un-scale-x) var(--un-scale-y);}
+.transform{transform:var(--un-rotate-x) var(--un-rotate-y) var(--un-rotate-z) var(--un-skew-x) var(--un-skew-y);}
 .transition-\[color\,opacity\]{transition-property:color,opacity;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration));}
 .transition-transform{transition-property:transform,translate,scale,rotate;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration));}
 .duration-200{--un-duration:200ms;transition-duration:200ms;}
