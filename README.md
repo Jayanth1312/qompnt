@@ -14,24 +14,20 @@ or use one of the commands below for your platform.
 
 ### Windows
 
-**PowerShell** (downloads the release and adds `qomp` to your user PATH):
-
 ```powershell
-irm https://raw.githubusercontent.com/Jayanth1312/qompnt/main/install/windows/install.ps1 | iex
+irm https://qompnt.vercel.app/install/windows.ps1 | iex
 ```
 
 **Scoop:**
 
 ```powershell
-scoop install https://raw.githubusercontent.com/Jayanth1312/qompnt/main/install/scoop/qomp.json
+scoop install https://qompnt.vercel.app/install/scoop.json
 ```
 
 ### macOS
 
-**Homebrew:**
-
 ```sh
-brew install --formula https://raw.githubusercontent.com/Jayanth1312/qompnt/main/install/homebrew/qomp.rb
+brew install --formula https://qompnt.vercel.app/install/qomp.rb
 ```
 
 ### Linux
@@ -39,12 +35,19 @@ brew install --formula https://raw.githubusercontent.com/Jayanth1312/qompnt/main
 **Homebrew** (Linuxbrew):
 
 ```sh
-brew install --formula https://raw.githubusercontent.com/Jayanth1312/qompnt/main/install/homebrew/qomp.rb
+brew install --formula https://qompnt.vercel.app/install/qomp.rb
 ```
 
 **Or** download the `qomp_linux_amd64` / `qomp_linux_arm64` archive from
 [GitHub Releases](https://github.com/Jayanth1312/qompnt/releases), extract it,
 and put `qomp` on your PATH.
+
+Install scripts are served from `qompnt.vercel.app/install/` — same files as the
+repo, shorter URLs. **Security:** `irm | iex` and `curl | sh` always mean you
+trust the host; inspect the script first if you want to verify. Scoop and
+Homebrew additionally check SHA-256 hashes before installing. The Windows script
+only downloads the official GitHub release binary — it does not run arbitrary
+code from elsewhere.
 
 ### After install
 

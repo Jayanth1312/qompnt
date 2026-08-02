@@ -15,7 +15,7 @@ import (
 // drops every file whose name starts with `_` or `.`. Keep all: so future
 // underscored template partials still embed.
 //
-//go:embed all:components all:templates all:static
+//go:embed all:components all:templates all:static all:install
 var embedded embed.FS
 
 // assets is the root every load goes through. In dev it is the working
