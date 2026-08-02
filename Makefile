@@ -13,11 +13,13 @@ css:
 	npx unocss "components/**/*.html" "templates/**/*.html" -o static/qompnt.css
 
 build: css
-	go build -o qompnt .
+	@mkdir -p bin
+	go build -o bin/qompnt .
 
 # Thin installer CLI — pulls themes/components from the live registry.
 qomp:
-	go build -o qomp ./cmd/qomp
+	@mkdir -p bin
+	go build -o bin/qomp ./cmd/qomp
 
 test:
 	go test ./...
@@ -28,10 +30,11 @@ dev: css kill
 	go run . -dev -addr :$(PORT)
 
 kill:
+	-@pkill -f "bin/qompnt -addr" 2>/dev/null || true
 	-@pkill -f "qompnt -addr" 2>/dev/null || true
 	-@pkill -f "exe/qompnt" 2>/dev/null || true
 	-@fuser -k $(PORT)/tcp 2>/dev/null || true
 	@sleep 0.3
 
 clean:
-	rm -f qompnt qomp static/qompnt.css static/components.css
+	rm -rf bin/qompnt bin/qomp qompnt qomp static/qompnt.css static/components.css

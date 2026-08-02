@@ -36,7 +36,7 @@ paths recorded in qomp.json.`,
 
 	initCmd := &cobra.Command{
 		Use:   "init",
-		Short: "Interactive setup (theme, accent, components)",
+		Short: "Interactive setup (theme and components)",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runInit(resolveRegistry(registry), initFlags)
 		},

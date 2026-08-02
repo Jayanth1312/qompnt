@@ -95,6 +95,11 @@ func (s *server) registryIndex(w http.ResponseWriter, r *http.Request) {
 
 const themeItemName = "qompnt-theme"
 
+const (
+	registryComponentsDir = "components/qompnt"
+	registryStylesDir     = "components/qompnt/styles"
+)
+
 func (s *server) registryItem(w http.ResponseWriter, r *http.Request, slug string) {
 	if slug == themeItemName {
 		item, err := themeItem()
@@ -129,7 +134,7 @@ func componentItem(c Component, base string) registryItem {
 		item.Files = append(item.Files, registryFile{
 			Path:    path.Join("components", c.Slug, f.Name),
 			Type:    "registry:file",
-			Target:  path.Join("qompnt", f.Name),
+			Target:  path.Join(registryComponentsDir, f.Name),
 			Content: f.Body,
 		})
 	}
@@ -139,7 +144,7 @@ func componentItem(c Component, base string) registryItem {
 		item.Files = append(item.Files, registryFile{
 			Path:    path.Join("components", c.Slug, "styles.css"),
 			Type:    "registry:file",
-			Target:  path.Join("qompnt", c.Slug+".css"),
+			Target:  path.Join(registryStylesDir, c.Slug+".css"),
 			Content: c.Styles,
 		})
 	}
@@ -165,7 +170,7 @@ func themeItem() (registryItem, error) {
 		item.Files = append(item.Files, registryFile{
 			Path:    path.Join("static", name),
 			Type:    "registry:file",
-			Target:  path.Join("qompnt", name),
+			Target:  path.Join(registryStylesDir, name),
 			Content: string(body),
 		})
 	}

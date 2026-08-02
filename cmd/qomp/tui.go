@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"regexp"
 	"strings"
 
@@ -11,10 +10,10 @@ import (
 var hexColorRe = regexp.MustCompile(`(?i)^#([0-9a-f]{3}|[0-9a-f]{6})$`)
 
 type initAnswers struct {
-	Theme      string
-	Accent     string
-	Mode       string // all | minimal | selective | none
-	Selected   []string
+	Theme    string
+	Accent   string
+	Mode     string // all | minimal | selective | none
+	Selected []string
 }
 
 func runInitWizard(m *Manifest) (initAnswers, error) {
@@ -24,69 +23,72 @@ func runInitWizard(m *Manifest) (initAnswers, error) {
 	for _, t := range m.Themes {
 		label := t.Title
 		if t.ID == "claude" {
-			label = "Claude (default tokens)"
+			label = "Claude (default)"
 		}
 		themeOpts = append(themeOpts, huh.NewOption(label, t.ID))
+	}
+
+	compOpts := make([]huh.Option[string], 0, len(m.Components))
+	for _, c := range m.Components {
+		label := c.Title
+		if c.Description != "" {
+			label = c.Title + " — " + truncate(c.Description, 50)
+		}
+		compOpts = append(compOpts, huh.NewOption(label, c.Slug))
 	}
 
 	form := huh.NewForm(
 		huh.NewGroup(
 			huh.NewSelect[string]().
-				Title("Theme").
-				Description("Design system token set").
+				Title("Pick a design system").
+				Description("One stylesheet swaps the whole look. Enter to continue.").
 				Options(themeOpts...).
 				Value(&a.Theme),
-			huh.NewInput().
-				Title("Accent color").
-				Description("Hex color, or leave blank to keep the theme primary").
-				Placeholder("#0071e3").
-				Value(&a.Accent).
-				Validate(func(s string) error {
-					s = strings.TrimSpace(s)
-					if s == "" {
-						return nil
-					}
-					if !hexColorRe.MatchString(s) {
-						return fmt.Errorf("use a hex color like #0071e3")
-					}
-					return nil
-				}),
+		).WithHeight(18),
+
+		huh.NewGroup(
 			huh.NewSelect[string]().
-				Title("Components").
+				Title("Install components").
+				Description("Choose what to copy into your project. Enter to finish.").
 				Options(
 					huh.NewOption("All components", "all"),
-					huh.NewOption("Minimal installation", "minimal"),
-					huh.NewOption("Selective installation", "selective"),
-					huh.NewOption("No installation", "none"),
+					huh.NewOption("Minimal set", "minimal"),
+					huh.NewOption("Pick individually", "selective"),
+					huh.NewOption("None — theme only", "none"),
 				).
 				Value(&a.Mode),
-		),
-	)
+		).WithHeight(12),
+
+		huh.NewGroup(
+			huh.NewMultiSelect[string]().
+				Title("Select components").
+				Description("Space to toggle · / to filter · enter when done").
+				Options(compOpts...).
+				Value(&a.Selected).
+				Filterable(true),
+		).
+			WithHideFunc(func() bool { return a.Mode != "selective" }).
+			WithHeight(20),
+	).WithTheme(wizardTheme()).WithWidth(64)
+
 	if err := form.Run(); err != nil {
 		return a, err
 	}
-	a.Accent = strings.TrimSpace(a.Accent)
-
-	if a.Mode == "selective" {
-		opts := make([]huh.Option[string], 0, len(m.Components))
-		for _, c := range m.Components {
-			label := c.Title
-			if c.Description != "" {
-				label = c.Title + " — " + truncate(c.Description, 60)
-			}
-			opts = append(opts, huh.NewOption(label, c.Slug))
-		}
-		sel := huh.NewMultiSelect[string]().
-			Title("Select components").
-			Description("Type to filter, space to toggle, enter to confirm").
-			Options(opts...).
-			Value(&a.Selected).
-			Filterable(true)
-		if err := huh.NewForm(huh.NewGroup(sel)).Run(); err != nil {
-			return a, err
-		}
-	}
 	return a, nil
+}
+
+// wizardTheme loosens vertical rhythm for a calmer step-by-step flow.
+func wizardTheme() *huh.Theme {
+	t := huh.ThemeCharm()
+	t.Group.Title = t.Group.Title.MarginBottom(1)
+	t.Group.Description = t.Group.Description.MarginBottom(1)
+	t.Focused.Title = t.Focused.Title.MarginTop(1)
+	t.Blurred.Title = t.Blurred.Title.MarginTop(1)
+	t.Focused.Base = t.Focused.Base.PaddingTop(0).PaddingBottom(0)
+	t.Blurred.Base = t.Blurred.Base.PaddingTop(0).PaddingBottom(0)
+	t.Help.ShortKey = t.Help.ShortKey.MarginTop(1)
+	t.Help.ShortDesc = t.Help.ShortDesc.MarginTop(1)
+	return t
 }
 
 func truncate(s string, n int) string {

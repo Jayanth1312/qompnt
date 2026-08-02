@@ -9,7 +9,7 @@
     </p>
     <p class="flex flex-wrap items-baseline gap-x-2 gap-y-2.5">
       <span>Grab the CLI with</span>
-      <span class="inline-flex flex-wrap items-baseline gap-x-3 gap-y-2">
+      <span class="inline-flex flex-wrap items-baseline gap-x-5 gap-y-3">
         <button type="button" class="install-pill"
                 data-copy-cmd="irm https://raw.githubusercontent.com/Jayanth1312/qompnt/main/install/windows/install.ps1 | iex"
                 aria-label="Copy Windows install command">winget</button>
@@ -26,6 +26,13 @@
       Want the source, issues, or release builds? Visit
       <a class="install-pill install-pill--link" href="https://github.com/Jayanth1312/qompnt">GitHub</a>
       to learn more about the project.
+    </p>
+    <p class="flex flex-wrap items-baseline gap-x-2 gap-y-2.5">
+      <span>Or install with shadcn:</span>
+      <button type="button" class="install-pill"
+              data-copy-cmd="npx shadcn@latest add https://qompnt.vercel.app/r/button.json"
+              aria-label="Copy shadcn install command">shadcn</button>
+      <span>— needs <code class="rounded-sm bg-secondary px-1 text-caption">components.json</code> in your project.</span>
     </p>
     <p>
       Native elements first. Browse below, open a component, customize it, copy
