@@ -59,8 +59,11 @@ Files land under `components/qompnt/` with a `qomp.json` config.
 
 ```sh
 qomp add accordion    # add one later
-qomp update           # refresh from the registry
+qomp update           # refresh project files from the registry
+qomp upgrade          # update the qomp binary itself
 ```
+
+`qomp update` refreshes themes and components in your project. `qomp upgrade` downloads the latest release from GitHub and replaces the running binary (`qomp upgrade --check` only prints if one is available).
 
 Default registry: `https://qompnt.vercel.app` (override with `--registry` or `QOMP_REGISTRY`).
 

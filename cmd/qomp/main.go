@@ -61,6 +61,17 @@ paths recorded in qomp.json.`,
 		},
 	})
 
+	upgradeCmd := &cobra.Command{
+		Use:   "upgrade",
+		Short: "Download and install the latest qomp release",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			check, _ := cmd.Flags().GetBool("check")
+			return runUpgrade(check)
+		},
+	}
+	upgradeCmd.Flags().Bool("check", false, "only report if a newer release is available")
+	root.AddCommand(upgradeCmd)
+
 	if err := root.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, "Error:", err)
 		os.Exit(1)

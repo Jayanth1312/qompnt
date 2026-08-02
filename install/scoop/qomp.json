@@ -1,12 +1,12 @@
 {
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "qompnt component installer — themes and HTML into your project",
   "homepage": "https://qompnt.vercel.app",
   "license": "MIT",
   "architecture": {
     "64bit": {
-      "url": "https://github.com/Jayanth1312/qompnt/releases/download/v1.0.1/qomp_windows_amd64.zip",
-      "hash": "e9da1a6504fc7d8ce40b75a5b410201da93f9ee6d9ae8b8a9a65eafeb3cc1999"
+      "url": "https://github.com/Jayanth1312/qompnt/releases/download/v1.0.2/qomp_windows_amd64.zip",
+      "hash": "b5180e0a465929e825fedb12decc435a65dab951f6a7a9b5fa06a56b78a00e05"
     }
   },
   "bin": "qomp.exe",
