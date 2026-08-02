@@ -41,13 +41,20 @@ func newSearchPicker(searchPlaceholder, title string, items []pickerItem, multi 
 		height:            20,
 	}
 	if !multi && len(items) > 0 {
-		m.selected[items[0].value] = true
 		m.resultSingle = items[0].value
 	}
 	return m
 }
 
 func (m *searchPicker) Init() tea.Cmd { return nil }
+
+func (m *searchPicker) toggleCursor() {
+	if len(m.filtered) == 0 {
+		return
+	}
+	v := m.filtered[m.cursor].value
+	m.selected[v] = !m.selected[v]
+}
 
 func (m *searchPicker) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
@@ -69,24 +76,25 @@ func (m *searchPicker) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.filter = m.filter[:len(m.filter)-1]
 				m.refilter()
 			}
-		case "enter":
+		case "ctrl+enter", "ctrl+j":
+			// Terminals often send ctrl+j for ctrl+enter.
 			if m.multi {
 				m.done = true
 				return m, tea.Quit
 			}
-			if len(m.filtered) > 0 {
+		case "enter":
+			if m.multi {
+				m.toggleCursor()
+			} else if len(m.filtered) > 0 {
 				m.resultSingle = m.filtered[m.cursor].value
 				m.done = true
 				return m, tea.Quit
 			}
 		case " ":
-			if m.multi && len(m.filtered) > 0 {
-				v := m.filtered[m.cursor].value
-				m.selected[v] = !m.selected[v]
-			} else if !m.multi && len(m.filtered) > 0 {
-				v := m.filtered[m.cursor].value
-				m.selected = map[string]bool{v: true}
-				m.resultSingle = v
+			if m.multi {
+				m.toggleCursor()
+			} else if len(m.filtered) > 0 {
+				m.resultSingle = m.filtered[m.cursor].value
 			}
 		case "esc":
 			m.filter = ""
@@ -152,11 +160,16 @@ func (m *searchPicker) View() string {
 		if i == m.cursor {
 			cursor = lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Render("> ")
 		}
-		mark := "[ ]"
-		if m.selected[it.value] {
-			mark = "[X]"
+		var line string
+		if m.multi {
+			mark := "[ ]"
+			if m.selected[it.value] {
+				mark = "[✓]"
+			}
+			line = cursor + mark + " " + it.label
+		} else {
+			line = cursor + it.label
 		}
-		line := cursor + mark + " " + it.label
 		if i == m.cursor {
 			line = lipgloss.NewStyle().Foreground(lipgloss.Color("42")).Render(line)
 		}
@@ -166,7 +179,7 @@ func (m *searchPicker) View() string {
 
 	help := "type to search"
 	if m.multi {
-		help += " · space toggle · enter done"
+		help += " · enter/space toggle · ctrl+enter done"
 	} else {
 		help += " · enter select"
 	}

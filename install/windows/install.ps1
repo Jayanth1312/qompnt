@@ -1,7 +1,7 @@
 # Temporary winget-shaped install until the package lands in winget-pkgs.
 # Downloads the Windows release zip and puts qomp.exe on the user PATH.
 $ErrorActionPreference = "Stop"
-$ver = "1.0.3"
+$ver = "1.0.4"
 $url = "https://github.com/Jayanth1312/qompnt/releases/download/v$ver/qomp_windows_amd64.zip"
 $dir = Join-Path $env:LOCALAPPDATA "qomp"
 $zip = Join-Path $env:TEMP "qomp-$ver.zip"
