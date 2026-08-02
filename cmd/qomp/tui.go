@@ -2,7 +2,6 @@ package main
 
 import (
 	"regexp"
-	"strings"
 
 	"github.com/charmbracelet/huh"
 )
@@ -19,37 +18,26 @@ type initAnswers struct {
 func runInitWizard(m *Manifest) (initAnswers, error) {
 	var a initAnswers
 
-	themeOpts := make([]huh.Option[string], 0, len(m.Themes))
+	themeItems := make([]pickerItem, 0, len(m.Themes))
 	for _, t := range m.Themes {
 		label := t.Title
 		if t.ID == "claude" {
-			label = "Claude (default)"
+			label = "Claude"
 		}
-		themeOpts = append(themeOpts, huh.NewOption(label, t.ID))
+		themeItems = append(themeItems, pickerItem{label: label, value: t.ID})
 	}
 
-	compOpts := make([]huh.Option[string], 0, len(m.Components))
-	for _, c := range m.Components {
-		label := c.Title
-		if c.Description != "" {
-			label = c.Title + " — " + truncate(c.Description, 50)
-		}
-		compOpts = append(compOpts, huh.NewOption(label, c.Slug))
+	theme, _, err := runSearchPicker("Search themes", "Select themes", themeItems, false)
+	if err != nil {
+		return a, err
 	}
+	a.Theme = theme
 
-	form := huh.NewForm(
-		huh.NewGroup(
-			huh.NewSelect[string]().
-				Title("Pick a design system").
-				Description("One stylesheet swaps the whole look. Enter to continue.").
-				Options(themeOpts...).
-				Value(&a.Theme),
-		).WithHeight(18),
-
+	modeForm := huh.NewForm(
 		huh.NewGroup(
 			huh.NewSelect[string]().
 				Title("Install components").
-				Description("Choose what to copy into your project. Enter to finish.").
+				Description("Choose what to copy into your project. Enter to continue.").
 				Options(
 					huh.NewOption("All components", "all"),
 					huh.NewOption("Minimal set", "minimal"),
@@ -58,22 +46,23 @@ func runInitWizard(m *Manifest) (initAnswers, error) {
 				).
 				Value(&a.Mode),
 		).WithHeight(12),
-
-		huh.NewGroup(
-			huh.NewMultiSelect[string]().
-				Title("Select components").
-				Description("Space to toggle · / to filter · enter when done").
-				Options(compOpts...).
-				Value(&a.Selected).
-				Filterable(true),
-		).
-			WithHideFunc(func() bool { return a.Mode != "selective" }).
-			WithHeight(20),
 	).WithTheme(wizardTheme()).WithWidth(64)
-
-	if err := form.Run(); err != nil {
+	if err := modeForm.Run(); err != nil {
 		return a, err
 	}
+
+	if a.Mode == "selective" {
+		compItems := make([]pickerItem, 0, len(m.Components))
+		for _, c := range m.Components {
+			compItems = append(compItems, pickerItem{label: c.Title, value: c.Slug})
+		}
+		_, selected, err := runSearchPicker("Search components", "Select components", compItems, true)
+		if err != nil {
+			return a, err
+		}
+		a.Selected = selected
+	}
+
 	return a, nil
 }
 
@@ -89,14 +78,6 @@ func wizardTheme() *huh.Theme {
 	t.Help.ShortKey = t.Help.ShortKey.MarginTop(1)
 	t.Help.ShortDesc = t.Help.ShortDesc.MarginTop(1)
 	return t
-}
-
-func truncate(s string, n int) string {
-	s = strings.TrimSpace(s)
-	if len(s) <= n {
-		return s
-	}
-	return s[:n-1] + "…"
 }
 
 func resolveSlugs(m *Manifest, mode string, selected []string) []string {

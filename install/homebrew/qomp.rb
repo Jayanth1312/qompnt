@@ -1,28 +1,28 @@
 class Qomp < Formula
   desc "Install qompnt themes and HTML components into a project"
   homepage "https://qompnt.vercel.app"
-  version "1.0.2"
+  version "1.0.3"
   license "MIT"
 
   on_macos do
     on_arm do
-      url "https://github.com/Jayanth1312/qompnt/releases/download/v1.0.2/qomp_darwin_arm64.tar.gz"
-      sha256 "426b2d1e17a49b3d9ca631a61a8f1ebf9a3cb3fe77e1aea514134d4755b7cd4d"
+      url "https://github.com/Jayanth1312/qompnt/releases/download/v1.0.3/qomp_darwin_arm64.tar.gz"
+      sha256 "81f6887add529f68f86667619a0509ce00d15e3da566c4eb710991cf08b47e29"
     end
     on_intel do
-      url "https://github.com/Jayanth1312/qompnt/releases/download/v1.0.2/qomp_darwin_amd64.tar.gz"
-      sha256 "79de1f6f90ff1275faba3256ef7e7b2e19c46f2ce7c1082bd916a342987c85a5"
+      url "https://github.com/Jayanth1312/qompnt/releases/download/v1.0.3/qomp_darwin_amd64.tar.gz"
+      sha256 "9f8e665fc8682aad0b6caac39a2a4b5ac205c84fee42de976ff8c254ea42b69b"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/Jayanth1312/qompnt/releases/download/v1.0.2/qomp_linux_arm64.tar.gz"
-      sha256 "769e1808a9823ce69dc803ac0de400ddc1af2905599081006cfa5458344f4e6a"
+      url "https://github.com/Jayanth1312/qompnt/releases/download/v1.0.3/qomp_linux_arm64.tar.gz"
+      sha256 "d29811160f0146193052d5cf7dcd5ef3aa4def8f52b3e4b074f122df0f7c6423"
     end
     on_intel do
-      url "https://github.com/Jayanth1312/qompnt/releases/download/v1.0.2/qomp_linux_amd64.tar.gz"
-      sha256 "b63436da1cf859d2ab6b71a08fc19e5e587f4bf61b16e0b25b73f834ade86852"
+      url "https://github.com/Jayanth1312/qompnt/releases/download/v1.0.3/qomp_linux_amd64.tar.gz"
+      sha256 "41564ab071ec2cd9875fd5fc1602067e31b226032776320819aa554653d561d4"
     end
   end
 
