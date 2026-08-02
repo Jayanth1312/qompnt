@@ -17,6 +17,7 @@
      stylesheet to render. See README, "Icons". -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/duotone/style.css">
 <link rel="stylesheet" href="/static/tokens.css?v={{.V}}">
 <link rel="stylesheet" href="/static/qompnt.css?v={{.V}}">
 <!-- Generated from components/*/styles.css - see componentsCSS in main.go. -->
@@ -88,8 +89,8 @@ try {
 <button type="button" data-theme-toggle data-theme-instant
         aria-label="Toggle dark mode"
         class="grid shrink-0 cursor-pointer place-items-center rounded-md p-[8px] text-muted-foreground hover:bg-accent hover:text-site-foreground">
-  <i data-icon="moon" class="ph ph-moon text-[16px] leading-none" aria-hidden="true"></i>
-  <i data-icon="sun" class="ph ph-sun text-[16px] leading-none" aria-hidden="true"></i>
+  <i data-icon="moon" class="ph-fill ph-moon text-[16px] leading-none" aria-hidden="true"></i>
+  <i data-icon="sun" class="ph-fill ph-sun text-[16px] leading-none" aria-hidden="true"></i>
 </button>
 {{end}}
 
@@ -107,7 +108,12 @@ try {
 <!-- Shared shell: small wordmark, sticky blur. Design systems cycle via the
      color dot; Cmd+K opens the palette from any page including home. -->
 <header data-sticky-header class="sticky top-0 z-30 -mx-5 mb-8 flex items-center gap-[2px] px-5 py-3">
-  <a href="/" class="mr-auto shrink-0 text-[15px] leading-none text-site-foreground no-underline" style="font-weight: 500;">Qompnt</a>
+  <div class="mr-auto flex shrink-0 items-center gap-2">
+    <a href="/" class="text-[15px] leading-none text-site-foreground no-underline" style="font-weight: 500;">Qompnt</a>
+    {{if .Home}}
+    <span class="inline-flex items-center rounded-pill border border-border bg-secondary text-[12px] leading-none tabular-nums text-muted-foreground" style="padding: 2px 6px;">{{len .Components}}</span>
+    {{end}}
+  </div>
 
   <div class="flex shrink-0 items-center gap-[2px]">
     {{template "themepen" .}}
