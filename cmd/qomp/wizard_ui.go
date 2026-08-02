@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strings"
+	"unicode"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -56,31 +57,42 @@ func (m *searchPicker) toggleCursor() {
 	m.selected[v] = !m.selected[v]
 }
 
+func (m *searchPicker) finishMulti() (tea.Model, tea.Cmd) {
+	m.done = true
+	return m, tea.Quit
+}
+
 func (m *searchPicker) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.width = max(20, msg.Width)
+		m.height = max(5, msg.Height-6)
 	case tea.KeyMsg:
-		switch msg.String() {
+		key := msg.String()
+		switch key {
 		case "ctrl+c":
 			m.quitting = true
 			return m, tea.Quit
-		case "up", "k":
+		case "up":
 			if m.cursor > 0 {
 				m.cursor--
 			}
-		case "down", "j":
+		case "down":
 			if m.cursor < len(m.filtered)-1 {
 				m.cursor++
 			}
 		case "backspace":
 			if len(m.filter) > 0 {
-				m.filter = m.filter[:len(m.filter)-1]
+				// Drop last rune, not last byte.
+				r := []rune(m.filter)
+				m.filter = string(r[:len(r)-1])
 				m.refilter()
 			}
-		case "ctrl+enter", "ctrl+j":
-			// Terminals often send ctrl+j for ctrl+enter.
+		case "ctrl+enter", "ctrl+j", "ctrl+m", "tab":
+			// ctrl+enter: Windows/conhost often emits ctrl+j / ctrl+m instead.
+			// tab is a reliable fallback when the terminal swallows ctrl+enter.
 			if m.multi {
-				m.done = true
-				return m, tea.Quit
+				return m.finishMulti()
 			}
 		case "enter":
 			if m.multi {
@@ -100,8 +112,22 @@ func (m *searchPicker) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.filter = ""
 			m.refilter()
 		default:
-			if k := msg.String(); len(k) == 1 && k != " " {
-				m.filter += k
+			// Never let ctrl/alt/meta chords or non-printables poison the filter
+			// (that emptied the component list when Ctrl was pressed on Windows).
+			if strings.HasPrefix(key, "ctrl+") || strings.HasPrefix(key, "alt+") || strings.HasPrefix(key, "shift+") {
+				break
+			}
+			if msg.Type != tea.KeyRunes {
+				break
+			}
+			added := false
+			for _, r := range msg.Runes {
+				if unicode.IsPrint(r) && !unicode.IsSpace(r) {
+					m.filter += string(r)
+					added = true
+				}
+			}
+			if added {
 				m.refilter()
 			}
 		}
@@ -111,6 +137,13 @@ func (m *searchPicker) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m *searchPicker) refilter() {
 	q := strings.ToLower(strings.TrimSpace(m.filter))
+	// Strip leftover non-printables so a bad key never leaves the list empty.
+	q = strings.Map(func(r rune) rune {
+		if unicode.IsPrint(r) {
+			return r
+		}
+		return -1
+	}, q)
 	if q == "" {
 		m.filtered = append(m.filtered[:0], m.items...)
 	} else {
@@ -177,9 +210,9 @@ func (m *searchPicker) View() string {
 		b.WriteString("\n")
 	}
 
-	help := "type to search"
+	help := "type to search · ↑/↓ move"
 	if m.multi {
-		help += " · enter/space toggle · ctrl+enter done"
+		help += " · enter/space toggle · tab or ctrl+enter done"
 	} else {
 		help += " · enter select"
 	}
