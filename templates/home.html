@@ -9,7 +9,7 @@
     </p>
     <p class="flex flex-wrap items-baseline gap-x-2 gap-y-2.5">
       <span>Grab the CLI with</span>
-      <span class="inline-flex flex-wrap items-baseline gap-x-1 gap-y-3">
+      <span class="inline-flex flex-wrap items-baseline gap-y-3">
         <button type="button" class="install-pill"
                 data-copy-cmd="irm https://qompnt.vercel.app/install/windows.ps1 | iex"
                 aria-label="Copy Windows install command">
@@ -36,17 +36,6 @@
       </span>
       <span>— click one to copy the install command.</span>
     </p>
-    <!-- <p class="flex flex-wrap items-baseline gap-x-2 gap-y-2.5">
-      <span>Or install with shadcn:</span>
-      <button type="button" class="install-pill"
-              data-copy-cmd="npx shadcn@latest add https://qompnt.vercel.app/r/button.json"
-              aria-label="Copy shadcn install command">
-        <span data-install-label>shadcn</span>
-        <i data-install-copy class="ph ph-copy" aria-hidden="true"></i>
-        <i data-install-check class="ph ph-check" aria-hidden="true"></i>
-      </button>
-      <span>— needs <code class="rounded-sm bg-secondary px-1 text-caption">components.json</code> in your project.</span>
-    </p> -->
     <p>
       To know how to use components in your project, check the
       <a class="text-primary underline" href="/docs">Docs</a>.
@@ -57,24 +46,40 @@
     </p>
   </section>
 
-  <section class="flex flex-col gap-3" aria-label="Components">
-    <h2 class="flex items-center gap-2 text-body-md text-site-foreground-muted">
-      Components
-    </h2>
-    <div data-home-components class="divide-y divide-border border-y border-border">
+  <section class="flex flex-col gap-4" aria-label="Components">
+    <div class="home-comp-toolbar">
+      <label class="home-comp-search">
+        <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+        <input type="search" data-home-search
+               placeholder="Search..."
+               autocomplete="off"
+               spellcheck="false"
+               aria-label="Search components">
+      </label>
+      <button type="button" class="home-comp-sort"
+              data-home-sort-toggle
+              aria-label="Sort Z to A">
+        <span data-home-sort-label>Z–A</span>
+      </button>
+    </div>
+
+    <div data-home-components data-sort="asc"
+         class="divide-y divide-border border-y border-border">
       {{range .Components}}
       <a href="/c/{{.Slug}}"
          data-slug="{{.Slug}}"
-         class="home-comp-row flex items-baseline justify-between gap-4 py-3.5 text-body-md text-site-foreground no-underline transition-[color,opacity] duration-200">
-        <span>{{.Name}}</span>
-        <span class="tabular-nums text-caption text-site-foreground-muted">{{.Created.Format "Jan 2"}}</span>
+         data-name="{{.Name}}"
+         data-blurb="{{.Blurb}}"
+         class="home-comp-row home-comp-row--compact no-underline">
+        <span class="home-comp-year tabular-nums">{{.Created.Format "2006"}}</span>
+        <span class="home-comp-title">{{.Name}}</span>
+        <span class="home-comp-date tabular-nums">{{.Created.Format "01/02"}}</span>
       </a>
       {{end}}
     </div>
-
-    {{range .Components}}
-    <template data-home-preview="{{.Slug}}">{{.Preview}}</template>
-    {{end}}
+    <p data-home-empty hidden class="py-6 text-center text-body-md text-site-foreground-muted">
+      No components match.
+    </p>
   </section>
 
   <footer class="home-footer text-site-foreground-muted">

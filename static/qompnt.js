@@ -266,6 +266,16 @@ const assetV =
         document.querySelector('link[href*="tokens.css"]').href,
     ).searchParams.get("v") || "";
 
+// ---- UI sounds --------------------------------------------------------------
+// Definitions live in static/sounds.js (window.qompntSounds). Silent when
+// motion is off. @web-kits/audio stays vendored under static/vendor/ for later.
+function playUi(name) {
+    if (document.documentElement.dataset.motion === "off") return;
+    try {
+        window.qompntSounds?.[name]?.();
+    } catch (_) {}
+}
+
 function applyDesignSystem(name) {
     // removeAttribute rather than href='' inside: an empty href points at the
     // current page, which the browser dutifully downloads and parses as CSS.
@@ -335,6 +345,7 @@ function syncDesignSystem() {
     }
     enforceScheme(current);
     syncDsSwatch();
+    syncFavicon();
 }
 
 // Motion. One attribute on <html>; tokens.css zeroes the duration tokens from
@@ -460,6 +471,7 @@ function toggleTheme() {
     if (schemesFor(document.documentElement.dataset.ds).length === 1) return;
     const root = document.documentElement;
     const next = root.dataset.theme === "dark" ? "light" : "dark";
+    playUi("toggle");
     const apply = () => {
         withoutTransitions(() => {
             root.dataset.theme = next;
@@ -507,6 +519,36 @@ function syncDsSwatch() {
     document.querySelectorAll("[data-ds-label]").forEach((el) => {
         el.textContent = name;
     });
+}
+
+// Favicons cannot inherit page CSS, so the tab icon is a data-URI SVG painted
+// with the design system's dark --primary. Same colour in light and dark: the
+// accent that reads on a dark tab chrome, not the light-mode one (which is often
+// near-black and vanishes in the browser UI).
+const siteIconPath =
+    "M 256 64 L 256 128 L 192.5 128 L 160 95 L 128 64 L 96 95 L 63.5 128 L 64 128 L 128 192 L 128 256 L 64.5 256 L 32 223 L 0 192 L 0 64 L 64 0 L 192 0 Z M 256 192 L 256 256 L 192.5 256 L 160 223 L 128 192 L 128 128 L 192 128 Z";
+
+function syncFavicon() {
+    const probe = document.createElement("div");
+    probe.dataset.theme = "dark";
+    document.body.appendChild(probe);
+    const color =
+        getComputedStyle(probe).getPropertyValue("--primary").trim() ||
+        "#cc785c";
+    probe.remove();
+
+    const svg =
+        `<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" fill="none">` +
+        `<path d="${siteIconPath}" fill="${color}"/></svg>`;
+    const href = `data:image/svg+xml,${encodeURIComponent(svg)}`;
+    let link = document.querySelector('link[rel="icon"]');
+    if (!link) {
+        link = document.createElement("link");
+        link.rel = "icon";
+        link.type = "image/svg+xml";
+        document.head.appendChild(link);
+    }
+    link.href = href;
 }
 
 document.addEventListener("click", async (e) => {
@@ -561,6 +603,7 @@ document.addEventListener("click", async (e) => {
             await copyText(cmd);
             copyCmd.dataset.copied = "";
             copyCmd.setAttribute("aria-label", "Copied");
+            playUi("click");
         } catch (_) {
             copyCmd.setAttribute("aria-label", "Copy failed");
         }
@@ -580,6 +623,7 @@ document.addEventListener("click", async (e) => {
             const res = await fetch(copySrc.dataset.copySrc);
             await copyText(await res.text());
             copySrc.setAttribute("aria-label", "Copied");
+            playUi("click");
         } catch (_) {
             copySrc.setAttribute("aria-label", "Copy failed");
         }
@@ -602,6 +646,7 @@ document.addEventListener("click", async (e) => {
         try {
             await copyText(code.textContent);
             pane.setAttribute("aria-label", "Copied");
+            playUi("click");
         } catch (_) {
             pane.setAttribute("aria-label", "Copy failed");
         }
@@ -620,6 +665,7 @@ document.addEventListener("click", async (e) => {
         try {
             await copyText(code.textContent);
             copy.setAttribute("aria-label", "Copied");
+            playUi("click");
         } catch (_) {
             copy.setAttribute("aria-label", "Copy failed");
         }
@@ -864,6 +910,7 @@ document.addEventListener("click", async (e) => {
             await copyText(text);
             btn.dataset.copied = "";
             btn.setAttribute("aria-label", "Copied");
+            playUi("click");
             const icon = btn.querySelector("[data-docs-copy-icon]");
             if (icon) {
                 icon.classList.remove("ph-copy");
@@ -1291,253 +1338,98 @@ window.addEventListener("pageshow", (e) => {
 // navigation the browser performs. Same failure, same fix.
 document.body?.addEventListener("htmx:historyRestore", restorePreferences);
 
-// Home component hover preview: 300ms delay, cursor-follow, one popover.
-// Document-level mouseover/mouseout so hx-boost swaps need no rebind, and
-// nested <span>s inside .home-comp-row links do not restart the timer.
+// Home component list: search + A–Z / Z–A name sort toggle.
+// Hover preview is off for now.
 (() => {
-    const DELAY = 300;
-    const OFFSET = 16;
-
-    const finePointer = () =>
-        matchMedia("(hover: hover) and (pointer: fine)").matches;
-
-    let timer = 0;
-    let activeRow = null;
-    let lastX = 0;
-    let lastY = 0;
-
-    const pop = () => document.querySelector("[data-home-preview-pop]");
-
-    function hide() {
-        clearTimeout(timer);
-        timer = 0;
-        activeRow = null;
-        const el = pop();
-        if (!el) return;
-        el.removeAttribute("data-open");
-        el.removeAttribute("data-preview-slug");
-        el.hidden = true;
-        el.replaceChildren();
+    function listEl() {
+        return document.querySelector("[data-home-components]");
     }
 
-    function enterRow(row, x, y) {
-        if (!finePointer()) return;
-        if (!row?.closest?.("[data-home-components]")) return;
-        if (activeRow === row) return;
-
-        hide();
-        activeRow = row;
-        lastX = x;
-        lastY = y;
-        const slug = row.dataset.slug;
-        timer = window.setTimeout(() => {
-            timer = 0;
-            if (activeRow !== row) return;
-            show(slug, lastX, lastY);
-        }, DELAY);
-    }
-
-    function syncRowUnderCursor() {
-        if (!finePointer()) return;
-        const hit = document.elementFromPoint(lastX, lastY);
-        const row = hit?.closest?.(".home-comp-row[data-slug]");
-        if (!row) return;
-        enterRow(row, lastX, lastY);
-    }
-
-    function dismissOnScroll(e) {
-        if (e?.clientX != null) lastX = e.clientX;
-        if (e?.clientY != null) lastY = e.clientY;
-        hide();
-        // Layout settles after scroll; re-hover whatever is now under the pointer.
-        requestAnimationFrame(() => {
-            requestAnimationFrame(syncRowUnderCursor);
+    function filterHome(q) {
+        const list = listEl();
+        const empty = document.querySelector("[data-home-empty]");
+        if (!list) return;
+        const needle = q.trim().toLowerCase();
+        let shown = 0;
+        list.querySelectorAll(".home-comp-row[data-slug]").forEach((row) => {
+            const hay = [
+                row.dataset.name || "",
+                row.dataset.slug || "",
+                row.dataset.blurb || "",
+            ]
+                .join(" ")
+                .toLowerCase();
+            const match = !needle || hay.includes(needle);
+            row.hidden = !match;
+            if (match) shown += 1;
         });
+        if (empty) empty.hidden = shown > 0 || !needle;
+        list.hidden = shown === 0 && !!needle;
     }
 
-    function place(el, x, y) {
-        // clientX/Y are viewport coords; el is position:fixed on <body>.
-        const w = el.offsetWidth;
-        const h = el.offsetHeight;
-        const vw = window.innerWidth;
-        const vh = window.innerHeight;
-        let left = x + OFFSET;
-        let top = y + OFFSET;
-        if (left + w > vw - 8) left = x - w - OFFSET;
-        if (top + h > vh - 8) top = y - h - OFFSET;
-        left = Math.min(Math.max(8, left), Math.max(8, vw - w - 8));
-        top = Math.min(Math.max(8, top), Math.max(8, vh - h - 8));
-        el.style.left = `${left}px`;
-        el.style.top = `${top}px`;
-    }
-
-    // Force interactive demos into their "showing" state for the hover card.
-    function primePreview(root, slug) {
-        root.dataset.previewSlug = slug;
-
-        root.querySelectorAll("details[data-select]").forEach((d) => {
-            d.open = true;
-        });
-
-        const cb = root.querySelector("[data-combobox], [data-x-cb]");
-        if (cb) {
-            const input = cb.querySelector('[role="combobox"]');
-            const list = cb.querySelector('[role="listbox"]');
-            if (input) input.setAttribute("aria-expanded", "true");
-            if (list) {
-                list.hidden = false;
-                list.style.maxHeight = "none";
-            }
-        }
-
-        // Keep open menus in-flow inside the frame; three options is enough.
-        if (
-            slug === "select" ||
-            slug === "filter" ||
-            slug === "combobox"
-        ) {
-            root.querySelectorAll('[role="listbox"]').forEach((list) => {
-                const opts = [...list.querySelectorAll('[role="option"]')];
-                opts.slice(3).forEach((o) => o.remove());
-                list.querySelector("[data-combobox-empty]")?.remove();
-            });
-        }
-
-        const search = root.querySelector("[data-search]");
-        if (search) {
-            const openBtn = search.querySelector("[data-search-open]");
-            const field = search.querySelector("[data-search-field]");
-            if (openBtn) openBtn.hidden = true;
-            if (field) field.hidden = false;
-        }
-
-        root.querySelectorAll(".tip").forEach((t) => t.classList.add("tip-open"));
-
-        if (slug === "table") {
-            root.querySelectorAll("[data-x-wrap]").forEach((w) => {
-                w.classList.remove(
-                    "border",
-                    "border-border",
-                    "rounded-lg",
-                    "overflow-x-auto",
-                );
-            });
-        }
-
-        if (slug === "dialog") {
-            const dialog = root.querySelector("dialog");
-            if (dialog) {
-                // Drop the trigger; keep only the panel.
-                [...root.querySelectorAll("button")].forEach((b) => {
-                    if (!dialog.contains(b)) b.remove();
-                });
-                dialog.removeAttribute("id");
-                const body = [...dialog.children].find(
-                    (c) => c.tagName === "DIV",
-                );
-                if (body) {
-                    body.removeAttribute("id");
-                    body.innerHTML = `<h2 class="mb-2 text-title-md font-500 text-foreground">Delete this component?</h2>
-<p class="text-body-md text-foreground">
-  The directory and its three source files are removed. This cannot be undone.
-</p>`;
-                }
-                // Non-modal open so it paints as a panel inside the hover card.
-                dialog.setAttribute("open", "");
-                dialog.style.margin = "0";
-                dialog.style.width = "min(320px, 70vw)";
-                dialog.style.maxWidth = "100%";
-                dialog.style.position = "static";
-                const wrap = dialog.parentElement;
-                if (wrap && wrap !== root) wrap.replaceWith(dialog);
-            }
-        }
-
-        if (slug === "toast") {
-            root.replaceChildren();
-            root.insertAdjacentHTML(
-                "beforeend",
-                `<div class="toast-life tone-success flex items-start gap-2 rounded-lg border px-control-x py-control-y shadow-e2">
-  <svg data-tone-icon="success" class="mt-px shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none"
-       stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-    <circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/>
-  </svg>
-  <svg data-tone-icon="error" class="mt-px shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none"
-       stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-    <circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/>
-  </svg>
-  <svg data-tone-icon="info" class="mt-px shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none"
-       stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-    <circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.5v.5"/>
-  </svg>
-  <p class="min-w-0 flex-1 text-body-sm leading-5">Changes saved</p>
-  <button type="button" aria-label="Dismiss"
-          class="mt-px grid shrink-0 place-items-center rounded-sm opacity-70">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-         stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
-  </button>
-</div>`,
-            );
-        }
-    }
-
-    function show(slug, x, y) {
-        const el = pop();
-        if (!el) return;
-        const tpl = document.querySelector(
-            `template[data-home-preview="${CSS.escape(slug)}"]`,
+    // Button shows the *next* order: A–Z list → label "Z–A", and vice versa.
+    function syncSortButton(dir) {
+        const btn = document.querySelector("[data-home-sort-toggle]");
+        if (!btn) return;
+        const next = dir === "asc" ? "desc" : "asc";
+        const label = btn.querySelector("[data-home-sort-label]");
+        if (label) label.textContent = next === "asc" ? "A–Z" : "Z–A";
+        btn.setAttribute(
+            "aria-label",
+            next === "asc" ? "Sort A to Z" : "Sort Z to A",
         );
-        if (!tpl) return;
-        // Stay on <body> even if hx-boost re-injected a host under main.
-        if (el.parentElement !== document.body) {
-            document.body.appendChild(el);
-        }
-        el.replaceChildren(tpl.content.cloneNode(true));
-        primePreview(el, slug);
-        el.hidden = false;
-        el.dataset.open = "";
-        place(el, x, y);
     }
 
-    document.addEventListener("mouseover", (e) => {
-        if (!finePointer()) return;
-        const row = e.target.closest?.(".home-comp-row[data-slug]");
-        if (!row || !row.closest("[data-home-components]")) return;
-        // Moving between descendants of the same row — ignore.
-        if (row.contains(e.relatedTarget)) return;
-        enterRow(row, e.clientX, e.clientY);
+    function sortHome(dir) {
+        const list = listEl();
+        if (!list) return;
+        const rows = [...list.querySelectorAll(".home-comp-row[data-slug]")];
+        const mul = dir === "asc" ? 1 : -1;
+        rows.sort((a, b) => {
+            const na = (a.dataset.name || "").toLowerCase();
+            const nb = (b.dataset.name || "").toLowerCase();
+            if (na === nb) return 0;
+            return na < nb ? -mul : mul;
+        });
+        rows.forEach((row) => list.appendChild(row));
+        list.dataset.sort = dir;
+        syncSortButton(dir);
+    }
+
+    function initHomeList() {
+        const list = listEl();
+        if (!list) return;
+        sortHome(list.dataset.sort || "asc");
+        const input = document.querySelector("[data-home-search]");
+        if (input?.value) filterHome(input.value);
+    }
+
+    document.addEventListener("input", (e) => {
+        if (!e.target.matches?.("[data-home-search]")) return;
+        filterHome(e.target.value);
     });
 
-    document.addEventListener("mouseout", (e) => {
-        const row = e.target.closest?.(".home-comp-row[data-slug]");
-        if (!row || row !== activeRow) return;
-        if (row.contains(e.relatedTarget)) return;
-        hide();
+    document.addEventListener("click", (e) => {
+        const btn = e.target.closest?.("[data-home-sort-toggle]");
+        if (!btn) return;
+        const list = listEl();
+        if (!list) return;
+        const cur = list.dataset.sort || "asc";
+        sortHome(cur === "asc" ? "desc" : "asc");
+        playUi("tick");
     });
 
-    document.addEventListener(
-        "pointermove",
-        (e) => {
-            lastX = e.clientX;
-            lastY = e.clientY;
-            if (!activeRow || !activeRow.contains(e.target)) return;
-            const el = pop();
-            if (!el || el.hidden || !el.hasAttribute("data-open")) return;
-            place(el, lastX, lastY);
-        },
-        true,
-    );
-
-    // Scroll moves rows under a stationary cursor without mouseout — dismiss,
-    // then re-enter hover on whatever row ended up under the pointer.
-    document.addEventListener("scroll", dismissOnScroll, true);
-    document.addEventListener("wheel", dismissOnScroll, {
-        capture: true,
-        passive: true,
+    document.body?.addEventListener("htmx:beforeSwap", () => {
+        const input = document.querySelector("[data-home-search]");
+        if (input) input.value = "";
     });
 
-    // Pop host is on <body>; clear it when the boosted page leaves home.
-    document.body?.addEventListener("htmx:beforeSwap", hide);
-    document.body?.addEventListener("htmx:historyRestore", hide);
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initHomeList);
+    } else {
+        initHomeList();
+    }
+    document.body?.addEventListener("htmx:afterSwap", initHomeList);
+    document.body?.addEventListener("htmx:historyRestore", initHomeList);
 })();
 

@@ -24,6 +24,7 @@ node_modules/
 /Designs/
 /expandable_tab_navigation/
 render.yaml
+skills-lock.json
 
 # Per-component working notes. component.go loads meta.json, preview.html,
 # styles.css, options.html, extras.html and src/* - never these.
@@ -32,6 +33,7 @@ components/*/notes.md
 # Superpowers plugin plans and specs — local agent working material, not project
 # docs. README.md is what this repo publishes.
 docs/
+.agents
 
 /component_test.go
 /dist/

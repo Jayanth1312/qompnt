@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "vendor:audio": "mkdir -p static/vendor && cp node_modules/@web-kits/audio/dist/index.js static/vendor/web-kits-audio.mjs"
   },
   "keywords": [],
   "author": "",
@@ -13,5 +14,8 @@
   "devDependencies": {
     "@unocss/cli": "^66.7.5",
     "unocss": "^66.7.5"
+  },
+  "dependencies": {
+    "@web-kits/audio": "^0.1.0"
   }
 }
