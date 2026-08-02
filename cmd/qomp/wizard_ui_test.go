@@ -32,26 +32,30 @@ func TestSearchPickerSingleDefault(t *testing.T) {
 	}
 }
 
-func TestSearchPickerMultiEnterToggles(t *testing.T) {
+func TestSearchPickerMultiSpaceToggleEnterDone(t *testing.T) {
 	m := newSearchPicker("Search components", "Select components", []pickerItem{
 		{label: "Button", value: "button"},
 		{label: "Card", value: "card"},
 	}, true)
-	m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{' '}})
 	if !m.selected["button"] {
-		t.Fatal("enter should toggle mark, not quit")
+		t.Fatal("space should toggle mark")
 	}
 	if m.done {
-		t.Fatal("enter must not finish multi select")
+		t.Fatal("space must not finish multi select")
 	}
 	m.cursor = 1
 	m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{' '}})
 	if !m.selected["card"] {
-		t.Fatal("space should toggle mark")
+		t.Fatal("space should toggle second mark")
 	}
-	m.Update(tea.KeyMsg{Type: tea.KeyTab})
+	// Windows Ctrl+Enter arrives as plain Enter — must confirm, not deselect.
+	m.Update(tea.KeyMsg{Type: tea.KeyEnter})
 	if !m.done {
-		t.Fatal("tab should finish multi select")
+		t.Fatal("enter should finish multi select")
+	}
+	if !m.selected["button"] || !m.selected["card"] {
+		t.Fatalf("enter must not clear marks: %+v", m.selected)
 	}
 }
 
@@ -75,11 +79,11 @@ func TestSearchPickerIgnoresControlRunes(t *testing.T) {
 	}
 }
 
-func TestSearchPickerCtrlEnterDone(t *testing.T) {
+func TestSearchPickerCtrlJDone(t *testing.T) {
 	m := newSearchPicker("Search components", "Select components", []pickerItem{
 		{label: "Button", value: "button"},
 	}, true)
-	m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{' '}})
 	m.Update(tea.KeyMsg{Type: tea.KeyCtrlJ})
 	if !m.done || !m.selected["button"] {
 		t.Fatalf("ctrl+j should finish with selection done=%v selected=%v", m.done, m.selected)

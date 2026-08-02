@@ -88,16 +88,18 @@ func (m *searchPicker) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.filter = string(r[:len(r)-1])
 				m.refilter()
 			}
-		case "ctrl+enter", "ctrl+j", "ctrl+m", "tab":
-			// ctrl+enter: Windows/conhost often emits ctrl+j / ctrl+m instead.
-			// tab is a reliable fallback when the terminal swallows ctrl+enter.
+		case "ctrl+enter", "ctrl+j", "tab":
+			// Windows often delivers Ctrl+Enter as plain Enter — handled below.
 			if m.multi {
 				return m.finishMulti()
 			}
 		case "enter":
+			// Multi: Enter confirms (Space toggles). Windows Ctrl+Enter ≈ Enter,
+			// so treating Enter as done fixes "ctrl+enter deselects".
 			if m.multi {
-				m.toggleCursor()
-			} else if len(m.filtered) > 0 {
+				return m.finishMulti()
+			}
+			if len(m.filtered) > 0 {
 				m.resultSingle = m.filtered[m.cursor].value
 				m.done = true
 				return m, tea.Quit
@@ -212,7 +214,7 @@ func (m *searchPicker) View() string {
 
 	help := "type to search · ↑/↓ move"
 	if m.multi {
-		help += " · enter/space toggle · tab or ctrl+enter done"
+		help += " · space toggle · enter done"
 	} else {
 		help += " · enter select"
 	}
